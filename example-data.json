@@ -1,0 +1,62 @@
+[
+    {
+        "id": "p1",
+        "title": "Religionspädagogik in der Kita",
+        "slug": "rpi-kita",
+        "externalUrl": "https://relimentar.de",
+        "departments": [
+            "B1"
+        ],
+        "perspectives": [
+            "justice",
+            "sustainability"
+        ],
+        "targetGroups": [
+            "0-3",
+            "4-6"
+        ],
+        "type": "ground",
+        "staff": [
+            "m1",
+            "m2"
+        ]
+    },
+    {
+        "id": "p2",
+        "title": "Digitales Gemeindemanagement",
+        "slug": "digi-gemeinde",
+        "externalUrl": "https://efabi.net",
+        "departments": [
+            "B3",
+            "Q3"
+        ],
+        "perspectives": [
+            "digitality",
+            "structure"
+        ],
+        "targetGroups": [
+            "adults",
+            "employees"
+        ],
+        "type": "ground",
+        "staff": [
+            "m3"
+        ]
+    },
+    {
+        "id": "p3",
+        "title": "Forschungsstelle Bildungsbericht",
+        "slug": "bildungsbericht",
+        "externalUrl": "https://comenius.de",
+        "departments": [
+            "Q1"
+        ],
+        "perspectives": [
+            "justice"
+        ],
+        "type": "orbit",
+        "staff": [
+            "m1"
+        ]
+    }
+]
