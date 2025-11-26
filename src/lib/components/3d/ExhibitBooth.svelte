@@ -170,25 +170,25 @@
                 onclick={handleBannerClick}
             >
                 <T.PlaneGeometry args={[s.width, s.height]} />
-                <T.MeshBasicMaterial color="#0f172a" />
+                <T.MeshBasicMaterial color={isHovered ? '#1e293b' : '#0f172a'} />
             </T.Mesh>
 
-            <!-- Farbiger Rahmen -->
+            <!-- Farbiger Rahmen - heller bei Hover -->
             <T.Mesh position={[0, s.height / 2 - 0.06, 0.01]}>
                 <T.BoxGeometry args={[s.width, 0.12, 0.02]} />
-                <T.MeshBasicMaterial color={displayColor} />
+                <T.MeshBasicMaterial color={isHovered ? '#ffffff' : displayColor} />
             </T.Mesh>
             <T.Mesh position={[0, -s.height / 2 + 0.06, 0.01]}>
                 <T.BoxGeometry args={[s.width, 0.12, 0.02]} />
-                <T.MeshBasicMaterial color={displayColor} />
+                <T.MeshBasicMaterial color={isHovered ? '#ffffff' : displayColor} />
             </T.Mesh>
             <T.Mesh position={[-s.width / 2 + 0.04, 0, 0.01]}>
                 <T.BoxGeometry args={[0.08, s.height, 0.02]} />
-                <T.MeshBasicMaterial color={displayColor} />
+                <T.MeshBasicMaterial color={isHovered ? '#ffffff' : displayColor} />
             </T.Mesh>
             <T.Mesh position={[s.width / 2 - 0.04, 0, 0.01]}>
                 <T.BoxGeometry args={[0.08, s.height, 0.02]} />
-                <T.MeshBasicMaterial color={displayColor} />
+                <T.MeshBasicMaterial color={isHovered ? '#ffffff' : displayColor} />
             </T.Mesh>
 
             <!-- Content Vorderseite -->
@@ -259,25 +259,25 @@
                 onclick={handleBannerClick}
             >
                 <T.PlaneGeometry args={[s.width, s.height]} />
-                <T.MeshBasicMaterial color="#0f172a" />
+                <T.MeshBasicMaterial color={isHovered ? '#1e293b' : '#0f172a'} />
             </T.Mesh>
 
-            <!-- Farbiger Rahmen -->
+            <!-- Farbiger Rahmen - heller bei Hover -->
             <T.Mesh position={[0, s.height / 2 - 0.06, 0.01]}>
                 <T.BoxGeometry args={[s.width, 0.12, 0.02]} />
-                <T.MeshBasicMaterial color={displayColor} />
+                <T.MeshBasicMaterial color={isHovered ? '#ffffff' : displayColor} />
             </T.Mesh>
             <T.Mesh position={[0, -s.height / 2 + 0.06, 0.01]}>
                 <T.BoxGeometry args={[s.width, 0.12, 0.02]} />
-                <T.MeshBasicMaterial color={displayColor} />
+                <T.MeshBasicMaterial color={isHovered ? '#ffffff' : displayColor} />
             </T.Mesh>
             <T.Mesh position={[-s.width / 2 + 0.04, 0, 0.01]}>
                 <T.BoxGeometry args={[0.08, s.height, 0.02]} />
-                <T.MeshBasicMaterial color={displayColor} />
+                <T.MeshBasicMaterial color={isHovered ? '#ffffff' : displayColor} />
             </T.Mesh>
             <T.Mesh position={[s.width / 2 - 0.04, 0, 0.01]}>
                 <T.BoxGeometry args={[0.08, s.height, 0.02]} />
-                <T.MeshBasicMaterial color={displayColor} />
+                <T.MeshBasicMaterial color={isHovered ? '#ffffff' : displayColor} />
             </T.Mesh>
 
             <!-- Content Rückseite (identisch) -->
@@ -338,14 +338,6 @@
                 color={isHovered ? '#ffffff' : '#64748b'}
             />
         </T.Group>
-
-        <!-- Hover-Glow Effekt (beidseitig) -->
-        {#if isHovered}
-            <T.Mesh position.z={0.04}>
-                <T.PlaneGeometry args={[s.width + 0.2, s.height + 0.2]} />
-                <T.MeshBasicMaterial color={displayColor} transparent opacity={0.2} side={2} />
-            </T.Mesh>
-        {/if}
     </T.Group>
 
     <!-- Spotlight bei Hover (von beiden Seiten) -->

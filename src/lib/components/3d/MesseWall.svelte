@@ -315,16 +315,16 @@
                 >
                     <T.PlaneGeometry args={[posterSize, posterSize]} />
                     <T.MeshBasicMaterial 
-                        color={displayColor}
+                        color={isHovered ? '#ffffff' : displayColor}
                         transparent
                         opacity={isHovered ? 1 : 0.9}
                     />
                 </T.Mesh>
 
                 <!-- Poster-Inhalt (dunkel) - QUADRATISCH -->
-                <T.Mesh position.z={0.21}>
+                <T.Mesh position.z={0.22}>
                     <T.PlaneGeometry args={[posterSize * 0.9, posterSize * 0.9]} />
-                    <T.MeshBasicMaterial color="#0f172a" />
+                    <T.MeshBasicMaterial color={isHovered ? '#1e293b' : '#0f172a'} />
                 </T.Mesh>
 
                 <!-- Projekt-Titel - dynamische Schriftgröße -->
@@ -365,18 +365,8 @@
                     color={isHovered ? '#ffffff' : '#64748b'}
                 />
 
-                <!-- Hover-Glow -->
+                <!-- Hover-Tooltip rechts neben dem Poster -->
                 {#if isHovered}
-                    <T.Mesh position.z={0.15}>
-                        <T.PlaneGeometry args={[posterSize + 0.2, posterSize + 0.2]} />
-                        <T.MeshBasicMaterial 
-                            color={displayColor}
-                            transparent
-                            opacity={0.3}
-                        />
-                    </T.Mesh>
-                    
-                    <!-- Hover-Tooltip rechts neben dem Poster, höher positioniert -->
                     <HTML position={[posterSize * 0.7, posterSize * 0.3, 0.3]} center={false}>
                         <div style="
                             background: #ffffff;
