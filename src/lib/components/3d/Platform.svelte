@@ -261,6 +261,7 @@
                 height={5}
                 radius={3}
                 color={platform.color}
+                platformPosition={[platform.x, platform.y, platform.z]}
             />
         {/if}
 

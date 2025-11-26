@@ -16,6 +16,7 @@
     import { spring } from 'svelte/motion';
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
+    import { getCameraY } from '$lib/logic/platforms';
     import InteractionPillar from './InteractionPillar.svelte';
 
     interface Props {
@@ -64,7 +65,8 @@
         const worldBoothZ = platformPosition[2] + position[2];
         
         const viewDistance = 6; // Abstand zur Betrachtung
-        const bannerY = worldBoothY + s.height * 0.4; // Augenhöhe
+        // Kamera auf Augenhöhe (relativ zur Plattform-Oberfläche)
+        const cameraY = getCameraY(platformPosition[1]);
         
         // Das Banner zeigt standardmäßig in +Z Richtung (Vorderseite)
         // Bei Y-Rotation dreht sich die "Vorderseite"
@@ -79,14 +81,14 @@
         // Kamera-Position in Weltkoordinaten
         const cameraPos = {
             x: worldBoothX + worldOffsetX,
-            y: bannerY,
+            y: cameraY,
             z: worldBoothZ + worldOffsetZ
         };
         
-        // LookAt = Banner-Position (Mitte des Banners)
+        // LookAt = Banner-Mitte (auf Augenhöhe)
         const lookAtPos = {
             x: worldBoothX,
-            y: bannerY,
+            y: cameraY,
             z: worldBoothZ
         };
         

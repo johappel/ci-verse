@@ -6,7 +6,7 @@
 	import WorldLayout from './WorldLayout.svelte';
 	import BottomFog from './BottomFog.svelte';
 	import { worldStore } from '$lib/logic/store.svelte';
-	import { platforms } from '$lib/logic/platforms';
+	import { platforms, getCameraY } from '$lib/logic/platforms';
 
 	// CameraControls Referenz für Transport-Animation
 	let cameraControls = $state<CameraControlsRef>();
@@ -111,10 +111,11 @@
 					camZ = currentPlatform.z + dirZ * cameraDistFromCenter;
 				}
 				
-				// Kamera schaut IMMER zum Klickpunkt
+				// Kamera auf Augenhöhe, schaut IMMER zum Klickpunkt
+				const cameraY = getCameraY(currentPlatform.y);
 				cameraControls.setLookAt(
-					camX, currentPlatform.y + 8, camZ,          // Kamera-Position
-					target.x, currentPlatform.y + 4, target.z, // Schaut zum Klickpunkt
+					camX, cameraY, camZ,                        // Kamera-Position auf Augenhöhe
+					target.x, currentPlatform.y + 2, target.z,  // Schaut zum Klickpunkt (leicht über Oberfläche)
 					true
 				);
 			}

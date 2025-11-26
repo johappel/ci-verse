@@ -14,6 +14,27 @@
  * - Q1-Q3: Querschnittsplattformen (höher schwebend)
  */
 
+// ========================================
+// KONSTANTEN FÜR KAMERA-POSITIONIERUNG
+// ========================================
+
+/** Augenhöhe des Betrachters in Einheiten (≈ Metern) */
+export const EYE_HEIGHT = 1.8;
+
+/** Dicke der Plattform (Zylinder-Höhe) - Oberfläche ist bei platform.y + PLATFORM_SURFACE_OFFSET */
+export const PLATFORM_THICKNESS = 3;
+
+/** Offset von platform.y zur begehbaren Oberfläche */
+export const PLATFORM_SURFACE_OFFSET = PLATFORM_THICKNESS / 2; // = 1.5
+
+/** Standard-Betrachtungsabstand zu Exponaten */
+export const VIEW_DISTANCE = 5;
+
+/** Berechnet die Kamera-Y-Position für eine Plattform */
+export function getCameraY(platformY: number): number {
+    return platformY + PLATFORM_SURFACE_OFFSET + EYE_HEIGHT;
+}
+
 export interface Platform {
     id: string;
     name: string;

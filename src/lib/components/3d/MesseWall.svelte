@@ -16,6 +16,7 @@
     import { Text, useCursor, HTML } from '@threlte/extras';
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
+    import { getCameraY } from '$lib/logic/platforms';
     import InteractionPillar from './InteractionPillar.svelte';
 
     interface WallPoster {
@@ -120,8 +121,10 @@
         
         // Tatsächliche Poster-Position in Weltkoordinaten
         const worldPosterX = platformPosition[0] + posterX + offsetWorldX;
-        const worldPosterY = platformPosition[1] + wallHeight / 2 + 1.5;
         const worldPosterZ = platformPosition[2] + posterZ + offsetWorldZ;
+        
+        // Kamera auf Augenhöhe (relativ zur Plattform-Oberfläche)
+        const cameraY = getCameraY(platformPosition[1]);
         
         // Die Wand-Normale (lokales +Z) zeigt zur Plattform-Mitte
         // Lokales +Z nach Welt: (sin(rotY), 0, cos(rotY))
@@ -132,14 +135,14 @@
         // Kamera steht VOR dem Poster (in Richtung der Wand-Normale)
         const cameraPos = {
             x: worldPosterX + normalX * viewDistance,
-            y: worldPosterY,
+            y: cameraY,
             z: worldPosterZ + normalZ * viewDistance
         };
         
-        // Kamera schaut ZUM Poster
+        // Kamera schaut ZUM Poster (auf Augenhöhe)
         const lookAtPos = {
             x: worldPosterX,
-            y: worldPosterY,
+            y: cameraY,
             z: worldPosterZ
         };
         

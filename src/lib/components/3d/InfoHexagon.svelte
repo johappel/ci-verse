@@ -7,12 +7,15 @@
      * - 5 Seiten zeigen je einen Aspect (Icon + Titel)
      * - 6. Seite zeigt den Plattform-Titel
      * - Hover auf eine Seite zeigt Description
-     * - Klick öffnet contentUrl
+     * - Klick fährt Kamera davor, InteractionPillar öffnet contentUrl
      */
     import { T } from '@threlte/core';
     import { Text, useCursor, HTML } from '@threlte/extras';
     import { spring } from 'svelte/motion';
     import type { PlatformAspect } from '$lib/types/project';
+    import { worldStore } from '$lib/logic/store.svelte';
+    import { getCameraY } from '$lib/logic/platforms';
+    import InteractionPillar from './InteractionPillar.svelte';
 
     interface Props {
         platformName: string;
@@ -21,6 +24,7 @@
         height?: number;
         radius?: number;
         color?: string;
+        platformPosition?: [number, number, number]; // Welt-Position der Plattform
     }
 
     let { 
@@ -29,7 +33,8 @@
         position = [0, 0, 0], 
         height = 4,
         radius = 2.5,
-        color = '#1e293b'
+        color = '#1e293b',
+        platformPosition = [0, 0, 0]
     }: Props = $props();
 
     const { hovering, onPointerEnter, onPointerLeave } = useCursor('pointer');
@@ -61,10 +66,48 @@
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
         const rotY = -angle + Math.PI / 2; // Zeigt nach außen
-        return { x, z, rotY };
+        return { x, z, rotY, angle };
     }
 
-    // Klick auf Aspect öffnet Content-URL
+    // Klick auf Seite: Kamera fährt davor
+    function handleSideClick(sideIndex: number) {
+        const transform = getSideTransform(sideIndex);
+        const viewDistance = 5;
+        
+        // Welt-Position des Hexagons
+        const hexWorldX = platformPosition[0] + position[0];
+        const hexWorldZ = platformPosition[2] + position[2];
+        
+        // Kamera auf Augenhöhe (relativ zur Plattform-Oberfläche)
+        const cameraY = getCameraY(platformPosition[1]);
+        
+        // Die Seite zeigt nach außen (in Richtung des Winkels)
+        // Kamera muss außerhalb stehen und zur Seite schauen
+        const normalX = Math.cos(transform.angle);
+        const normalZ = Math.sin(transform.angle);
+        
+        // Seiten-Position in Weltkoordinaten
+        const sideWorldX = hexWorldX + transform.x;
+        const sideWorldZ = hexWorldZ + transform.z;
+        
+        // Kamera steht VOR der Seite (in Richtung der Normalen, also nach außen)
+        const cameraPos = {
+            x: sideWorldX + normalX * viewDistance,
+            y: cameraY,
+            z: sideWorldZ + normalZ * viewDistance
+        };
+        
+        // Kamera schaut ZUR Seite (auf Augenhöhe)
+        const lookAtPos = {
+            x: sideWorldX,
+            y: cameraY,
+            z: sideWorldZ
+        };
+        
+        worldStore.setViewTarget(cameraPos, lookAtPos);
+    }
+
+    // Klick auf Aspect öffnet Content-URL (nur noch für direkte Öffnung)
     function handleAspectClick(aspect: PlatformAspect | null) {
         if (aspect?.contentUrl) {
             window.open(aspect.contentUrl, '_blank');
@@ -114,12 +157,40 @@
             position={[transform.x, height / 2, transform.z]}
             rotation.y={transform.rotY}
         >
+            <!-- InteractionPillar vor Aspect-Seiten (nicht vor Titel-Seite) -->
+            {#if side.type === 'aspect' && side.aspect?.contentUrl}
+                {@const pillarDistance = 2.5}
+                {@const normalX = Math.cos(transform.angle)}
+                {@const normalZ = Math.sin(transform.angle)}
+                {@const hexWorldX = platformPosition[0] + position[0]}
+                {@const hexWorldZ = platformPosition[2] + position[2]}
+                {@const pillarWorldX = hexWorldX + transform.x + normalX * pillarDistance}
+                {@const pillarWorldZ = hexWorldZ + transform.z + normalZ * pillarDistance}
+                <InteractionPillar 
+                    project={{
+                        id: side.aspect.id,
+                        title: side.aspect.title,
+                        slug: side.aspect.id,
+                        externalUrl: side.aspect.contentUrl || '',
+                        departments: [],
+                        perspectives: [],
+                        targetGroups: [],
+                        type: 'ground',
+                        staff: [],
+                        display: { slogan: side.aspect.description, color: '#60a5fa' }
+                    }}
+                    position={[0, -height / 2 + 0.5, pillarDistance]}
+                    height={1.0}
+                    worldPosition={[pillarWorldX, platformPosition[1] + 0.5, pillarWorldZ]}
+                />
+            {/if}
+            
             <!-- Hintergrund-Panel für diese Seite -->
             <T.Mesh
                 position.z={0.01}
                 onpointerenter={() => { hoveredSide = i; onPointerEnter(); }}
                 onpointerleave={() => { hoveredSide = null; onPointerLeave(); }}
-                onclick={() => side.type === 'aspect' && handleAspectClick(side.aspect)}
+                onclick={() => handleSideClick(i)}
             >
                 <T.PlaneGeometry args={[radius * 1.1, height * 0.85]} />
                 <T.MeshBasicMaterial 
