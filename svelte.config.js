@@ -15,4 +15,12 @@ const config = {
 	}
 };
 
-export default config;
+export default {
+  vitePlugin: {
+    inspector: {
+      toggleKeyCombo: 'alt-x',
+      showToggleButton: 'always',
+      toggleButtonPos: 'bottom-right'
+    }
+  }
+};
