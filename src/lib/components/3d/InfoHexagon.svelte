@@ -72,7 +72,7 @@
     // Klick auf Seite: Kamera fährt davor
     function handleSideClick(sideIndex: number) {
         const transform = getSideTransform(sideIndex);
-        const viewDistance = 5;
+        const viewDistance = 10; // Weiter weg für bessere Gesamtansicht
         
         // Welt-Position des Hexagons
         const hexWorldX = platformPosition[0] + position[0];
@@ -97,11 +97,11 @@
             z: sideWorldZ + normalZ * viewDistance
         };
         
-        // Kamera schaut ZUR Seite (auf Augenhöhe)
+        // Kamera schaut zur Mitte des Hexagons (etwas über Augenhöhe für besseren Blickwinkel)
         const lookAtPos = {
-            x: sideWorldX,
-            y: cameraY,
-            z: sideWorldZ
+            x: hexWorldX,
+            y: cameraY + 0.5, // Leicht nach oben schauen
+            z: hexWorldZ
         };
         
         worldStore.setViewTarget(cameraPos, lookAtPos);

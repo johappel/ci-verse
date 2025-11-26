@@ -156,7 +156,7 @@
         
         // Die Wand-Normale (lokales +Z) zeigt zur Plattform-Mitte
         // Lokales +Z nach Welt: (sin(rotY), 0, cos(rotY))
-        const viewDistance = 5;
+        const viewDistance = 10;
         const normalX = sinR;
         const normalZ = cosR;
         

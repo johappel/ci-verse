@@ -64,7 +64,7 @@
         const worldBoothY = platformPosition[1] + position[1];
         const worldBoothZ = platformPosition[2] + position[2];
         
-        const viewDistance = 6; // Abstand zur Betrachtung
+        const viewDistance = 10; // Abstand zur Betrachtung (weiter weg für Gesamtansicht)
         // Kamera auf Augenhöhe (relativ zur Plattform-Oberfläche)
         const cameraY = getCameraY(platformPosition[1]);
         
@@ -85,10 +85,11 @@
             z: worldBoothZ + worldOffsetZ
         };
         
-        // LookAt = Banner-Mitte (auf Augenhöhe)
+        // LookAt = Banner-Mitte (etwas höher als Augenhöhe, da Banner hoch ist)
+        const bannerCenterY = worldBoothY + s.height / 2 + 0.3; // Mitte des Banners
         const lookAtPos = {
             x: worldBoothX,
-            y: cameraY,
+            y: Math.min(bannerCenterY, cameraY + 1), // Nicht zu hoch schauen
             z: worldBoothZ
         };
         
