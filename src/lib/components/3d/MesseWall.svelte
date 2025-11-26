@@ -6,18 +6,17 @@
      * - Gebogene/segmentierte Wand am Plattformrand
      * - Poster-Slots für Projekt-Plakate
      * - Halbtransparentes Material (Glas-Effekt)
-     * - InteractionPillar vor jedem Poster
+     * - Wandknopf unter jedem Poster für Link
      * 
      * Interaktion:
      * - Klick auf Poster → Kamera fährt davor
-     * - Klick auf Pillar-Knopf (bei Nähe) → Öffnet Link
+     * - Klick auf Wandknopf → Öffnet externe URL
      */
-    import { T } from '@threlte/core';
+    import { T, useThrelte, useTask } from '@threlte/core';
     import { Text, useCursor, HTML } from '@threlte/extras';
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
-    import InteractionPillar from './InteractionPillar.svelte';
 
     interface WallPoster {
         project: ProjectData;
@@ -32,6 +31,7 @@
         wallCount?: number; // Anzahl der Wände (1-6, entspricht Hexagon-Kanten)
         startEdge?: number; // Welche Hexagon-Kante als Start (0-5)
         platformPosition?: [number, number, number]; // Welt-Position der Plattform
+        platformId?: string; // ID der Plattform für Aktivierungs-Check
     }
 
     let { 
@@ -41,12 +41,40 @@
         wallHeight = 8,
         wallCount = 3, // Standard: 3 Wände (halbes Hexagon)
         startEdge = 3, // Standard: "hinten" (gegenüber vom Eingang)
-        platformPosition = [0, 0, 0]
+        platformPosition = [0, 0, 0],
+        platformId = '' // ID der Plattform für Aktivierungs-Check
     }: Props = $props();
 
+    const { camera } = useThrelte();
     const { hovering, onPointerEnter, onPointerLeave } = useCursor('pointer');
     
     let hoveredPosterId = $state<string | null>(null);
+    let hoveredButtonId = $state<string | null>(null);
+    
+    // Distanz-Check wie bei InteractionPillar
+    // Aktivierungsdistanz = Plattform-Größe + Puffer (User muss auf Plattform stehen)
+    const ACTIVATION_DISTANCE = platformSize + 15;
+    let isNearWall = $state(false);
+    let frameCounter = 0;
+    
+    useTask(() => {
+        frameCounter++;
+        if (frameCounter % 6 !== 0) return; // Alle 6 Frames
+        
+        const camPos = $camera.position;
+        const px = platformPosition[0];
+        const py = platformPosition[1] + 3.3; // Augenhöhe
+        const pz = platformPosition[2];
+        
+        const dx = camPos.x - px;
+        const dy = camPos.y - py;
+        const dz = camPos.z - pz;
+        const distSq = dx * dx + dy * dy + dz * dz;
+        const maxDistSq = ACTIVATION_DISTANCE * ACTIVATION_DISTANCE;
+        
+        // console.log('MesseWall Dist:', Math.sqrt(distSq).toFixed(1), 'Max:', ACTIVATION_DISTANCE, 'Near:', distSq <= maxDistSq);
+        isNearWall = distSq <= maxDistSq;
+    });
 
     // Hexagon-Geometrie: Kantenlänge = Radius
     const hexEdgeLength = platformSize; // Kantenlänge des Hexagons
@@ -197,28 +225,86 @@
     <!-- Poster auf der Wand -->
     {#each posterPositions as { project, x, z, rotY, offsetX }}
         {@const isHovered = hoveredPosterId === project.id}
+        {@const isButtonHovered = hoveredButtonId === project.id}
         {@const displayColor = project.display?.color || project.color || '#3b82f6'}
         {@const titleFontSize = project.title.length > 20 ? 0.28 : project.title.length > 12 ? 0.32 : 0.38}
-        {@const pillarDirX = -Math.sin(rotY)}
-        {@const pillarDirZ = -Math.cos(rotY)}
         
         <T.Group position={[x, wallHeight / 2 + 1.5, z]} rotation.y={rotY}>
             <!-- Offset für Position auf der Wand -->
             <T.Group position.x={offsetX}>
-                <!-- InteractionPillar vor dem Poster -->
-                <!-- Berechne Welt-Position für den Pillar -->
-                {@const pillarLocalZ = 3}
-                {@const cosR = Math.cos(rotY)}
-                {@const sinR = Math.sin(rotY)}
-                <!-- Lokales X → Welt: (cos, 0, -sin), Lokales Z → Welt: (sin, 0, cos) -->
-                {@const pillarWorldX = platformPosition[0] + x + offsetX * cosR + pillarLocalZ * sinR}
-                {@const pillarWorldZ = platformPosition[2] + z - offsetX * sinR + pillarLocalZ * cosR}
-                <InteractionPillar 
-                    {project}
-                    position={[0, -wallHeight / 2 - 0.3, pillarLocalZ]}
-                    height={1.0}
-                    worldPosition={[pillarWorldX, platformPosition[1] + 1.2, pillarWorldZ]}
-                />
+                <!-- Wandknopf unter dem Poster (ersetzt InteractionPillar) -->
+                {#if project.externalUrl}
+                    <T.Group position={[0, -posterSize / 2 - 0.8, 0.25]}>
+                        <!-- Knopf-Gehäuse (flach an der Wand) -->
+                        <T.Mesh rotation.x={Math.PI / 2}>
+                            <T.CylinderGeometry args={[0.4, 0.4, 0.15, 8]} />
+                            <T.MeshStandardMaterial 
+                                color={isNearWall ? '#1e293b' : '#0f172a'}
+                                metalness={0.5}
+                                roughness={0.5}
+                            />
+                        </T.Mesh>
+                        
+                        <!-- Leuchtender Knopf -->
+                        <T.Mesh 
+                            position.z={0.12}
+                            onclick={() => { 
+                                if (isNearWall && project.externalUrl) {
+                                    window.open(project.externalUrl, '_blank'); 
+                                }
+                            }}
+                            onpointerenter={() => { hoveredButtonId = project.id; if (isNearWall) onPointerEnter(); }}
+                            onpointerleave={() => { hoveredButtonId = null; onPointerLeave(); }}
+                        >
+                            <T.CircleGeometry args={[0.3, 16]} />
+                            <T.MeshBasicMaterial 
+                                color={isNearWall ? displayColor : '#475569'}
+                                transparent
+                                opacity={isButtonHovered ? 1 : 0.8}
+                            />
+                        </T.Mesh>
+                        
+                        <!-- Glow-Ring (nur wenn nah) -->
+                        {#if isNearWall}
+                            <T.Mesh position.z={0.08} rotation.x={Math.PI / 2}>
+                                <T.RingGeometry args={[0.32, 0.45, 16]} />
+                                <T.MeshBasicMaterial 
+                                    color={displayColor}
+                                    transparent
+                                    opacity={isButtonHovered ? 0.6 : 0.3}
+                                />
+                            </T.Mesh>
+                        {/if}
+                        
+                        <!-- Link-Icon (🔗) -->
+                        <Text
+                            text="🔗"
+                            fontSize={0.25}
+                            anchorX="center"
+                            anchorY="middle"
+                            position.z={0.15}
+                        />
+                        
+                        <!-- Hover-Tooltip (immer bei Hover, unterschiedlicher Text) -->
+                        {#if isButtonHovered}
+                            <HTML position={[0.8, 0.3, 0]} center={false} transform={false}>
+                                <div style="
+                                    background: {isNearWall ? '#ffffff' : 'rgba(15, 23, 42, 0.9)'};
+                                    color: {isNearWall ? '#0f172a' : '#94a3b8'};
+                                    padding: 6px 10px;
+                                    border-radius: 4px;
+                                    font-size: 0.75rem;
+                                    font-weight: 600;
+                                    white-space: nowrap;
+                                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                                    border-bottom: 2px solid {isNearWall ? displayColor : '#475569'};
+                                ">
+                                    {isNearWall ? 'Projekt öffnen →' : 'Näher kommen...'}
+                                </div>
+                            </HTML>
+                        {/if}
+                    </T.Group>
+                {/if}
                 
                 <!-- Poster-Hintergrund (farbiger Rahmen) - QUADRATISCH -->
                 <T.Mesh

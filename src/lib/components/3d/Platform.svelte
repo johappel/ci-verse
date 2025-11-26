@@ -277,6 +277,7 @@
                 wallCount={Math.min(wallPosters.length, 3)}
                 startEdge={3}
                 platformPosition={[platform.x, platform.y, platform.z]}
+                platformId={platform.id}
             />
         {/if}
 
