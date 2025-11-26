@@ -43,8 +43,8 @@
         receiveShadow
         rotation.y={Math.PI / 6}
     >
-        <!-- rotation.y dreht Hexagon damit Kanten nach vorne zeigen, nicht Ecken -->
-        <T.CylinderGeometry args={[platform.size, platform.size, 0.5, 6]} />
+        <!-- Plattform ist jetzt 3 Einheiten dick (begehbar) -->
+        <T.CylinderGeometry args={[platform.size, platform.size, 3, 6]} />
         <T.MeshStandardMaterial
             color={platform.color}
             metalness={0.3}
@@ -57,7 +57,7 @@
     <!-- Glow-Ring unter der Plattform (flach, gleiche Orientierung wie Hexagon) -->
     <!-- RingGeometry startet mit Ecke bei 0°, CylinderGeometry mit Kante -->
     <!-- Daher: Ring OHNE Y-Rotation, nur flachlegen -->
-    <T.Mesh position.y={-0.3} rotation.x={-Math.PI / 2}>
+    <T.Mesh position.y={-2} rotation.x={-Math.PI / 2}>
         <T.RingGeometry args={[platform.size * 0.95, platform.size * 1.05, 6]} />
         <T.MeshBasicMaterial
             color={platform.glowColor}
@@ -68,7 +68,7 @@
     </T.Mesh>
 
     <!-- Plattform-Name Label (schwebt über der Plattform) -->
-    <HTML position={[0, 3, 0]} center pointerEvents="none">
+    <HTML position={[0, 15, 0]} center pointerEvents="none">
         <div
             class="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap
                    transition-all duration-300 pointer-events-none select-none
@@ -87,9 +87,9 @@
 
     <!-- Licht-Punkt auf der Plattform -->
     <T.PointLight
-        position={[0, 2, 0]}
+        position={[0, 10, 0]}
         color={platform.glowColor}
-        intensity={isCurrentPlatform ? 2 : 0.5}
-        distance={platform.size * 2}
+        intensity={isCurrentPlatform ? 50 : 10}
+        distance={platform.size * 3}
     />
 </T.Group>

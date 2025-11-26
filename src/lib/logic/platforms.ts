@@ -1,10 +1,17 @@
 /**
  * Plattform-Definitionen für die schwebende Welt
  * 
+ * SKALA (neu):
+ * - 1 Einheit ≈ 1 Meter
+ * - Person: ~1.8 Einheiten groß
+ * - Messestand: ~4x3 Einheiten
+ * - Plattform: 50-80 Einheiten Durchmesser (für 5-15 Stände)
+ * - Abstand zwischen Plattformen: 150-250 Einheiten
+ * 
  * Architektur:
- * - S: Marktplatz (Zentrum, Y=8)
- * - B1-B3: Bildungsplattformen (gleiche Höhe wie S, Y=8)
- * - Q1-Q3: Querschnittsplattformen (höher, Y=20-25)
+ * - S: Marktplatz (Zentrum, Y=0)
+ * - B1-B3: Bildungsplattformen (gleiche Höhe wie S)
+ * - Q1-Q3: Querschnittsplattformen (höher schwebend)
  */
 
 export interface Platform {
@@ -15,7 +22,7 @@ export interface Platform {
     y: number;
     x: number;
     z: number;
-    size: number;
+    size: number;          // Radius der Plattform
     color: string;
     glowColor: string;
 }
@@ -28,34 +35,34 @@ export interface Connection {
 }
 
 // ============================================
-// PLATTFORM-DEFINITIONEN
+// PLATTFORM-DEFINITIONEN (NEUE SKALA!)
 // ============================================
 
 export const platforms: Record<string, Platform> = {
-    // S - Marktplatz (Zentrum)
+    // S - Marktplatz (Zentrum) - größte Plattform
     S: {
         id: 'S',
         name: 'Marktplatz',
         shortName: 'Markt',
         description: 'Zentraler Ausgangspunkt mit Bibliothek und ProjectChart',
-        y: 8,
+        y: 0,
         x: 0,
         z: 0,
-        size: 8,
+        size: 40,              // 80m Durchmesser
         color: '#64748b',      // Slate
         glowColor: '#94a3b8'
     },
 
-    // B-Plattformen (Bildung) - gleiche Höhe wie S
+    // B-Plattformen (Bildung) - gleiche Höhe wie S, im Kreis angeordnet
     B1: {
         id: 'B1',
         name: 'Frühkindliche Bildung',
         shortName: 'Kita',
         description: 'Religiöse Bildung für Kinder von 0-6 Jahren',
-        y: 8,
-        x: -22,
+        y: 0,
+        x: -180,
         z: 0,
-        size: 10,
+        size: 35,              // 70m Durchmesser
         color: '#fcd34d',      // Amber
         glowColor: '#fde68a'
     },
@@ -64,10 +71,10 @@ export const platforms: Record<string, Platform> = {
         name: 'Schule & Jugend',
         shortName: 'Schule',
         description: 'Bildungsangebote für Schule und Jugendarbeit',
-        y: 8,
+        y: 0,
         x: 0,
-        z: 18,
-        size: 10,
+        z: 180,
+        size: 35,
         color: '#fb923c',      // Orange
         glowColor: '#fdba74'
     },
@@ -76,10 +83,10 @@ export const platforms: Record<string, Platform> = {
         name: 'Erwachsenenbildung',
         shortName: 'Erwachsene',
         description: 'Fortbildung und Lebenslanges Lernen',
-        y: 8,
-        x: 22,
+        y: 0,
+        x: 180,
         z: 0,
-        size: 10,
+        size: 35,
         color: '#f87171',      // Red
         glowColor: '#fca5a5'
     },
@@ -90,10 +97,10 @@ export const platforms: Record<string, Platform> = {
         name: 'Forschung',
         shortName: 'Forschung',
         description: 'Wissenschaftliche Studien und Publikationen',
-        y: 18,
-        x: -16,
-        z: -14,
-        size: 12,
+        y: 80,
+        x: -140,
+        z: -140,
+        size: 45,              // Größer wegen mehr Projekten
         color: '#a78bfa',      // Violet
         glowColor: '#c4b5fd'
     },
@@ -102,10 +109,10 @@ export const platforms: Record<string, Platform> = {
         name: 'Europa',
         shortName: 'Europa',
         description: 'Internationale Kooperationen und EU-Projekte',
-        y: 24,
+        y: 120,
         x: 0,
-        z: -22,
-        size: 12,
+        z: -200,
+        size: 45,
         color: '#fbbf24',      // Yellow
         glowColor: '#fcd34d'
     },
@@ -114,10 +121,10 @@ export const platforms: Record<string, Platform> = {
         name: 'Digitalisierung',
         shortName: 'Digital',
         description: 'Digitale Transformation und E-Learning',
-        y: 18,
-        x: 16,
-        z: -14,
-        size: 12,
+        y: 80,
+        x: 140,
+        z: -140,
+        size: 45,
         color: '#22d3ee',      // Cyan
         glowColor: '#67e8f9'
     }

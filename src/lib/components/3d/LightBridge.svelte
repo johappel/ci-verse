@@ -18,17 +18,17 @@
     let isHovered = $state(false);
 
     // Punkte für die Lichtlinie (leichte Kurve nach oben)
-    let midHeight = $derived(Math.max(from.y, to.y) + 4);
+    let midHeight = $derived(Math.max(from.y, to.y) + 25);
     
     // Bezier-Kurve für sanften Bogen
     let curve = $derived(new QuadraticBezierCurve3(
-        new Vector3(from.x, from.y + 0.8, from.z),
+        new Vector3(from.x, from.y + 3, from.z),
         new Vector3((from.x + to.x) / 2, midHeight, (from.z + to.z) / 2),
-        new Vector3(to.x, to.y + 0.8, to.z)
+        new Vector3(to.x, to.y + 3, to.z)
     ));
 
-    // TubeGeometry für sichtbare Lichtstrahlen (WebGL ignoriert linewidth!)
-    let tubeGeometry = $derived(new TubeGeometry(curve, 24, 0.08, 6, false));
+    // TubeGeometry - dünn und dezent
+    let tubeGeometry = $derived(new TubeGeometry(curve, 32, 0.15, 6, false));
 
     // Mittelpunkt für Label (3D Position)
     let labelPosition = $derived<[number, number, number]>([
@@ -75,12 +75,12 @@
 
 <!-- Zweite, dickere Tube für Glow-Effekt (sehr transparent) -->
 {#if isActive}
-    {@const glowTube = new TubeGeometry(curve, 16, 0.25, 6, false)}
+    {@const glowTube = new TubeGeometry(curve, 24, 0.5, 6, false)}
     <T.Mesh geometry={glowTube}>
         <T.MeshBasicMaterial
             color={color}
             transparent
-            opacity={pulseOpacity * 0.3}
+            opacity={pulseOpacity * 0.2}
         />
     </T.Mesh>
 {/if}
@@ -89,7 +89,7 @@
 {#if isHovered}
     <HTML position={labelPosition} center pointerEvents="none">
         <div
-            class="bg-black/80 text-white px-3 py-1.5 rounded-lg text-sm font-medium
+            class="bg-black/80 text-white px-4 py-2 rounded-lg text-base font-medium
                    shadow-xl border border-white/30 whitespace-nowrap
                    pointer-events-none select-none"
         >
@@ -98,23 +98,23 @@
     </HTML>
 
     <!-- Leuchtender Punkt am Ziel -->
-    <T.Mesh position={[to.x, to.y + 2, to.z]}>
-        <T.SphereGeometry args={[0.5, 12, 12]} />
+    <T.Mesh position={[to.x, to.y + 8, to.z]}>
+        <T.SphereGeometry args={[1.5, 12, 12]} />
         <T.MeshBasicMaterial color="#ffffff" transparent opacity={0.8} />
     </T.Mesh>
 
     <!-- Glow-Effekt am Ziel -->
-    <T.PointLight position={[to.x, to.y + 2, to.z]} color="#ffffff" intensity={3} distance={8} />
+    <T.PointLight position={[to.x, to.y + 8, to.z]} color="#ffffff" intensity={30} distance={40} />
 {/if}
 
 <!-- Kleine leuchtende Punkte an Start und Ende -->
 {#if isActive}
-    <T.Mesh position={[from.x, from.y + 0.8, from.z]}>
-        <T.SphereGeometry args={[0.18, 8, 8]} />
+    <T.Mesh position={[from.x, from.y + 3, from.z]}>
+        <T.SphereGeometry args={[0.4, 8, 8]} />
         <T.MeshBasicMaterial color={color} transparent opacity={pulseOpacity * 1.3} />
     </T.Mesh>
-    <T.Mesh position={[to.x, to.y + 0.8, to.z]}>
-        <T.SphereGeometry args={[0.18, 8, 8]} />
+    <T.Mesh position={[to.x, to.y + 3, to.z]}>
+        <T.SphereGeometry args={[0.4, 8, 8]} />
         <T.MeshBasicMaterial color={color} transparent opacity={pulseOpacity * 1.3} />
     </T.Mesh>
 {/if}

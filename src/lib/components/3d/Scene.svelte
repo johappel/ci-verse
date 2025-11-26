@@ -27,39 +27,39 @@
 <!-- Container mit festen viewport-Einheiten -->
 <div class="w-screen h-screen" style="position: fixed; top: 0; left: 0;">
 	<Canvas>
-		<!-- Kamera: Start VOR dem Marktplatz (negatives Z = vor dem User) -->
-		<T.PerspectiveCamera makeDefault position={[0, 11, -16]} fov={60} near={0.1} far={200}>
+		<!-- Kamera: Auf Plattform-Höhe, etwas zurück -->
+		<T.PerspectiveCamera makeDefault position={[0, 8, -80]} fov={60} near={1} far={2000}>
 			<OrbitControls
 				enableDamping
 				dampingFactor={0.05}
 				maxPolarAngle={Math.PI / 2.1}
-				minPolarAngle={Math.PI / 6}
-				maxDistance={60}
+				minPolarAngle={Math.PI / 8}
+				maxDistance={500}
 				minDistance={5}
-				target={[0, 8, 0]}
+				target={[0, 0, 0]}
 			/>
 		</T.PerspectiveCamera>
 
 		<!-- Hintergrund (sehr dunkel für Kontrast) -->
 		<T.Color attach="background" args={[currentFogColor]} />
 
-		<!-- Exponentieller Nebel - moderat, entfernte Plattformen im Nebel -->
-		<T.FogExp2 attach="fog" args={[currentFogColor, 0.018]} />
+		<!-- Exponentieller Nebel - angepasst für große Distanzen -->
+		<T.FogExp2 attach="fog" args={[currentFogColor, 0.002]} />
 
 		<!-- Beleuchtung -->
 		<T.AmbientLight intensity={ambientIntensity} color="#e0e7ff" />
 
-		<!-- Hauptlicht von oben -->
-		<T.DirectionalLight position={[15, 40, 20]} intensity={1} castShadow color="#ffffff" />
+		<!-- Hauptlicht von oben (höher für große Szene) -->
+		<T.DirectionalLight position={[100, 300, 150]} intensity={1.2} castShadow color="#ffffff" />
 
 		<!-- Gegenlicht für weichere Schatten -->
-		<T.DirectionalLight position={[-20, 30, -15]} intensity={0.4} color="#93c5fd" />
+		<T.DirectionalLight position={[-150, 200, -100]} intensity={0.5} color="#93c5fd" />
 
 		<!-- Bodenlicht (nach oben gerichtet, für Atmosphäre) -->
-		<T.DirectionalLight position={[0, -10, 0]} intensity={0.2} color="#4f46e5" />
+		<T.DirectionalLight position={[0, -50, 0]} intensity={0.3} color="#4f46e5" />
 
 		<!-- Hemisphären-Licht für natürlichere Beleuchtung -->
-		<T.HemisphereLight args={['#87ceeb', '#1a1a2e', 0.4]} />
+		<T.HemisphereLight args={['#87ceeb', '#1a1a2e', 0.5]} />
 
 		<!-- Projekt-Layout mit Plattformen -->
 		<WorldLayout />
