@@ -11,7 +11,6 @@
      */
     import { T } from '@threlte/core';
     import { Text, useCursor, HTML } from '@threlte/extras';
-    import { spring } from 'svelte/motion';
     import type { PlatformAspect } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
@@ -41,13 +40,6 @@
     
     // Welche Seite ist gehovered?
     let hoveredSide = $state<number | null>(null);
-    
-    // Scale Animation bei Hover
-    let scale = spring(1, { stiffness: 0.3, damping: 0.8 });
-    
-    $effect(() => {
-        scale.set(hoveredSide !== null ? 1.02 : 1);
-    });
 
     // 6 Seiten: 5 Aspects + 1 Titel
     // Aspect-Seiten (0-4), Titel-Seite (5)
@@ -115,7 +107,7 @@
     }
 </script>
 
-<T.Group position={position} scale={$scale}>
+<T.Group position={position}>
     <!-- Hexagonale Säule - rotation.y um 30° damit Kanten zu den Seiten passen -->
     <T.Mesh position.y={height / 2} rotation.y={Math.PI / 6} castShadow receiveShadow>
         <T.CylinderGeometry args={[radius, radius * 1.1, height, 6]} />

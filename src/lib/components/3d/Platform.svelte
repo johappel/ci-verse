@@ -38,11 +38,12 @@
     // Cursor-Änderung bei Hover
     const { hovering, onPointerEnter, onPointerLeave } = useCursor();
     
-    // Spring für numerische Werte
-    let platformScale = spring(1, { stiffness: 0.3, damping: 0.8 });
+    // Glow-Intensität für den Ring bei Hover
+    let glowOpacity = spring(0.15, { stiffness: 0.4, damping: 0.7 });
 
     $effect(() => {
-        platformScale.set($hovering ? 1.02 : 1);
+        const baseOpacity = isCurrentPlatform ? 0.5 : 0.15;
+        glowOpacity.set($hovering ? 0.9 : baseOpacity);
     });
 
     // Layout für Projekt-Stände auf der Plattform
@@ -110,7 +111,7 @@
     });
 </script>
 
-<T.Group position={[platform.x, platform.y, platform.z]} scale={$platformScale}>
+<T.Group position={[platform.x, platform.y, platform.z]}>
     <!-- Hexagonale Plattform-Basis (6-seitiger Zylinder) -->
     <T.Mesh
         onpointerdown={handlePointerDown}
@@ -129,13 +130,13 @@
         />
     </T.Mesh>
 
-    <!-- Dezenter Ring am Rand -->
+    <!-- Dezenter Ring am Rand - leuchtet bei Hover -->
     <T.Mesh position.y={-2} rotation.x={-Math.PI / 2}>
         <T.RingGeometry args={[platform.size * 0.98, platform.size * 1.02, 6]} />
         <T.MeshBasicMaterial
             color={platform.glowColor}
             transparent
-            opacity={isCurrentPlatform ? 0.5 : 0.15}
+            opacity={$glowOpacity}
             side={2}
         />
     </T.Mesh>

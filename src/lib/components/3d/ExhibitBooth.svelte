@@ -13,7 +13,6 @@
      */
     import { T } from '@threlte/core';
     import { Text, useCursor, HTML } from '@threlte/extras';
-    import { spring } from 'svelte/motion';
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
@@ -38,13 +37,6 @@
     const { hovering, onPointerEnter, onPointerLeave } = useCursor('pointer');
     
     let isHovered = $state(false);
-    
-    // Scale Animation
-    let scale = spring(1, { stiffness: 0.3, damping: 0.8 });
-    
-    $effect(() => {
-        scale.set(isHovered ? 1.03 : 1);
-    });
 
     // Größen-Varianten für Rollup
     const sizes = {
@@ -107,7 +99,7 @@
     }
 </script>
 
-<T.Group position={position} rotation.y={rotation} scale={$scale}>
+<T.Group position={position} rotation.y={rotation}>
     
     <!-- InteractionPillar vor dem Rollup -->
     {@const cos = Math.cos(rotation)}
@@ -193,7 +185,7 @@
             </T.Mesh>
 
             <!-- Content Vorderseite -->
-            {@const titleFontSize = project.title.length > 20 ? 0.28 : project.title.length > 14 ? 0.32 : 0.4}
+            {@const titleFontSize = project.title.length > 20 ? 0.22 : project.title.length > 14 ? 0.26 : 0.32}
             <Text
                 text={project.title}
                 fontSize={titleFontSize}
@@ -202,7 +194,7 @@
                 position={[0, s.height * 0.4, 0.02]}
                 color="#ffffff"
                 fontWeight="bold"
-                maxWidth={s.width * 0.85}
+                maxWidth={s.width * 0.8}
                 textAlign="center"
             />
 
@@ -282,7 +274,7 @@
             </T.Mesh>
 
             <!-- Content Rückseite (identisch) -->
-            {@const titleFontSize = project.title.length > 20 ? 0.28 : project.title.length > 14 ? 0.32 : 0.4}
+            {@const titleFontSize = project.title.length > 20 ? 0.22 : project.title.length > 14 ? 0.26 : 0.32}
             <Text
                 text={project.title}
                 fontSize={titleFontSize}
@@ -291,7 +283,7 @@
                 position={[0, s.height * 0.4, 0.02]}
                 color="#ffffff"
                 fontWeight="bold"
-                maxWidth={s.width * 0.85}
+                maxWidth={s.width * 0.8}
                 textAlign="center"
             />
 
