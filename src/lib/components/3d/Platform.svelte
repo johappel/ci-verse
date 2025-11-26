@@ -7,7 +7,7 @@
     import ExhibitStand from './ExhibitStand.svelte';
     import { getHexagonalLayout } from '$lib/logic/layout';
     import { worldStore } from '$lib/logic/store.svelte';
-    import type { Object3D } from 'three';
+    import type { Object3D, Intersection } from 'three';
 
     let { platform, projects = [] }: { platform: PlatformType; projects: ProjectData[] } = $props();
 
@@ -30,11 +30,50 @@
     // Ist diese Plattform die aktuelle?
     let isCurrentPlatform = $derived(worldStore.state.currentPlatform === platform.id);
 
-    function handlePlatformClick() {
-        // Wenn nicht aktuelle Plattform, navigiere dorthin
-        if (!isCurrentPlatform) {
-            worldStore.startTransport(platform.id);
+    // Drag-Detection: Unterscheide zwischen Klick und Kamera-Drehen
+    let pointerDownPos = $state<{ x: number; y: number } | null>(null);
+    let pointerDownTime = $state<number>(0);
+    const DRAG_THRESHOLD = 5; // Pixel Bewegung bevor es als Drag gilt
+    const CLICK_MAX_DURATION = 300; // Max ms für einen Klick
+
+    // Typ für Threlte Click Event
+    type ThreltePointerEvent = { 
+        point: { x: number; y: number; z: number };
+        nativeEvent: PointerEvent;
+        stopPropagation: () => void;
+    };
+
+    function handlePointerDown(event: ThreltePointerEvent) {
+        pointerDownPos = { x: event.nativeEvent.clientX, y: event.nativeEvent.clientY };
+        pointerDownTime = Date.now();
+    }
+
+    function handlePointerUp(event: ThreltePointerEvent) {
+        if (!pointerDownPos) return;
+        
+        const dx = Math.abs(event.nativeEvent.clientX - pointerDownPos.x);
+        const dy = Math.abs(event.nativeEvent.clientY - pointerDownPos.y);
+        const duration = Date.now() - pointerDownTime;
+        
+        // Nur als Klick werten wenn: wenig Bewegung UND kurze Dauer
+        const isClick = dx < DRAG_THRESHOLD && dy < DRAG_THRESHOLD && duration < CLICK_MAX_DURATION;
+        
+        if (isClick) {
+            if (!isCurrentPlatform) {
+                // Wenn nicht aktuelle Plattform, navigiere dorthin
+                worldStore.startTransport(platform.id);
+            } else {
+                // Auf aktueller Plattform: Bewege Kamera zum Klickpunkt
+                const clickPoint = event.point;
+                worldStore.moveToLocalPosition({
+                    x: clickPoint.x,
+                    y: clickPoint.y,
+                    z: clickPoint.z
+                });
+            }
         }
+        
+        pointerDownPos = null;
     }
 
     // 6 Spotlight-Positionen im Hexagon-Muster (wie Messehallen-Beleuchtung)
@@ -53,7 +92,8 @@
 <T.Group position={[platform.x, platform.y, platform.z]} scale={$platformScale}>
     <!-- Hexagonale Plattform-Basis (6-seitiger Zylinder) -->
     <T.Mesh
-        onclick={handlePlatformClick}
+        onpointerdown={handlePointerDown}
+        onpointerup={handlePointerUp}
         onpointerenter={onPointerEnter}
         onpointerleave={onPointerLeave}
         receiveShadow

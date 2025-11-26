@@ -36,6 +36,8 @@ export interface AppState {
     isTransporting: boolean;
     transportTarget: string | null;
     hoveredDestination: string | null; // Für Lichtlinien-Highlight
+    // Lokale Kamera-Bewegung
+    localCameraTarget: { x: number; y: number; z: number } | null;
     // Chat-Modal
     isChatOpen: boolean;
 }

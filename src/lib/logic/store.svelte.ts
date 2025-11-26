@@ -12,6 +12,8 @@ export class WorldStore {
         isTransporting: false,
         transportTarget: null,
         hoveredDestination: null, // Für Lichtlinien-Highlight
+        // NEU: Lokale Kamera-Bewegung auf Plattform
+        localCameraTarget: null, // {x, y, z} Position auf der Plattform
         // NEU: Chat-Modal
         isChatOpen: false
     });
@@ -123,6 +125,15 @@ export class WorldStore {
     // NEU: Hover über Transport-Button
     setHoveredDestination(platformId: string | null) {
         this.state.hoveredDestination = platformId;
+    }
+
+    // NEU: Lokale Kamera-Bewegung auf der Plattform
+    moveToLocalPosition(worldPosition: { x: number; y: number; z: number }) {
+        this.state.localCameraTarget = worldPosition;
+    }
+
+    clearLocalCameraTarget() {
+        this.state.localCameraTarget = null;
     }
 
     // Algorithmus: Finde verwandte Projekte

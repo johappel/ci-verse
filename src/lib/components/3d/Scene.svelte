@@ -31,6 +31,52 @@
 		}
 	});
 
+	// Lokale Kamera-Bewegung auf der Plattform (Klick auf Boden)
+	$effect(() => {
+		const target = worldStore.state.localCameraTarget;
+		if (target && cameraControls && !worldStore.state.isTransporting) {
+			const currentPlatform = platforms[worldStore.state.currentPlatform];
+			if (currentPlatform) {
+				// Berechne Distanz vom Klickpunkt zur Plattformmitte
+				const dx = target.x - currentPlatform.x;
+				const dz = target.z - currentPlatform.z;
+				const distFromCenter = Math.sqrt(dx * dx + dz * dz);
+				
+				// Schwellwert: Innerhalb von 40% des Radius = "innen"
+				const innerThreshold = currentPlatform.size * 0.4;
+				const isInnerArea = distFromCenter < innerThreshold;
+				
+				let camX: number, camZ: number, lookX: number, lookZ: number;
+				
+				if (isInnerArea) {
+					// Innerer Bereich: Kamera hinter Klickpunkt, schaut zur Mitte
+					const dirX = dx / (distFromCenter || 1);
+					const dirZ = dz / (distFromCenter || 1);
+					camX = target.x + dirX * 15;  // Hinter dem Klickpunkt (von Mitte aus)
+					camZ = target.z + dirZ * 15;
+					lookX = currentPlatform.x;    // Schaut zur Plattform-Mitte
+					lookZ = currentPlatform.z;
+				} else {
+					// Äußerer Bereich: Kamera zwischen Mitte und Klickpunkt, schaut nach außen
+					const dirX = dx / distFromCenter;
+					const dirZ = dz / distFromCenter;
+					camX = target.x - dirX * 20;  // Zwischen Mitte und Klickpunkt
+					camZ = target.z - dirZ * 20;
+					lookX = target.x;             // Schaut zum Klickpunkt (Rand)
+					lookZ = target.z;
+				}
+				
+				cameraControls.setLookAt(
+					camX, target.y + 10, camZ,    // Kamera-Position
+					lookX, target.y + 2, lookZ,   // Look-At Ziel
+					true
+				);
+			}
+			// Target zurücksetzen nach Animation
+			setTimeout(() => worldStore.clearLocalCameraTarget(), 100);
+		}
+	});
+
 	// Nebel-Farben je nach Perspektive
 	const fogColors: Record<string, string> = {
 		default: '#0d1117',
