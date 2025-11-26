@@ -7,8 +7,12 @@
     import ExhibitStand from './ExhibitStand.svelte';
     import { getHexagonalLayout } from '$lib/logic/layout';
     import { worldStore } from '$lib/logic/store.svelte';
+    import type { Object3D } from 'three';
 
     let { platform, projects = [] }: { platform: PlatformType; projects: ProjectData[] } = $props();
+
+    // Referenzen für Spotlight-Targets (je Spot ein eigenes Target)
+    let spotTargets: (Object3D | undefined)[] = $state(Array(6).fill(undefined));
 
     // Cursor-Änderung bei Hover
     const { hovering, onPointerEnter, onPointerLeave } = useCursor();
@@ -34,10 +38,11 @@
     }
 
     // 6 Spotlight-Positionen im Hexagon-Muster (wie Messehallen-Beleuchtung)
-    const spotlightHeight = 25; // Höhe über der Plattform
+    const spotlightHeight = 15; // Höhe über der Plattform (näher)
     const spotlightRadius = 0.7; // Relativ zur Plattform-Größe
     const spotlightPositions = Array.from({ length: 6 }, (_, i) => {
-        const angle = (i / 6) * Math.PI * 2 + Math.PI / 6;
+        // Startwinkel angepasst damit Spots über den Ecken der Plattform sind
+        const angle = (i / 6) * Math.PI * 2;
         return {
             x: Math.cos(angle) * spotlightRadius,
             z: Math.sin(angle) * spotlightRadius
@@ -119,27 +124,43 @@
     <!-- 6 Spotlights wie in einer Messehalle (nur für aktive Plattform) -->
     {#if isCurrentPlatform}
         {#each spotlightPositions as spot, i}
-            <!-- Spotlight von oben -->
+            <!-- Target-Objekt direkt unter dem Spot (leicht zur Mitte versetzt) -->
+            <T.Object3D 
+                position={[spot.x * platform.size * 0.85, 0, spot.z * platform.size * 0.85]} 
+                bind:ref={spotTargets[i]} 
+            />
+            
+            <!-- Spotlight von oben - zielt fast senkrecht nach unten -->
             <T.SpotLight
-                position={[spot.x * platform.size, spotlightHeight, spot.z * platform.size]}
-                target.position={[spot.x * platform.size * 0.5, 0, spot.z * platform.size * 0.5]}
+                position={[spot.x * platform.size, spotlightHeight - 1.5, spot.z * platform.size]}
+                target={spotTargets[i]}
                 color={platform.glowColor}
-                intensity={80}
-                distance={spotlightHeight * 2}
-                angle={0.4}
-                penumbra={0.5}
-                decay={1.5}
+                intensity={250}
+                distance={spotlightHeight * 2.5}
+                angle={0.7}
+                penumbra={0.6}
+                decay={1.2}
                 castShadow
             />
-            <!-- Kleine sichtbare Lampe -->
-            <T.Mesh position={[spot.x * platform.size, spotlightHeight, spot.z * platform.size]}>
-                <T.SphereGeometry args={[0.3, 8, 8]} />
+            <!-- Aufhängung (kurze Stange) -->
+            <T.Mesh position={[spot.x * platform.size, spotlightHeight - 0.5, spot.z * platform.size]}>
+                <T.CylinderGeometry args={[0.08, 0.08, 1, 8]} />
+                <T.MeshStandardMaterial color="#374151" metalness={0.8} roughness={0.3} />
+            </T.Mesh>
+            <!-- Spot-Gehäuse (hängt unter der Traverse) -->
+            <T.Mesh position={[spot.x * platform.size, spotlightHeight - 1.3, spot.z * platform.size]}>
+                <T.CylinderGeometry args={[0.5, 0.3, 0.6, 8]} />
+                <T.MeshStandardMaterial color="#1f2937" metalness={0.7} roughness={0.3} />
+            </T.Mesh>
+            <!-- Leuchtende Linse -->
+            <T.Mesh position={[spot.x * platform.size, spotlightHeight - 1.7, spot.z * platform.size]}>
+                <T.SphereGeometry args={[0.25, 8, 8]} />
                 <T.MeshBasicMaterial color={platform.glowColor} />
             </T.Mesh>
         {/each}
         
-        <!-- Dünne Traversen-Struktur die die Lampen verbindet -->
-        <T.Mesh position.y={spotlightHeight} rotation.y={Math.PI / 6}>
+        <!-- Dünne Traversen-Struktur die die Lampen verbindet (horizontal liegend) -->
+        <T.Mesh position.y={spotlightHeight} rotation.x={Math.PI / 2}>
             <T.TorusGeometry args={[platform.size * spotlightRadius, 0.15, 6, 6]} />
             <T.MeshStandardMaterial color="#374151" metalness={0.8} roughness={0.3} />
         </T.Mesh>
