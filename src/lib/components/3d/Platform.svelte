@@ -242,14 +242,18 @@
         {/if}
 
         <!-- Freistehende Exhibit-Booths für Booth-Projekte -->
+        <!-- Positioniert auf der VORDEREN Seite (gegenüber der Wände bei startEdge=3) -->
         {#each boothProjects as project, i}
-            {@const angle = (i / Math.max(boothProjects.length, 1)) * Math.PI * 0.6 + Math.PI * 0.7}
-            {@const radius = platform.size * 0.55}
+            {@const boothCount = boothProjects.length}
+            {@const spreadAngle = Math.min(boothCount * 0.4, Math.PI * 0.5)}
+            {@const startAngle = -spreadAngle / 2}
+            {@const angle = startAngle + (i / Math.max(boothCount - 1, 1)) * spreadAngle}
+            {@const radius = platform.size * 0.5}
             <ExhibitBooth
                 {project}
                 position={[Math.cos(angle) * radius, 1.5, Math.sin(angle) * radius]}
-                rotation={-angle + Math.PI}
-                size={boothProjects.length > 3 ? 'small' : 'medium'}
+                rotation={-angle + Math.PI / 2}
+                size={boothCount > 3 ? 'small' : 'medium'}
             />
         {/each}
     {:else}
