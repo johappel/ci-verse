@@ -38,75 +38,81 @@
         (from.z + to.z) / 2
     ]);
 
-    // Pulsieren der Linie
-    let pulseOpacity = $state(0.5);
-    let lineWidth = $state(0.3);
+    // Ist diese Linie relevant für den User? (startet von aktueller Plattform)
+    let isRelevant = $derived(worldStore.state.currentPlatform === from.id);
+
+    // Wird dieses Ziel gerade gehovert (im TransportPortal)?
+    let isDestinationHovered = $derived(worldStore.state.hoveredDestination === to.id);
+
+    // Linie ist nur sichtbar wenn: gehovert ODER Ziel gehovert
+    let isVisible = $derived(isHovered || isDestinationHovered);
+
+    // Farbe je nach Zustand
+    let displayColor = $derived(isVisible ? '#ffffff' : color);
     
+    // Opacity: Unsichtbar außer bei Hover
+    let baseOpacity = $derived(
+        isDestinationHovered ? 1.0 : (isVisible ? 0.8 : 0.0)
+    );
+
+    // Pulsieren der Linie - nur bei Hover
+    let pulsePhase = $state(0);
+    
+    // useTask NUR wenn sichtbar (Hover)
     useTask(() => {
-        // Nur bei Hover pulsieren
-        if (isDestinationHovered || isHovered) {
-            const pulse = Math.sin(Date.now() * 0.005) * 0.15 + 0.85;
-            pulseOpacity = pulse;
-            lineWidth = 0.5;
-        } else {
-            pulseOpacity = baseOpacity;
-            lineWidth = isActive ? 0.15 : 0.08;
-        }
+        if (!isVisible) return;
+        pulsePhase = Date.now() * 0.005;
     });
+    
+    // Derived values
+    let pulseOpacity = $derived(
+        isVisible 
+            ? Math.sin(pulsePhase) * 0.15 + 0.85
+            : 0
+    );
+    let lineWidth = $derived(
+        isDestinationHovered ? 0.5 : (isHovered ? 0.4 : 0.08)
+    );
 
     function handleClick() {
         worldStore.startTransport(to.id);
     }
-
-    // Ist die Linie aktiv (verbunden mit aktueller Plattform)?
-    let isActive = $derived(
-        worldStore.state.currentPlatform === from.id || worldStore.state.currentPlatform === to.id
-    );
-
-    // NEU: Wird dieses Ziel gerade gehovert?
-    let isDestinationHovered = $derived(worldStore.state.hoveredDestination === to.id);
-
-    // Farbe je nach Zustand - nur bei Hover leuchten!
-    let displayColor = $derived(isHovered || isDestinationHovered ? '#ffffff' : color);
-    
-    // Opacity: Nur sichtbar wenn aktiv, hell wenn gehovert
-    let baseOpacity = $derived(
-        isDestinationHovered ? 1.0 : (isActive ? 0.15 : 0.05)
-    );
 </script>
 
-<!-- Lichtstrahl mit MeshLineMaterial (unterstützt variable Breite!) -->
-<T.Mesh
-    onclick={handleClick}
-    onpointerenter={() => (isHovered = true)}
-    onpointerleave={() => (isHovered = false)}
->
-    <MeshLineGeometry points={linePoints} />
-    <MeshLineMaterial
-        width={lineWidth}
-        color={displayColor}
-        opacity={pulseOpacity}
-        transparent
-        depthWrite={false}
-    />
-</T.Mesh>
-
-<!-- Glow-Linie (breiter, transparenter) -->
-{#if isActive}
-    <T.Mesh>
+<!-- Lichtstrahl - nur rendern wenn relevant (von aktueller Plattform) -->
+{#if isRelevant}
+    <T.Mesh
+        onclick={handleClick}
+        onpointerenter={() => (isHovered = true)}
+        onpointerleave={() => (isHovered = false)}
+    >
         <MeshLineGeometry points={linePoints} />
         <MeshLineMaterial
-            width={lineWidth * 3}
-            color={color}
-            opacity={pulseOpacity * 0.15}
+            width={lineWidth}
+            color={displayColor}
+            opacity={pulseOpacity}
             transparent
             depthWrite={false}
         />
     </T.Mesh>
+
+    <!-- Glow-Linie nur bei Hover -->
+    {#if isVisible}
+        <T.Mesh>
+            <MeshLineGeometry points={linePoints} />
+            <MeshLineMaterial
+                width={lineWidth * 3}
+                color={color}
+                opacity={pulseOpacity * 0.15}
+                transparent
+                depthWrite={false}
+            />
+        </T.Mesh>
+    {/if}
 {/if}
 
 <!-- Ziel-Label bei Hover als 3D Glasscheibe -->
-{#if isHovered}
+{#if isHovered && isRelevant}
     <T.Group position={labelPosition}>
         <Billboard>
             <!-- Glasscheibe -->
@@ -139,7 +145,7 @@
 
     <!-- Leuchtender Punkt am Ziel-Oktaeder -->
     <T.Mesh position={[to.x, to.y + OKTAEDER_HEIGHT, to.z]}>
-        <T.SphereGeometry args={[1.8, 12, 12]} />
+        <T.SphereGeometry args={[1.8, 6, 6]} />
         <T.MeshBasicMaterial color="#ffffff" transparent opacity={0.9} />
     </T.Mesh>
 
@@ -147,14 +153,14 @@
     <T.PointLight position={[to.x, to.y + OKTAEDER_HEIGHT, to.z]} color="#ffffff" intensity={50} distance={40} />
 {/if}
 
-<!-- Kleine leuchtende Punkte an Start und Ende (am Oktaeder) -->
-{#if isActive}
+<!-- Kleine leuchtende Punkte an Start und Ende - nur bei Hover -->
+{#if isVisible && isRelevant}
     <T.Mesh position={[from.x, from.y + OKTAEDER_HEIGHT, from.z]}>
-        <T.SphereGeometry args={[0.5, 8, 8]} />
+        <T.SphereGeometry args={[0.5, 6, 6]} />
         <T.MeshBasicMaterial color={color} transparent opacity={pulseOpacity} />
     </T.Mesh>
     <T.Mesh position={[to.x, to.y + OKTAEDER_HEIGHT, to.z]}>
-        <T.SphereGeometry args={[0.5, 8, 8]} />
+        <T.SphereGeometry args={[0.5, 6, 6]} />
         <T.MeshBasicMaterial color={color} transparent opacity={pulseOpacity} />
     </T.Mesh>
 {/if}

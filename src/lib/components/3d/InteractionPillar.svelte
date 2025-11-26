@@ -40,13 +40,23 @@
     let isNearby = $state(false);
     let isHovered = $state(false);
     let pulsePhase = $state(0);
+    let frameCounter = 0; // Für Throttling der Distanz-Prüfung
     
     const displayColor = project.display?.color || project.color || '#3b82f6';
 
-    // Kontinuierliche Distanz-Prüfung (mit Weltkoordinaten)
+    // Optimierte Distanz-Prüfung (nur alle 6 Frames, ~10Hz bei 60fps)
     useTask((delta) => {
+        frameCounter++;
+        
+        // Puls-Animation läuft immer wenn nah (leichtgewichtig)
+        if (isNearby) {
+            pulsePhase += delta * 3;
+        }
+        
+        // Distanz-Prüfung nur alle 6 Frames (Performance)
+        if (frameCounter % 6 !== 0) return;
+        
         const camPos = $camera.position;
-        // Nutze die effektive Welt-Position
         const wx = effectiveWorldPos[0];
         const wy = effectiveWorldPos[1];
         const wz = effectiveWorldPos[2];
@@ -54,14 +64,10 @@
         const dx = camPos.x - wx;
         const dy = camPos.y - wy;
         const dz = camPos.z - wz;
-        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        // Vermeide sqrt wenn möglich (vergleiche Quadrate)
+        const distSq = dx * dx + dy * dy + dz * dz;
         
-        isNearby = distance <= ACTIVATION_DISTANCE;
-        
-        // Pulsieren wenn aktiv
-        if (isNearby) {
-            pulsePhase += delta * 3;
-        }
+        isNearby = distSq <= ACTIVATION_DISTANCE * ACTIVATION_DISTANCE;
     });
 
     function handleClick() {
@@ -77,9 +83,9 @@
 </script>
 
 <T.Group position={position} rotation.y={rotation}>
-    <!-- Säule (dünn, metallisch) -->
-    <T.Mesh position.y={height / 2} castShadow>
-        <T.CylinderGeometry args={[0.08, 0.1, height, 8]} />
+    <!-- Säule (dünn, metallisch) - reduzierte Segmente -->
+    <T.Mesh position.y={height / 2}>
+        <T.CylinderGeometry args={[0.08, 0.1, height, 6]} />
         <T.MeshStandardMaterial 
             color="#374151"
             metalness={0.8}
@@ -87,9 +93,9 @@
         />
     </T.Mesh>
 
-    <!-- Sockel -->
+    <!-- Sockel - reduzierte Segmente -->
     <T.Mesh position.y={0.05}>
-        <T.CylinderGeometry args={[0.2, 0.25, 0.1, 8]} />
+        <T.CylinderGeometry args={[0.2, 0.25, 0.1, 6]} />
         <T.MeshStandardMaterial 
             color="#1f2937"
             metalness={0.7}
@@ -97,9 +103,9 @@
         />
     </T.Mesh>
 
-    <!-- Knopf-Gehäuse -->
+    <!-- Knopf-Gehäuse - reduzierte Segmente -->
     <T.Mesh position.y={height + 0.15}>
-        <T.CylinderGeometry args={[0.18, 0.15, 0.3, 16]} />
+        <T.CylinderGeometry args={[0.18, 0.15, 0.3, 8]} />
         <T.MeshStandardMaterial 
             color={isNearby ? '#1e293b' : '#0f172a'}
             metalness={0.5}
@@ -107,14 +113,14 @@
         />
     </T.Mesh>
 
-    <!-- Leuchtender Knopf (nur aktiv wenn nah) -->
+    <!-- Leuchtender Knopf - reduzierte Segmente -->
     <T.Mesh 
         position.y={height + 0.32}
         onclick={handleClick}
         onpointerenter={() => { if (isNearby) { isHovered = true; onPointerEnter(); }}}
         onpointerleave={() => { isHovered = false; onPointerLeave(); }}
     >
-        <T.SphereGeometry args={[0.12, 16, 16]} />
+        <T.SphereGeometry args={[0.12, 8, 8]} />
         <T.MeshBasicMaterial 
             color={isNearby ? displayColor : '#475569'}
             transparent
@@ -122,10 +128,10 @@
         />
     </T.Mesh>
 
-    <!-- Glow-Ring um den Knopf (nur wenn aktiv) -->
+    <!-- Glow-Ring um den Knopf (nur wenn aktiv) - reduzierte Segmente -->
     {#if isNearby}
         <T.Mesh position.y={height + 0.32} rotation.x={-Math.PI / 2}>
-            <T.RingGeometry args={[0.15, 0.25, 16]} />
+            <T.RingGeometry args={[0.15, 0.25, 8]} />
             <T.MeshBasicMaterial 
                 color={displayColor}
                 transparent
@@ -134,14 +140,16 @@
             />
         </T.Mesh>
 
-        <!-- Punktlicht vom Knopf -->
-        <T.PointLight
-            position.y={height + 0.4}
-            color={displayColor}
-            intensity={isHovered ? 15 : 8}
-            distance={3}
-            decay={2}
-        />
+        <!-- Punktlicht vom Knopf - nur bei Hover für Performance -->
+        {#if isHovered}
+            <T.PointLight
+                position.y={height + 0.4}
+                color={displayColor}
+                intensity={12}
+                distance={3}
+                decay={2}
+            />
+        {/if}
     {/if}
 
     <!-- Label über dem Knopf (nur wenn nah und gehovert) -->

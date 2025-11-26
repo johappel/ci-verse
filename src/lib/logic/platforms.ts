@@ -19,7 +19,7 @@
 // ========================================
 
 /** Augenhöhe des Betrachters in Einheiten (≈ Metern) */
-export const EYE_HEIGHT = 1.8;
+export const EYE_HEIGHT = 4.8;
 
 /** Dicke der Plattform (Zylinder-Höhe) - Oberfläche ist bei platform.y + PLATFORM_SURFACE_OFFSET */
 export const PLATFORM_THICKNESS = 3;
@@ -79,8 +79,8 @@ export const platforms: Record<string, Platform> = {
         color: '#64748b',      // Slate
         glowColor: '#94a3b8',
         landing: {
-            offset: [0, 12, -35],      // Vor der Plattform, leicht erhöht
-            lookAtOffset: [0, 3, 0]    // Schaut zur Mitte
+            offset: [0, 10, -25],      // Vor der Plattform, leicht erhöht
+            lookAtOffset: [0, 3, 2]    // Schaut zur Mitte
         }
     },
 

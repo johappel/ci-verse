@@ -27,10 +27,12 @@
     // Referenzen für Spotlight-Targets (je Spot ein eigenes Target)
     let spotTargets: (Object3D | undefined)[] = $state(Array(6).fill(undefined));
 
-    // Oktaeder-Rotation (animiert)
+    // Oktaeder-Rotation (animiert) - nur auf aktueller Plattform für Performance
     let octaederRotation = $state(0);
     useTask((delta) => {
-        octaederRotation += delta * 0.5; // Langsame Rotation
+        if (isCurrentPlatform) {
+            octaederRotation += delta * 0.5; // Langsame Rotation
+        }
     });
 
     // Cursor-Änderung bei Hover

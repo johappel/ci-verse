@@ -13,17 +13,21 @@
 
     let { project, position }: Props = $props();
 
-    // Langsame Rotation
-    let rotation = $state(0);
-    useTask((delta) => {
-        rotation += delta * 0.3;
-    });
-
-    // Zustände
+    // Zustände müssen vor shouldAnimate definiert werden
     let isHovered = $derived(worldStore.state.hoveredId === project.id);
     let isActive = $derived(
         worldStore.state.activeQPlatform === project.departments[0],
     );
+
+    // Langsame Rotation - nur wenn sichtbar (gehovert oder aktiv)
+    let rotation = $state(0);
+    let shouldAnimate = $derived(isHovered || isActive);
+    
+    useTask((delta) => {
+        if (shouldAnimate) {
+            rotation += delta * 0.3;
+        }
+    });
 
     // Animierte Werte
     let scale = spring(1, { stiffness: 0.3, damping: 0.6 });
@@ -99,7 +103,7 @@
 
     <!-- Glow-Ring um den Kristall (dicker, heller) -->
     <T.Mesh rotation.x={Math.PI / 2} scale={$scale}>
-        <T.TorusGeometry args={[3.5, 0.15, 16, 64]} />
+        <T.TorusGeometry args={[3.5, 0.15, 8, 24]} />
         <T.MeshBasicMaterial
             color={platformColor}
             transparent
@@ -109,7 +113,7 @@
 
     <!-- Zweiter Ring (gekippt, rotiert mit) -->
     <T.Mesh rotation.x={Math.PI / 3} rotation.z={rotation * 0.5} scale={$scale}>
-        <T.TorusGeometry args={[4.2, 0.1, 16, 64]} />
+        <T.TorusGeometry args={[4.2, 0.1, 8, 24]} />
         <T.MeshBasicMaterial
             color={platformColor}
             transparent

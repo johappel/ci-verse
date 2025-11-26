@@ -5,11 +5,13 @@
     import { platforms } from '$lib/logic/platforms';
     import { CylinderGeometry } from 'three';
 
-    // Rotationswinkel für Animation
+    // Rotationswinkel für Animation - nur wenn Portal sichtbar (isOnS)
     let rotationY = $state(0);
     
     useTask((delta) => {
-        rotationY += delta * 0.3; // Langsame Rotation des Rings
+        if (isOnS) {
+            rotationY += delta * 0.3; // Langsame Rotation des Rings
+        }
     });
 
     // Alle Ziel-Plattformen (außer S selbst)
