@@ -17,14 +17,15 @@
 
     let isHovered = $state(false);
 
-    // Punkte für die Lichtlinie (leichte Kurve nach oben)
-    let midHeight = $derived(Math.max(from.y, to.y) + 25);
+    // Punkte für die Lichtlinie - enden am Oktaeder (Y+15)
+    const OKTAEDER_HEIGHT = 15;
+    let midHeight = $derived(Math.max(from.y, to.y) + OKTAEDER_HEIGHT + 10);
     
-    // Bezier-Kurve für sanften Bogen
+    // Bezier-Kurve für sanften Bogen - Start und Ende am Oktaeder
     let curve = $derived(new QuadraticBezierCurve3(
-        new Vector3(from.x, from.y + 3, from.z),
+        new Vector3(from.x, from.y + OKTAEDER_HEIGHT, from.z),
         new Vector3((from.x + to.x) / 2, midHeight, (from.z + to.z) / 2),
-        new Vector3(to.x, to.y + 3, to.z)
+        new Vector3(to.x, to.y + OKTAEDER_HEIGHT, to.z)
     ));
 
     // Punkte entlang der Kurve für MeshLine
@@ -136,23 +137,23 @@
         </Billboard>
     </T.Group>
 
-    <!-- Leuchtender Punkt am Ziel -->
-    <T.Mesh position={[to.x, to.y + 8, to.z]}>
-        <T.SphereGeometry args={[1.5, 12, 12]} />
-        <T.MeshBasicMaterial color="#ffffff" transparent opacity={0.8} />
+    <!-- Leuchtender Punkt am Ziel-Oktaeder -->
+    <T.Mesh position={[to.x, to.y + OKTAEDER_HEIGHT, to.z]}>
+        <T.SphereGeometry args={[1.8, 12, 12]} />
+        <T.MeshBasicMaterial color="#ffffff" transparent opacity={0.9} />
     </T.Mesh>
 
-    <!-- Glow-Effekt am Ziel -->
-    <T.PointLight position={[to.x, to.y + 8, to.z]} color="#ffffff" intensity={30} distance={40} />
+    <!-- Glow-Effekt am Ziel-Oktaeder -->
+    <T.PointLight position={[to.x, to.y + OKTAEDER_HEIGHT, to.z]} color="#ffffff" intensity={50} distance={40} />
 {/if}
 
-<!-- Kleine leuchtende Punkte an Start und Ende -->
+<!-- Kleine leuchtende Punkte an Start und Ende (am Oktaeder) -->
 {#if isActive}
-    <T.Mesh position={[from.x, from.y + 3, from.z]}>
+    <T.Mesh position={[from.x, from.y + OKTAEDER_HEIGHT, from.z]}>
         <T.SphereGeometry args={[0.5, 8, 8]} />
         <T.MeshBasicMaterial color={color} transparent opacity={pulseOpacity} />
     </T.Mesh>
-    <T.Mesh position={[to.x, to.y + 3, to.z]}>
+    <T.Mesh position={[to.x, to.y + OKTAEDER_HEIGHT, to.z]}>
         <T.SphereGeometry args={[0.5, 8, 8]} />
         <T.MeshBasicMaterial color={color} transparent opacity={pulseOpacity} />
     </T.Mesh>

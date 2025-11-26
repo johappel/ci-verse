@@ -138,12 +138,27 @@
         />
     </T.Mesh>
 
-    <!-- Rotierender Oktaeder über dem Schild - Ankerpunkt für Lichtlinie zum Marktplatz -->
+    <!-- Rotierender Oktaeder über dem Schild - Ankerpunkt für Lichtlinien -->
+    <!-- Klick auf Oktaeder = Zurück zum Marktplatz (S) -->
     <T.Group position.y={15}>
-        <!-- Oktaeder (halbtransparent) -->
+        <!-- Oktaeder (halbtransparent, klickbar) -->
         <T.Mesh 
             rotation.y={octaederRotation}
             rotation.x={Math.PI / 8}
+            onclick={(e: ThreltePointerEvent) => {
+                e.stopPropagation();
+                if (platform.id !== 'S') {
+                    worldStore.startTransport('S');
+                }
+            }}
+            onpointerenter={() => {
+                if (platform.id !== 'S') {
+                    document.body.style.cursor = 'pointer';
+                }
+            }}
+            onpointerleave={() => {
+                document.body.style.cursor = 'auto';
+            }}
         >
             <T.OctahedronGeometry args={[1.2, 0]} />
             <T.MeshPhysicalMaterial 
@@ -157,8 +172,16 @@
                 transmission={0.3}
             />
         </T.Mesh>
-        <!-- Innere leuchtende Kugel (der "Kern") -->
-        <T.Mesh rotation.y={octaederRotation * -1.5}>
+        <!-- Innere leuchtende Kugel (der "Kern", auch klickbar) -->
+        <T.Mesh 
+            rotation.y={octaederRotation * -1.5}
+            onclick={(e: ThreltePointerEvent) => {
+                e.stopPropagation();
+                if (platform.id !== 'S') {
+                    worldStore.startTransport('S');
+                }
+            }}
+        >
             <T.SphereGeometry args={[0.5, 16, 16]} />
             <T.MeshBasicMaterial 
                 color={platform.glowColor}
@@ -171,6 +194,18 @@
             distance={20}
             decay={2}
         />
+        <!-- Tooltip bei Hover (nur wenn nicht Marktplatz) -->
+        {#if platform.id !== 'S'}
+            <Billboard position={[0, 2.5, 0]}>
+                <Text
+                    text="→ Marktplatz"
+                    color="#94a3b8"
+                    fontSize={0.4}
+                    anchorX="center"
+                    anchorY="middle"
+                />
+            </Billboard>
+        {/if}
     </T.Group>
 
     <!-- 3D Namensschild - unter dem Oktaeder -->

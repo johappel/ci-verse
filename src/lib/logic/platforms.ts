@@ -25,6 +25,12 @@ export interface Platform {
     size: number;          // Radius der Plattform
     color: string;
     glowColor: string;
+    // Landepunkt: Wo die Kamera beim Betreten positioniert wird
+    // Relativ zur Plattform-Mitte, User schaut Richtung lookAt
+    landing?: {
+        offset: [number, number, number];  // [x, y, z] Offset von Plattform-Mitte
+        lookAtOffset: [number, number, number]; // Wohin der User schaut (relativ)
+    };
 }
 
 export interface Connection {
@@ -50,7 +56,11 @@ export const platforms: Record<string, Platform> = {
         z: 0,
         size: 40,              // 80m Durchmesser
         color: '#64748b',      // Slate
-        glowColor: '#94a3b8'
+        glowColor: '#94a3b8',
+        landing: {
+            offset: [0, 12, -35],      // Vor der Plattform, leicht erhöht
+            lookAtOffset: [0, 3, 0]    // Schaut zur Mitte
+        }
     },
 
     // B-Plattformen (Bildung) - gleiche Höhe wie S, im Kreis angeordnet
@@ -64,7 +74,11 @@ export const platforms: Record<string, Platform> = {
         z: 0,
         size: 35,              // 70m Durchmesser
         color: '#fcd34d',      // Amber
-        glowColor: '#fde68a'
+        glowColor: '#fde68a',
+        landing: {
+            offset: [8, 8, -5],        // Nah an InfoHexagon, seitlich
+            lookAtOffset: [0, 5, 15]   // Schaut Richtung Wände (hinten)
+        }
     },
     B2: {
         id: 'B2',
@@ -76,7 +90,11 @@ export const platforms: Record<string, Platform> = {
         z: 180,
         size: 35,
         color: '#fb923c',      // Orange
-        glowColor: '#fdba74'
+        glowColor: '#fdba74',
+        landing: {
+            offset: [-8, 8, -5],       // Nah an InfoHexagon, seitlich
+            lookAtOffset: [0, 5, 15]   // Schaut Richtung Wände (hinten)
+        }
     },
     B3: {
         id: 'B3',
@@ -88,7 +106,11 @@ export const platforms: Record<string, Platform> = {
         z: 0,
         size: 35,
         color: '#f87171',      // Red
-        glowColor: '#fca5a5'
+        glowColor: '#fca5a5',
+        landing: {
+            offset: [-8, 8, -5],       // Nah an InfoHexagon, seitlich
+            lookAtOffset: [0, 5, 15]   // Schaut Richtung Wände (hinten)
+        }
     },
 
     // Q-Plattformen (Querschnitt) - höher schwebend
@@ -102,7 +124,11 @@ export const platforms: Record<string, Platform> = {
         z: -140,
         size: 45,              // Größer wegen mehr Projekten
         color: '#a78bfa',      // Violet
-        glowColor: '#c4b5fd'
+        glowColor: '#c4b5fd',
+        landing: {
+            offset: [10, 10, -8],      // Nah an InfoHexagon, seitlich
+            lookAtOffset: [0, 5, 20]   // Schaut Richtung Wände
+        }
     },
     Q2: {
         id: 'Q2',
@@ -114,7 +140,11 @@ export const platforms: Record<string, Platform> = {
         z: -200,
         size: 45,
         color: '#fbbf24',      // Yellow
-        glowColor: '#fcd34d'
+        glowColor: '#fcd34d',
+        landing: {
+            offset: [-10, 10, -8],     // Nah an InfoHexagon, seitlich
+            lookAtOffset: [0, 5, 20]   // Schaut Richtung Wände
+        }
     },
     Q3: {
         id: 'Q3',
@@ -126,7 +156,11 @@ export const platforms: Record<string, Platform> = {
         z: -140,
         size: 45,
         color: '#22d3ee',      // Cyan
-        glowColor: '#67e8f9'
+        glowColor: '#67e8f9',
+        landing: {
+            offset: [-10, 10, -8],     // Nah an InfoHexagon, seitlich
+            lookAtOffset: [0, 5, 20]   // Schaut Richtung Wände
+        }
     }
 };
 

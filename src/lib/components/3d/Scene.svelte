@@ -21,11 +21,27 @@
 		if (worldStore.state.isTransporting && worldStore.state.transportTarget && cameraControls) {
 			const target = platforms[worldStore.state.transportTarget];
 			if (target) {
-				// Fliege zur Ziel-Plattform
+				// Landepunkt: Entweder custom oder Fallback
+				const landing = target.landing || {
+					offset: [0, 15, -40],
+					lookAtOffset: [0, 3, 0]
+				};
+				
+				// Berechne absolute Kamera-Position
+				const camX = target.x + landing.offset[0];
+				const camY = target.y + landing.offset[1];
+				const camZ = target.z + landing.offset[2];
+				
+				// Berechne absolute Look-At Position
+				const lookX = target.x + landing.lookAtOffset[0];
+				const lookY = target.y + landing.lookAtOffset[1];
+				const lookZ = target.z + landing.lookAtOffset[2];
+				
+				// Fliege zur Ziel-Plattform mit individuellem Landepunkt
 				cameraControls.setLookAt(
-					target.x, target.y + 15, target.z - 60,  // Kamera-Position
-					target.x, target.y, target.z,            // Look-At Ziel
-					true                                      // animiert
+					camX, camY, camZ,    // Kamera-Position
+					lookX, lookY, lookZ, // Look-At Ziel
+					true                 // animiert
 				);
 			}
 		}
