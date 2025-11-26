@@ -1,9 +1,9 @@
 <script lang="ts">
     import { T, useTask } from '@threlte/core';
-    import { HTML } from '@threlte/extras';
+    import { HTML, MeshLineGeometry, MeshLineMaterial } from '@threlte/extras';
     import type { Platform } from '$lib/logic/platforms';
     import { worldStore } from '$lib/logic/store.svelte';
-    import { Vector3, QuadraticBezierCurve3, TubeGeometry } from 'three';
+    import { Vector3, QuadraticBezierCurve3 } from 'three';
 
     let {
         from,
@@ -27,8 +27,8 @@
         new Vector3(to.x, to.y + 3, to.z)
     ));
 
-    // TubeGeometry - dünn und dezent
-    let tubeGeometry = $derived(new TubeGeometry(curve, 32, 0.15, 6, false));
+    // Punkte entlang der Kurve für MeshLine
+    let linePoints = $derived(curve.getPoints(50));
 
     // Mittelpunkt für Label (3D Position)
     let labelPosition = $derived<[number, number, number]>([
@@ -39,11 +39,13 @@
 
     // Pulsieren der Linie
     let pulseOpacity = $state(0.5);
+    let lineWidth = $state(0.3);
     
     useTask(() => {
         // Sanftes Pulsieren
-        const pulse = Math.sin(Date.now() * 0.003) * 0.25 + 0.55;
-        pulseOpacity = isHovered ? 0.95 : (isActive ? pulse : 0.25);
+        const pulse = Math.sin(Date.now() * 0.003) * 0.2 + 0.6;
+        pulseOpacity = isHovered ? 1.0 : (isActive ? pulse : 0.3);
+        lineWidth = isHovered ? 0.6 : (isActive ? 0.4 : 0.2);
     });
 
     function handleClick() {
@@ -59,28 +61,32 @@
     let displayColor = $derived(isHovered ? '#ffffff' : color);
 </script>
 
-<!-- Lichtstrahl als Tube (THREE.Line mit linewidth funktioniert nicht in WebGL!) -->
+<!-- Lichtstrahl mit MeshLineMaterial (unterstützt variable Breite!) -->
 <T.Mesh
-    geometry={tubeGeometry}
     onclick={handleClick}
     onpointerenter={() => (isHovered = true)}
     onpointerleave={() => (isHovered = false)}
 >
-    <T.MeshBasicMaterial
+    <MeshLineGeometry points={linePoints} />
+    <MeshLineMaterial
+        width={lineWidth}
         color={displayColor}
-        transparent
         opacity={pulseOpacity}
+        transparent
+        depthWrite={false}
     />
 </T.Mesh>
 
-<!-- Zweite, dickere Tube für Glow-Effekt (sehr transparent) -->
+<!-- Glow-Linie (breiter, transparenter) -->
 {#if isActive}
-    {@const glowTube = new TubeGeometry(curve, 24, 0.5, 6, false)}
-    <T.Mesh geometry={glowTube}>
-        <T.MeshBasicMaterial
+    <T.Mesh>
+        <MeshLineGeometry points={linePoints} />
+        <MeshLineMaterial
+            width={lineWidth * 3}
             color={color}
+            opacity={pulseOpacity * 0.15}
             transparent
-            opacity={pulseOpacity * 0.2}
+            depthWrite={false}
         />
     </T.Mesh>
 {/if}
@@ -110,11 +116,11 @@
 <!-- Kleine leuchtende Punkte an Start und Ende -->
 {#if isActive}
     <T.Mesh position={[from.x, from.y + 3, from.z]}>
-        <T.SphereGeometry args={[0.4, 8, 8]} />
-        <T.MeshBasicMaterial color={color} transparent opacity={pulseOpacity * 1.3} />
+        <T.SphereGeometry args={[0.5, 8, 8]} />
+        <T.MeshBasicMaterial color={color} transparent opacity={pulseOpacity} />
     </T.Mesh>
     <T.Mesh position={[to.x, to.y + 3, to.z]}>
-        <T.SphereGeometry args={[0.4, 8, 8]} />
-        <T.MeshBasicMaterial color={color} transparent opacity={pulseOpacity * 1.3} />
+        <T.SphereGeometry args={[0.5, 8, 8]} />
+        <T.MeshBasicMaterial color={color} transparent opacity={pulseOpacity} />
     </T.Mesh>
 {/if}

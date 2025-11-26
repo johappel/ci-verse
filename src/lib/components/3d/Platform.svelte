@@ -1,6 +1,6 @@
 <script lang="ts">
     import { T } from '@threlte/core';
-    import { HTML } from '@threlte/extras';
+    import { HTML, FakeGlowMaterial, useCursor } from '@threlte/extras';
     import { spring } from 'svelte/motion';
     import type { Platform as PlatformType } from '$lib/logic/platforms';
     import type { ProjectData } from '$lib/types/project';
@@ -10,14 +10,14 @@
 
     let { platform, projects = [] }: { platform: PlatformType; projects: ProjectData[] } = $props();
 
-    // Hover-State
-    let isHovered = $state(false);
+    // Cursor-Änderung bei Hover
+    const { hovering, onPointerEnter, onPointerLeave } = useCursor();
     
-    // Spring für numerische Werte (nicht für Strings!)
+    // Spring für numerische Werte
     let platformScale = spring(1, { stiffness: 0.3, damping: 0.8 });
 
     $effect(() => {
-        platformScale.set(isHovered ? 1.03 : 1);
+        platformScale.set($hovering ? 1.02 : 1);
     });
 
     // Layout für Projekt-Stände auf der Plattform
@@ -38,8 +38,8 @@
     <!-- Hexagonale Plattform-Basis (6-seitiger Zylinder) -->
     <T.Mesh
         onclick={handlePlatformClick}
-        onpointerenter={() => (isHovered = true)}
-        onpointerleave={() => (isHovered = false)}
+        onpointerenter={onPointerEnter}
+        onpointerleave={onPointerLeave}
         receiveShadow
         rotation.y={Math.PI / 6}
     >
@@ -50,30 +50,41 @@
             metalness={0.3}
             roughness={0.6}
             emissive={isCurrentPlatform ? platform.glowColor : '#000000'}
-            emissiveIntensity={isCurrentPlatform ? 0.4 : 0}
+            emissiveIntensity={isCurrentPlatform ? 0.3 : 0}
         />
     </T.Mesh>
 
-    <!-- Glow-Ring unter der Plattform (flach, gleiche Orientierung wie Hexagon) -->
-    <!-- RingGeometry startet mit Ecke bei 0°, CylinderGeometry mit Kante -->
-    <!-- Daher: Ring OHNE Y-Rotation, nur flachlegen -->
+    <!-- Glow-Effekt mit FakeGlowMaterial (sichtbar wenn aktuelle Plattform) -->
+    {#if isCurrentPlatform}
+        <T.Mesh position.y={-1} rotation.y={Math.PI / 6}>
+            <T.CylinderGeometry args={[platform.size * 1.1, platform.size * 1.1, 1, 6]} />
+            <FakeGlowMaterial 
+                glowColor={platform.glowColor}
+                falloff={0.8}
+                glowSharpness={0.5}
+                glowInternalRadius={0.5}
+            />
+        </T.Mesh>
+    {/if}
+
+    <!-- Dezenter Ring auch für nicht-aktive Plattformen -->
     <T.Mesh position.y={-2} rotation.x={-Math.PI / 2}>
-        <T.RingGeometry args={[platform.size * 0.95, platform.size * 1.05, 6]} />
+        <T.RingGeometry args={[platform.size * 0.98, platform.size * 1.02, 6]} />
         <T.MeshBasicMaterial
             color={platform.glowColor}
             transparent
-            opacity={isCurrentPlatform ? 0.8 : 0.2}
+            opacity={isCurrentPlatform ? 0.6 : 0.15}
             side={2}
         />
     </T.Mesh>
 
     <!-- Plattform-Name Label (schwebt über der Plattform) -->
-    <HTML position={[0, 15, 0]} center pointerEvents="none">
+    <HTML position={[0, 12, 0]} center pointerEvents="none">
         <div
             class="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap
                    transition-all duration-300 pointer-events-none select-none
                    {isCurrentPlatform
-                ? 'bg-white text-slate-800 shadow-lg'
+                ? 'bg-white text-slate-800 shadow-lg scale-110'
                 : 'bg-black/60 text-white/90'}"
         >
             {platform.name}
@@ -82,14 +93,14 @@
 
     <!-- Projekt-Stände auf der Plattform -->
     {#each projects as project, i}
-        <ExhibitStand {project} position={[standPositions[i]?.x ?? 0, 0.5, standPositions[i]?.z ?? 0]} />
+        <ExhibitStand {project} position={[standPositions[i]?.x ?? 0, 2, standPositions[i]?.z ?? 0]} />
     {/each}
 
     <!-- Licht-Punkt auf der Plattform -->
     <T.PointLight
-        position={[0, 10, 0]}
+        position={[0, 8, 0]}
         color={platform.glowColor}
-        intensity={isCurrentPlatform ? 50 : 10}
-        distance={platform.size * 3}
+        intensity={isCurrentPlatform ? 40 : 8}
+        distance={platform.size * 2.5}
     />
 </T.Group>
