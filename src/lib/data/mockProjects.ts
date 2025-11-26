@@ -1,4 +1,4 @@
-import type { ProjectData, StaffMember, PlatformContent, WorldData } from '../types/project';
+import type { ProjectData, StaffMember, PlatformContent, WorldData, Department } from '../types/project';
 
 // ============================================================================
 // PROJEKTE (15 Stück)
@@ -467,7 +467,7 @@ export function getStaffById(id: string): StaffMember | undefined {
 
 /** Alle Projekte einer Plattform (basierend auf departments) */
 export function getProjectsForPlatform(platformId: string): ProjectData[] {
-    return mockProjects.filter(p => p.departments.includes(platformId));
+    return mockProjects.filter(p => p.departments.includes(platformId as Department));
 }
 
 /** Plattform-Content nach ID */

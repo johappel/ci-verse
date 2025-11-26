@@ -1,18 +1,37 @@
 <script lang="ts">
-    import { T } from '@threlte/core';
+    import { T, useTask } from '@threlte/core';
     import { useCursor, Text, Billboard } from '@threlte/extras';
     import { spring } from 'svelte/motion';
     import type { Platform as PlatformType } from '$lib/logic/platforms';
-    import type { ProjectData } from '$lib/types/project';
+    import type { ProjectData, PlatformContent } from '$lib/types/project';
     import ExhibitStand from './ExhibitStand.svelte';
+    import InfoHexagon from './InfoHexagon.svelte';
+    import MesseWall from './MesseWall.svelte';
+    import ExhibitBooth from './ExhibitBooth.svelte';
     import { getHexagonalLayout } from '$lib/logic/layout';
     import { worldStore } from '$lib/logic/store.svelte';
+    import { 
+        getPlatformContent, 
+        getBoothProjectsForPlatform, 
+        getWallPostersForPlatform 
+    } from '$lib/data/mockProjects';
     import type { Object3D, Intersection } from 'three';
 
     let { platform, projects = [] }: { platform: PlatformType; projects: ProjectData[] } = $props();
 
+    // Plattform-Content (Aspects, WallPosters, BoothProjects)
+    let platformContent = $derived(getPlatformContent(platform.id));
+    let boothProjects = $derived(getBoothProjectsForPlatform(platform.id));
+    let wallPosters = $derived(getWallPostersForPlatform(platform.id));
+
     // Referenzen für Spotlight-Targets (je Spot ein eigenes Target)
     let spotTargets: (Object3D | undefined)[] = $state(Array(6).fill(undefined));
+
+    // Oktaeder-Rotation (animiert)
+    let octaederRotation = $state(0);
+    useTask((delta) => {
+        octaederRotation += delta * 0.5; // Langsame Rotation
+    });
 
     // Cursor-Änderung bei Hover
     const { hovering, onPointerEnter, onPointerLeave } = useCursor();
@@ -119,11 +138,46 @@
         />
     </T.Mesh>
 
-    <!-- 3D Namensschild - kompakt, nah an der Plattform -->
-    <Billboard position={[0, 4, 0]}>
-        <!-- Halbtransparente Glasscheibe (kleiner) -->
+    <!-- Rotierender Oktaeder über dem Schild - Ankerpunkt für Lichtlinie zum Marktplatz -->
+    <T.Group position.y={15}>
+        <!-- Oktaeder (halbtransparent) -->
+        <T.Mesh 
+            rotation.y={octaederRotation}
+            rotation.x={Math.PI / 8}
+        >
+            <T.OctahedronGeometry args={[1.2, 0]} />
+            <T.MeshPhysicalMaterial 
+                color={platform.glowColor}
+                emissive={platform.glowColor}
+                emissiveIntensity={isCurrentPlatform ? 0.5 : 0.2}
+                metalness={0.3}
+                roughness={0.1}
+                transparent
+                opacity={0.6}
+                transmission={0.3}
+            />
+        </T.Mesh>
+        <!-- Innere leuchtende Kugel (der "Kern") -->
+        <T.Mesh rotation.y={octaederRotation * -1.5}>
+            <T.SphereGeometry args={[0.5, 16, 16]} />
+            <T.MeshBasicMaterial 
+                color={platform.glowColor}
+            />
+        </T.Mesh>
+        <!-- Punktlicht vom Kern -->
+        <T.PointLight
+            color={platform.glowColor}
+            intensity={isCurrentPlatform ? 50 : 15}
+            distance={20}
+            decay={2}
+        />
+    </T.Group>
+
+    <!-- 3D Namensschild - unter dem Oktaeder -->
+    <Billboard position={[0, 12, 0]}>
+        <!-- Halbtransparente Glasscheibe mit mehr Tiefe -->
         <T.Mesh>
-            <T.PlaneGeometry args={[platform.name.length * 0.5 + 1.5, 1.8]} />
+            <T.BoxGeometry args={[platform.name.length * 0.5 + 1.5, 1.8, 0.3]} />
             <T.MeshStandardMaterial 
                 color={isCurrentPlatform ? '#ffffff' : '#1e293b'}
                 transparent
@@ -133,13 +187,15 @@
             />
         </T.Mesh>
         
-        <!-- Rahmen -->
-        <T.Mesh position.z={-0.03}>
-            <T.PlaneGeometry args={[platform.name.length * 0.5 + 1.7, 2]} />
-            <T.MeshBasicMaterial 
+        <!-- Rahmen mit Tiefe -->
+        <T.Mesh position.z={-0.05}>
+            <T.BoxGeometry args={[platform.name.length * 0.5 + 1.7, 2, 0.1]} />
+            <T.MeshStandardMaterial 
                 color={platform.glowColor}
+                emissive={platform.glowColor}
+                emissiveIntensity={0.3}
                 transparent
-                opacity={0.6}
+                opacity={0.7}
             />
         </T.Mesh>
 
@@ -150,16 +206,58 @@
             fontSize={0.7}
             anchorX="center"
             anchorY="middle"
-            position.z={0.05}
+            position.z={0.2}
             outlineWidth={isCurrentPlatform ? 0 : 0.02}
             outlineColor="#000000"
         />
     </Billboard>
 
-    <!-- Projekt-Stände auf der Plattform -->
-    {#each projects as project, i}
-        <ExhibitStand {project} position={[standPositions[i]?.x ?? 0, 2, standPositions[i]?.z ?? 0]} />
-    {/each}
+    <!-- ============================================ -->
+    <!-- PLATTFORM-INHALTE (nur für B- und Q-Plattformen) -->
+    <!-- ============================================ -->
+    
+    {#if platformContent && platform.id !== 'S'}
+        <!-- Info-Hexagon im Zentrum -->
+        {#if platformContent.aspects.length > 0}
+            <InfoHexagon
+                platformName={platform.name}
+                aspects={platformContent.aspects}
+                position={[0, 1.5, 0]}
+                height={5}
+                radius={3}
+                color={platform.color}
+            />
+        {/if}
+
+        <!-- Messe-Wand am hinteren Rand -->
+        {#if wallPosters.length > 0}
+            <MesseWall
+                posters={wallPosters}
+                platformSize={platform.size}
+                platformColor={platform.color}
+                wallHeight={10}
+                wallArc={140}
+                startAngle={-70}
+            />
+        {/if}
+
+        <!-- Freistehende Exhibit-Booths für Booth-Projekte -->
+        {#each boothProjects as project, i}
+            {@const angle = (i / Math.max(boothProjects.length, 1)) * Math.PI * 0.6 + Math.PI * 0.7}
+            {@const radius = platform.size * 0.55}
+            <ExhibitBooth
+                {project}
+                position={[Math.cos(angle) * radius, 1.5, Math.sin(angle) * radius]}
+                rotation={-angle + Math.PI}
+                size={boothProjects.length > 3 ? 'small' : 'medium'}
+            />
+        {/each}
+    {:else}
+        <!-- Fallback: Alte ExhibitStand-Komponente für Projekte ohne PlatformContent -->
+        {#each projects as project, i}
+            <ExhibitStand {project} position={[standPositions[i]?.x ?? 0, 2, standPositions[i]?.z ?? 0]} />
+        {/each}
+    {/if}
 
     <!-- 6 Spotlights wie in einer Messehalle (nur für aktive Plattform) -->
     {#if isCurrentPlatform}
