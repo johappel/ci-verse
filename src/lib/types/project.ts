@@ -35,6 +35,7 @@ export interface AppState {
     currentPlatform: string;
     isTransporting: boolean;
     transportTarget: string | null;
+    hoveredDestination: string | null; // Für Lichtlinien-Highlight
     // Chat-Modal
     isChatOpen: boolean;
 }

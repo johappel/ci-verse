@@ -1,6 +1,6 @@
 <script lang="ts">
     import { T, useTask } from '@threlte/core';
-    import { HTML, MeshLineGeometry, MeshLineMaterial } from '@threlte/extras';
+    import { MeshLineGeometry, MeshLineMaterial, Text, Billboard } from '@threlte/extras';
     import type { Platform } from '$lib/logic/platforms';
     import { worldStore } from '$lib/logic/store.svelte';
     import { Vector3, QuadraticBezierCurve3 } from 'three';
@@ -42,10 +42,15 @@
     let lineWidth = $state(0.3);
     
     useTask(() => {
-        // Sanftes Pulsieren
-        const pulse = Math.sin(Date.now() * 0.003) * 0.2 + 0.6;
-        pulseOpacity = isHovered ? 1.0 : (isActive ? pulse : 0.3);
-        lineWidth = isHovered ? 0.6 : (isActive ? 0.4 : 0.2);
+        // Nur bei Hover pulsieren
+        if (isDestinationHovered || isHovered) {
+            const pulse = Math.sin(Date.now() * 0.005) * 0.15 + 0.85;
+            pulseOpacity = pulse;
+            lineWidth = 0.5;
+        } else {
+            pulseOpacity = baseOpacity;
+            lineWidth = isActive ? 0.15 : 0.08;
+        }
     });
 
     function handleClick() {
@@ -57,8 +62,16 @@
         worldStore.state.currentPlatform === from.id || worldStore.state.currentPlatform === to.id
     );
 
-    // Farbe je nach Zustand
-    let displayColor = $derived(isHovered ? '#ffffff' : color);
+    // NEU: Wird dieses Ziel gerade gehovert?
+    let isDestinationHovered = $derived(worldStore.state.hoveredDestination === to.id);
+
+    // Farbe je nach Zustand - nur bei Hover leuchten!
+    let displayColor = $derived(isHovered || isDestinationHovered ? '#ffffff' : color);
+    
+    // Opacity: Nur sichtbar wenn aktiv, hell wenn gehovert
+    let baseOpacity = $derived(
+        isDestinationHovered ? 1.0 : (isActive ? 0.15 : 0.05)
+    );
 </script>
 
 <!-- Lichtstrahl mit MeshLineMaterial (unterstützt variable Breite!) -->
@@ -91,17 +104,37 @@
     </T.Mesh>
 {/if}
 
-<!-- Ziel-Label bei Hover -->
+<!-- Ziel-Label bei Hover als 3D Glasscheibe -->
 {#if isHovered}
-    <HTML position={labelPosition} center pointerEvents="none">
-        <div
-            class="bg-black/80 text-white px-4 py-2 rounded-lg text-base font-medium
-                   shadow-xl border border-white/30 whitespace-nowrap
-                   pointer-events-none select-none"
-        >
-            → {to.name}
-        </div>
-    </HTML>
+    <T.Group position={labelPosition}>
+        <Billboard>
+            <!-- Glasscheibe -->
+            <T.Mesh>
+                <T.PlaneGeometry args={[to.name.length * 0.5 + 3, 2]} />
+                <T.MeshStandardMaterial 
+                    color="#0f172a"
+                    transparent
+                    opacity={0.92}
+                    metalness={0.2}
+                    roughness={0.2}
+                />
+            </T.Mesh>
+            <!-- Leuchtender Rahmen -->
+            <T.Mesh position.z={-0.03}>
+                <T.PlaneGeometry args={[to.name.length * 0.5 + 3.3, 2.3]} />
+                <T.MeshBasicMaterial color="#ffffff" transparent opacity={0.5} />
+            </T.Mesh>
+            <!-- Pfeil + Text -->
+            <Text
+                text={`→ ${to.name}`}
+                color="#ffffff"
+                fontSize={0.7}
+                anchorX="center"
+                anchorY="middle"
+                position.z={0.08}
+            />
+        </Billboard>
+    </T.Group>
 
     <!-- Leuchtender Punkt am Ziel -->
     <T.Mesh position={[to.x, to.y + 8, to.z]}>

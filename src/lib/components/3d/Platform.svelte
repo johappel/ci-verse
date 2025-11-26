@@ -1,6 +1,6 @@
 <script lang="ts">
     import { T } from '@threlte/core';
-    import { HTML, FakeGlowMaterial, useCursor } from '@threlte/extras';
+    import { useCursor, Text, Billboard } from '@threlte/extras';
     import { spring } from 'svelte/motion';
     import type { Platform as PlatformType } from '$lib/logic/platforms';
     import type { ProjectData } from '$lib/types/project';
@@ -32,6 +32,17 @@
             worldStore.startTransport(platform.id);
         }
     }
+
+    // 6 Spotlight-Positionen im Hexagon-Muster (wie Messehallen-Beleuchtung)
+    const spotlightHeight = 25; // Höhe über der Plattform
+    const spotlightRadius = 0.7; // Relativ zur Plattform-Größe
+    const spotlightPositions = Array.from({ length: 6 }, (_, i) => {
+        const angle = (i / 6) * Math.PI * 2 + Math.PI / 6;
+        return {
+            x: Math.cos(angle) * spotlightRadius,
+            z: Math.sin(angle) * spotlightRadius
+        };
+    });
 </script>
 
 <T.Group position={[platform.x, platform.y, platform.z]} scale={$platformScale}>
@@ -49,58 +60,98 @@
             color={platform.color}
             metalness={0.3}
             roughness={0.6}
-            emissive={isCurrentPlatform ? platform.glowColor : '#000000'}
-            emissiveIntensity={isCurrentPlatform ? 0.3 : 0}
         />
     </T.Mesh>
 
-    <!-- Glow-Effekt mit FakeGlowMaterial (sichtbar wenn aktuelle Plattform) -->
-    {#if isCurrentPlatform}
-        <T.Mesh position.y={-1} rotation.y={Math.PI / 6}>
-            <T.CylinderGeometry args={[platform.size * 1.1, platform.size * 1.1, 1, 6]} />
-            <FakeGlowMaterial 
-                glowColor={platform.glowColor}
-                falloff={0.8}
-                glowSharpness={0.5}
-                glowInternalRadius={0.5}
-            />
-        </T.Mesh>
-    {/if}
-
-    <!-- Dezenter Ring auch für nicht-aktive Plattformen -->
+    <!-- Dezenter Ring am Rand -->
     <T.Mesh position.y={-2} rotation.x={-Math.PI / 2}>
         <T.RingGeometry args={[platform.size * 0.98, platform.size * 1.02, 6]} />
         <T.MeshBasicMaterial
             color={platform.glowColor}
             transparent
-            opacity={isCurrentPlatform ? 0.6 : 0.15}
+            opacity={isCurrentPlatform ? 0.5 : 0.15}
             side={2}
         />
     </T.Mesh>
 
-    <!-- Plattform-Name Label (schwebt über der Plattform) -->
-    <HTML position={[0, 12, 0]} center pointerEvents="none">
-        <div
-            class="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap
-                   transition-all duration-300 pointer-events-none select-none
-                   {isCurrentPlatform
-                ? 'bg-white text-slate-800 shadow-lg scale-110'
-                : 'bg-black/60 text-white/90'}"
-        >
-            {platform.name}
-        </div>
-    </HTML>
+    <!-- 3D Namensschild - kompakt, nah an der Plattform -->
+    <Billboard position={[0, 4, 0]}>
+        <!-- Halbtransparente Glasscheibe (kleiner) -->
+        <T.Mesh>
+            <T.PlaneGeometry args={[platform.name.length * 0.5 + 1.5, 1.8]} />
+            <T.MeshStandardMaterial 
+                color={isCurrentPlatform ? '#ffffff' : '#1e293b'}
+                transparent
+                opacity={isCurrentPlatform ? 0.95 : 0.85}
+                metalness={0.1}
+                roughness={0.2}
+            />
+        </T.Mesh>
+        
+        <!-- Rahmen -->
+        <T.Mesh position.z={-0.03}>
+            <T.PlaneGeometry args={[platform.name.length * 0.5 + 1.7, 2]} />
+            <T.MeshBasicMaterial 
+                color={platform.glowColor}
+                transparent
+                opacity={0.6}
+            />
+        </T.Mesh>
+
+        <!-- 3D Text (kleinere Schrift) -->
+        <Text
+            text={platform.name}
+            color={isCurrentPlatform ? '#1e293b' : '#ffffff'}
+            fontSize={0.7}
+            anchorX="center"
+            anchorY="middle"
+            position.z={0.05}
+            outlineWidth={isCurrentPlatform ? 0 : 0.02}
+            outlineColor="#000000"
+        />
+    </Billboard>
 
     <!-- Projekt-Stände auf der Plattform -->
     {#each projects as project, i}
         <ExhibitStand {project} position={[standPositions[i]?.x ?? 0, 2, standPositions[i]?.z ?? 0]} />
     {/each}
 
-    <!-- Licht-Punkt auf der Plattform -->
-    <T.PointLight
-        position={[0, 8, 0]}
-        color={platform.glowColor}
-        intensity={isCurrentPlatform ? 40 : 8}
-        distance={platform.size * 2.5}
-    />
+    <!-- 6 Spotlights wie in einer Messehalle (nur für aktive Plattform) -->
+    {#if isCurrentPlatform}
+        {#each spotlightPositions as spot, i}
+            <!-- Spotlight von oben -->
+            <T.SpotLight
+                position={[spot.x * platform.size, spotlightHeight, spot.z * platform.size]}
+                target.position={[spot.x * platform.size * 0.5, 0, spot.z * platform.size * 0.5]}
+                color={platform.glowColor}
+                intensity={80}
+                distance={spotlightHeight * 2}
+                angle={0.4}
+                penumbra={0.5}
+                decay={1.5}
+                castShadow
+            />
+            <!-- Kleine sichtbare Lampe -->
+            <T.Mesh position={[spot.x * platform.size, spotlightHeight, spot.z * platform.size]}>
+                <T.SphereGeometry args={[0.3, 8, 8]} />
+                <T.MeshBasicMaterial color={platform.glowColor} />
+            </T.Mesh>
+        {/each}
+        
+        <!-- Dünne Traversen-Struktur die die Lampen verbindet -->
+        <T.Mesh position.y={spotlightHeight} rotation.y={Math.PI / 6}>
+            <T.TorusGeometry args={[platform.size * spotlightRadius, 0.15, 6, 6]} />
+            <T.MeshStandardMaterial color="#374151" metalness={0.8} roughness={0.3} />
+        </T.Mesh>
+    {/if}
+
+    <!-- Dezentes Ambient-Licht für nicht-aktive Plattformen -->
+    {#if !isCurrentPlatform}
+        <T.PointLight
+            position={[0, 10, 0]}
+            color={platform.glowColor}
+            intensity={5}
+            distance={platform.size * 1.5}
+        />
+    {/if}
 </T.Group>

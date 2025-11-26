@@ -11,6 +11,7 @@ export class WorldStore {
         currentPlatform: 'S',
         isTransporting: false,
         transportTarget: null,
+        hoveredDestination: null, // Für Lichtlinien-Highlight
         // NEU: Chat-Modal
         isChatOpen: false
     });
@@ -117,6 +118,11 @@ export class WorldStore {
 
     closeChat() {
         this.state.isChatOpen = false;
+    }
+
+    // NEU: Hover über Transport-Button
+    setHoveredDestination(platformId: string | null) {
+        this.state.hoveredDestination = platformId;
     }
 
     // Algorithmus: Finde verwandte Projekte
