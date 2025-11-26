@@ -229,15 +229,15 @@
             />
         {/if}
 
-        <!-- Messe-Wand am hinteren Rand -->
+        <!-- Messe-Wand am hinteren Rand (3 Hexagon-Kanten) -->
         {#if wallPosters.length > 0}
             <MesseWall
                 posters={wallPosters}
                 platformSize={platform.size}
                 platformColor={platform.color}
                 wallHeight={10}
-                wallArc={140}
-                startAngle={-70}
+                wallCount={Math.min(wallPosters.length, 3)}
+                startEdge={3}
             />
         {/if}
 

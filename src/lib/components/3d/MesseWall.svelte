@@ -22,8 +22,8 @@
         platformSize: number;
         platformColor?: string;
         wallHeight?: number;
-        wallArc?: number; // Bogen in Grad (z.B. 120 = 1/3 Kreis)
-        startAngle?: number; // Startwinkel in Grad
+        wallCount?: number; // Anzahl der Wände (1-6, entspricht Hexagon-Kanten)
+        startEdge?: number; // Welche Hexagon-Kante als Start (0-5)
     }
 
     let { 
@@ -31,28 +31,67 @@
         platformSize,
         platformColor = '#1e293b',
         wallHeight = 8,
-        wallArc = 120,
-        startAngle = -60 // Standardmäßig "hinten"
+        wallCount = 3, // Standard: 3 Wände (halbes Hexagon)
+        startEdge = 3 // Standard: "hinten" (gegenüber vom Eingang)
     }: Props = $props();
 
     const { hovering, onPointerEnter, onPointerLeave } = useCursor('pointer');
     
     let hoveredPosterId = $state<string | null>(null);
 
-    // Wand-Segmente berechnen
-    const segmentCount = Math.max(posters.length, 3); // Mindestens 3 Segmente
-    const wallRadius = platformSize * 0.85; // Etwas innerhalb des Randes
-    const segmentWidth = (wallArc / segmentCount) * (Math.PI / 180); // Radians pro Segment
-    const startRad = startAngle * (Math.PI / 180);
+    // Hexagon-Geometrie: Kantenlänge = Radius
+    const hexEdgeLength = platformSize; // Kantenlänge des Hexagons
+    const hexInnerRadius = platformSize * Math.cos(Math.PI / 6); // Apothem (Abstand Mitte zu Kante)
+    
+    // Wände entlang der Hexagon-Kanten
+    // Jede Kante ist um 60° (π/3) versetzt
+    const edgeAngleStep = Math.PI / 3; // 60°
+    
+    // Korrektur: Plattform ist um 30° rotiert (rotation.y = Math.PI / 6)
+    const platformRotationOffset = Math.PI / 6;
 
-    // Poster-Positionen auf der Wand
+    // Berechne Wand-Positionen (Mittelpunkt jeder Hexagon-Kante)
+    const wallPositions = $derived(
+        Array.from({ length: wallCount }, (_, i) => {
+            const edgeIndex = (startEdge + i) % 6;
+            // Winkel zur Kantenmitte (senkrecht zur Kante, von Mitte nach außen)
+            const angleToEdge = edgeIndex * edgeAngleStep + platformRotationOffset;
+            
+            return {
+                edgeIndex,
+                // Position: auf der Kante, Abstand = Apothem (innerer Radius)
+                x: Math.cos(angleToEdge) * hexInnerRadius * 0.98,
+                z: Math.sin(angleToEdge) * hexInnerRadius * 0.98,
+                // Rotation: Wand steht parallel zur Kante, zeigt nach innen
+                rotY: -angleToEdge - Math.PI / 2
+            };
+        })
+    );
+
+    // Poster auf die Wände verteilen (mehrere pro Wand möglich)
+    // Berechne wie viele Poster pro Wand und deren Position
+    const posterSize = 4; // Quadratische Poster
+    const postersPerWall = 3; // Max 3 Poster pro Wand
+    const posterSpacing = hexEdgeLength * 0.9 / postersPerWall; // Abstand zwischen Postern
+    
     const posterPositions = $derived(posters.map((poster, i) => {
-        const angle = startRad + (i + 0.5) * segmentWidth;
+        const wallIndex = Math.floor(i / postersPerWall) % wallCount;
+        const positionOnWall = i % postersPerWall; // 0, 1, oder 2
+        const wall = wallPositions[wallIndex];
+        
+        // Horizontale Offset-Position auf der Wand (-1, 0, 1) * spacing
+        const totalPostersOnThisWall = Math.min(
+            posters.filter((_, idx) => Math.floor(idx / postersPerWall) % wallCount === wallIndex).length,
+            postersPerWall
+        );
+        const offsetX = (positionOnWall - (totalPostersOnThisWall - 1) / 2) * posterSpacing;
+        
         return {
             ...poster,
-            x: Math.cos(angle) * wallRadius,
-            z: Math.sin(angle) * wallRadius,
-            rotY: -angle + Math.PI / 2 // Zeigt zur Mitte
+            wallIndex,
+            positionOnWall,
+            offsetX,
+            ...wall
         };
     }));
 
@@ -64,20 +103,16 @@
 </script>
 
 <T.Group>
-    <!-- Wand-Segmente (halbtransparentes Glas) -->
-    {#each Array(segmentCount) as _, i}
-        {@const angle = startRad + (i + 0.5) * segmentWidth}
-        {@const x = Math.cos(angle) * wallRadius}
-        {@const z = Math.sin(angle) * wallRadius}
-        
+    <!-- Wand-Segmente entlang der Hexagon-Kanten -->
+    {#each wallPositions as wall, i}
         <T.Mesh
-            position={[x, wallHeight / 2 + 1.5, z]}
-            rotation.y={-angle + Math.PI / 2}
+            position={[wall.x, wallHeight / 2 + 1.5, wall.z]}
+            rotation.y={wall.rotY}
             receiveShadow
         >
-            <!-- Segment-Breite basierend auf Bogen -->
+            <!-- Breite = Hexagon-Kantenlänge -->
             <T.BoxGeometry args={[
-                wallRadius * segmentWidth * 0.95, // Breite (mit kleinem Gap)
+                hexEdgeLength * 0.95, // Etwas kleiner als volle Kante
                 wallHeight,
                 0.3
             ]} />
@@ -94,115 +129,128 @@
         
         <!-- Rahmen oben -->
         <T.Mesh
-            position={[x, wallHeight + 1.5, z]}
-            rotation.y={-angle + Math.PI / 2}
+            position={[wall.x, wallHeight + 1.5, wall.z]}
+            rotation.y={wall.rotY}
         >
-            <T.BoxGeometry args={[wallRadius * segmentWidth * 0.95, 0.15, 0.35]} />
+            <T.BoxGeometry args={[hexEdgeLength * 0.95, 0.15, 0.35]} />
             <T.MeshStandardMaterial color="#374151" metalness={0.6} roughness={0.4} />
         </T.Mesh>
         
         <!-- Rahmen unten -->
         <T.Mesh
-            position={[x, 1.5, z]}
-            rotation.y={-angle + Math.PI / 2}
+            position={[wall.x, 1.5, wall.z]}
+            rotation.y={wall.rotY}
         >
-            <T.BoxGeometry args={[wallRadius * segmentWidth * 0.95, 0.15, 0.35]} />
+            <T.BoxGeometry args={[hexEdgeLength * 0.95, 0.15, 0.35]} />
             <T.MeshStandardMaterial color="#374151" metalness={0.6} roughness={0.4} />
         </T.Mesh>
     {/each}
 
     <!-- Poster auf der Wand -->
-    {#each posterPositions as { project, x, z, rotY }}
+    {#each posterPositions as { project, x, z, rotY, offsetX }}
         {@const isHovered = hoveredPosterId === project.id}
         {@const displayColor = project.display?.color || project.color || '#3b82f6'}
+        {@const titleFontSize = project.title.length > 20 ? 0.28 : project.title.length > 12 ? 0.32 : 0.38}
         
         <T.Group position={[x, wallHeight / 2 + 1.5, z]} rotation.y={rotY}>
-            <!-- Poster-Hintergrund (farbiger Rahmen) -->
-            <T.Mesh
-                position.z={0.2}
-                onpointerenter={() => { hoveredPosterId = project.id; onPointerEnter(); }}
-                onpointerleave={() => { hoveredPosterId = null; onPointerLeave(); }}
-                onclick={() => handlePosterClick(project)}
-            >
-                <T.PlaneGeometry args={[4, 6]} />
-                <T.MeshBasicMaterial 
-                    color={displayColor}
-                    transparent
-                    opacity={isHovered ? 1 : 0.9}
-                />
-            </T.Mesh>
-
-            <!-- Poster-Inhalt (weiß/dunkel) -->
-            <T.Mesh position.z={0.21}>
-                <T.PlaneGeometry args={[3.6, 5.6]} />
-                <T.MeshBasicMaterial color="#0f172a" />
-            </T.Mesh>
-
-            <!-- Projekt-Titel -->
-            <Text
-                text={project.title}
-                fontSize={0.4}
-                anchorX="center"
-                anchorY="top"
-                position={[0, 2.5, 0.25]}
-                color="#ffffff"
-                fontWeight="bold"
-                maxWidth={3.2}
-                textAlign="center"
-            />
-
-            <!-- Slogan (falls vorhanden) -->
-            {#if project.display?.slogan}
-                <Text
-                    text={project.display.slogan}
-                    fontSize={0.25}
-                    anchorX="center"
-                    anchorY="middle"
-                    position={[0, 0, 0.25]}
-                    color={displayColor}
-                    maxWidth={3.2}
-                    textAlign="center"
-                    fontStyle="italic"
-                />
-            {/if}
-
-            <!-- "Mehr erfahren" Link-Hinweis -->
-            <Text
-                text="→ Mehr erfahren"
-                fontSize={0.2}
-                anchorX="center"
-                anchorY="bottom"
-                position={[0, -2.5, 0.25]}
-                color={isHovered ? '#ffffff' : '#64748b'}
-            />
-
-            <!-- Hover-Glow -->
-            {#if isHovered}
-                <T.Mesh position.z={0.15}>
-                    <T.PlaneGeometry args={[4.2, 6.2]} />
+            <!-- Offset für Position auf der Wand -->
+            <T.Group position.x={offsetX}>
+                <!-- Poster-Hintergrund (farbiger Rahmen) - QUADRATISCH -->
+                <T.Mesh
+                    position.z={0.2}
+                    onpointerenter={() => { hoveredPosterId = project.id; onPointerEnter(); }}
+                    onpointerleave={() => { hoveredPosterId = null; onPointerLeave(); }}
+                    onclick={() => handlePosterClick(project)}
+                >
+                    <T.PlaneGeometry args={[posterSize, posterSize]} />
                     <T.MeshBasicMaterial 
                         color={displayColor}
                         transparent
-                        opacity={0.3}
+                        opacity={isHovered ? 1 : 0.9}
                     />
                 </T.Mesh>
-            {/if}
+
+                <!-- Poster-Inhalt (dunkel) - QUADRATISCH -->
+                <T.Mesh position.z={0.21}>
+                    <T.PlaneGeometry args={[posterSize * 0.9, posterSize * 0.9]} />
+                    <T.MeshBasicMaterial color="#0f172a" />
+                </T.Mesh>
+
+                <!-- Projekt-Titel - dynamische Schriftgröße -->
+                <Text
+                    text={project.title}
+                    fontSize={titleFontSize}
+                    anchorX="center"
+                    anchorY="top"
+                    position={[0, posterSize * 0.35, 0.25]}
+                    color="#ffffff"
+                    fontWeight="bold"
+                    maxWidth={posterSize * 0.75}
+                    textAlign="center"
+                />
+
+                <!-- Slogan (falls vorhanden) -->
+                {#if project.display?.slogan}
+                    <Text
+                        text={project.display.slogan}
+                        fontSize={0.22}
+                        anchorX="center"
+                        anchorY="middle"
+                        position={[0, -0.2, 0.25]}
+                        color={displayColor}
+                        maxWidth={posterSize * 0.75}
+                        textAlign="center"
+                        fontStyle="italic"
+                    />
+                {/if}
+
+                <!-- "Mehr erfahren" Link-Hinweis -->
+                <Text
+                    text="→ Mehr erfahren"
+                    fontSize={0.18}
+                    anchorX="center"
+                    anchorY="bottom"
+                    position={[0, -posterSize * 0.38, 0.25]}
+                    color={isHovered ? '#ffffff' : '#64748b'}
+                />
+
+                <!-- Hover-Glow -->
+                {#if isHovered}
+                    <T.Mesh position.z={0.15}>
+                        <T.PlaneGeometry args={[posterSize + 0.2, posterSize + 0.2]} />
+                        <T.MeshBasicMaterial 
+                            color={displayColor}
+                            transparent
+                            opacity={0.3}
+                        />
+                    </T.Mesh>
+                    
+                    <!-- Hover-Tooltip rechts neben dem Poster, höher positioniert -->
+                    <HTML position={[posterSize * 0.7, posterSize * 0.3, 0.3]} center={false}>
+                        <div style="
+                            background: #ffffff;
+                            color: #0f172a;
+                            padding: 16px 20px;
+                            border-radius: 8px;
+                            width: 220px;
+                            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+                            border-left: 4px solid {displayColor};
+                        ">
+                            <h3 style="font-weight: 700; font-size: 0.95rem; margin: 0 0 8px 0; color: #0f172a;">
+                                {project.title}
+                            </h3>
+                            {#if project.shortTeaser}
+                                <p style="font-size: 0.8rem; color: #374151; line-height: 1.5; margin: 0 0 10px 0;">
+                                    {project.shortTeaser}
+                                </p>
+                            {/if}
+                            <p style="font-size: 0.7rem; color: {displayColor}; margin: 0; font-weight: 500;">
+                                Klicken um Projekt zu öffnen →
+                            </p>
+                        </div>
+                    </HTML>
+                {/if}
+            </T.Group>
         </T.Group>
     {/each}
-
-    <!-- Hover-Tooltip -->
-    {#if hoveredPosterId}
-        {@const hoveredPoster = posterPositions.find(p => p.project.id === hoveredPosterId)}
-        {#if hoveredPoster}
-            <HTML position={[hoveredPoster.x * 0.5, wallHeight + 3, hoveredPoster.z * 0.5]} center>
-                <div class="bg-slate-900/95 text-white px-4 py-3 rounded-lg shadow-xl max-w-sm backdrop-blur-sm border border-slate-700">
-                    <h3 class="font-bold text-lg">{hoveredPoster.project.title}</h3>
-                    {#if hoveredPoster.project.shortTeaser}
-                        <p class="text-sm text-slate-300 mt-1">{hoveredPoster.project.shortTeaser}</p>
-                    {/if}
-                    <p class="text-xs text-blue-400 mt-2">Klicken um Projekt zu öffnen →</p>
-                </div>
-            </HTML>
-        {/if}
-    {/if}
 </T.Group>
