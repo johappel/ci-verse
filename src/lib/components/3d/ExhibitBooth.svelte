@@ -5,26 +5,33 @@
      * Struktur:
      * - Schmale Bodenplatte (Rollup-Fuß)
      * - Großes vertikales Banner
-     * - Optional: Video/Bild-Bereich
-     * - Interaktiv: Hover zeigt Details, Klick öffnet Projekt
+     * - InteractionPillar davor für Link-Aktivierung
+     * 
+     * Interaktion:
+     * - Klick auf Banner → Kamera fährt davor
+     * - Klick auf Pillar-Knopf (bei Nähe) → Öffnet Link
      */
     import { T } from '@threlte/core';
     import { Text, useCursor, HTML } from '@threlte/extras';
     import { spring } from 'svelte/motion';
     import type { ProjectData } from '$lib/types/project';
+    import { worldStore } from '$lib/logic/store.svelte';
+    import InteractionPillar from './InteractionPillar.svelte';
 
     interface Props {
         project: ProjectData;
         position?: [number, number, number];
         rotation?: number; // Y-Rotation in Radians
         size?: 'small' | 'medium' | 'large';
+        platformPosition?: [number, number, number]; // Welt-Position der Plattform
     }
 
     let { 
         project, 
         position = [0, 0, 0], 
         rotation = 0,
-        size = 'medium'
+        size = 'medium',
+        platformPosition = [0, 0, 0]
     }: Props = $props();
 
     const { hovering, onPointerEnter, onPointerLeave } = useCursor('pointer');
@@ -48,10 +55,42 @@
     const s = sizes[size];
     const displayColor = project.display?.color || project.color || '#3b82f6';
 
-    function handleClick() {
-        if (project.externalUrl) {
-            window.open(project.externalUrl, '_blank');
-        }
+    // Klick auf Banner: Kamera positioniert sich davor
+    function handleBannerClick() {
+        // Berechne WELT-Koordinaten
+        // Booth-Position ist relativ zur Plattform, also addiere Platform-Position
+        const worldBoothX = platformPosition[0] + position[0];
+        const worldBoothY = platformPosition[1] + position[1];
+        const worldBoothZ = platformPosition[2] + position[2];
+        
+        const viewDistance = 6; // Abstand zur Betrachtung
+        const bannerY = worldBoothY + s.height * 0.4; // Augenhöhe
+        
+        // Das Banner zeigt standardmäßig in +Z Richtung (Vorderseite)
+        // Bei Y-Rotation dreht sich die "Vorderseite"
+        // Kamera muss VOR dem Banner stehen
+        const cos = Math.cos(rotation);
+        const sin = Math.sin(rotation);
+        // Lokaler Offset: (0, 0, viewDistance) vor dem Banner
+        // Bei Y-Rotation: x' = z*sin, z' = z*cos
+        const worldOffsetX = viewDistance * sin;
+        const worldOffsetZ = viewDistance * cos;
+        
+        // Kamera-Position in Weltkoordinaten
+        const cameraPos = {
+            x: worldBoothX + worldOffsetX,
+            y: bannerY,
+            z: worldBoothZ + worldOffsetZ
+        };
+        
+        // LookAt = Banner-Position (Mitte des Banners)
+        const lookAtPos = {
+            x: worldBoothX,
+            y: bannerY,
+            z: worldBoothZ
+        };
+        
+        worldStore.setViewTarget(cameraPos, lookAtPos);
     }
 
     function handlePointerEnter() {
@@ -66,6 +105,21 @@
 </script>
 
 <T.Group position={position} rotation.y={rotation} scale={$scale}>
+    
+    <!-- InteractionPillar vor dem Rollup -->
+    {@const cos = Math.cos(rotation)}
+    {@const sin = Math.sin(rotation)}
+    {@const pillarLocalZ = s.footDepth + 0.8}
+    <InteractionPillar 
+        {project}
+        position={[0, 0, pillarLocalZ]}
+        height={1.0}
+        worldPosition={[
+            platformPosition[0] + position[0] + pillarLocalZ * sin,
+            platformPosition[1] + position[1],
+            platformPosition[2] + position[2] + pillarLocalZ * cos
+        ]}
+    />
     
     <!-- ========== ROLLUP-FUSS (Basis) ========== -->
     <T.Group>
@@ -111,7 +165,7 @@
             <T.Mesh 
                 onpointerenter={handlePointerEnter}
                 onpointerleave={handlePointerLeave}
-                onclick={handleClick}
+                onclick={handleBannerClick}
             >
                 <T.PlaneGeometry args={[s.width, s.height]} />
                 <T.MeshBasicMaterial color="#0f172a" />
@@ -200,7 +254,7 @@
             <T.Mesh 
                 onpointerenter={handlePointerEnter}
                 onpointerleave={handlePointerLeave}
-                onclick={handleClick}
+                onclick={handleBannerClick}
             >
                 <T.PlaneGeometry args={[s.width, s.height]} />
                 <T.MeshBasicMaterial color="#0f172a" />
@@ -346,7 +400,7 @@
                     </div>
                 {/if}
                 <p style="font-size: 0.7rem; color: {displayColor}; margin: 0; font-weight: 500;">
-                    Klicken für mehr →
+                    Klicken zum Heranfahren →
                 </p>
             </div>
         </HTML>

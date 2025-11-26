@@ -95,8 +95,13 @@ export interface AppState {
     isTransporting: boolean;
     transportTarget: string | null;
     hoveredDestination: string | null; // Für Lichtlinien-Highlight
-    // Lokale Kamera-Bewegung
+    // Lokale Kamera-Bewegung (Boden-Klick)
     localCameraTarget: { x: number; y: number; z: number } | null;
+    // Direkte Kamera-Ansicht (Poster/Rollup-Klick)
+    viewTarget: {
+        camera: { x: number; y: number; z: number };
+        lookAt: { x: number; y: number; z: number };
+    } | null;
     // Chat-Modal
     isChatOpen: boolean;
 }

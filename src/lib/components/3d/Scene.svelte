@@ -11,10 +11,35 @@
 	// CameraControls Referenz für Transport-Animation
 	let cameraControls = $state<CameraControlsRef>();
 
+	// Startposition: Marktplatz-Landepunkt
+	const startPlatform = platforms['S'];
+	const startLanding = startPlatform.landing || { offset: [0, 12, -35], lookAtOffset: [0, 3, 0] };
+	const initialCamPos: [number, number, number] = [
+		startPlatform.x + startLanding.offset[0],
+		startPlatform.y + startLanding.offset[1],
+		startPlatform.z + startLanding.offset[2]
+	];
+
 	// Exportiere controls für externe Nutzung
 	export function getCameraControls() {
 		return cameraControls;
 	}
+
+	// Initial-Setup: Kamera richtig ausrichten beim Start
+	let hasInitialized = $state(false);
+	$effect(() => {
+		if (cameraControls && !hasInitialized) {
+			hasInitialized = true;
+			// Setze initiale Kamera-Ausrichtung zur Plattform-Mitte
+			cameraControls.setLookAt(
+				initialCamPos[0], initialCamPos[1], initialCamPos[2],
+				startPlatform.x + startLanding.lookAtOffset[0],
+				startPlatform.y + startLanding.lookAtOffset[1],
+				startPlatform.z + startLanding.lookAtOffset[2],
+				false // Nicht animiert beim Start
+			);
+		}
+	});
 
 	// Transport-Animation wenn sich die Plattform ändert
 	$effect(() => {
@@ -32,15 +57,15 @@
 				const camY = target.y + landing.offset[1];
 				const camZ = target.z + landing.offset[2];
 				
-				// Berechne absolute Look-At Position
-				const lookX = target.x + landing.lookAtOffset[0];
-				const lookY = target.y + landing.lookAtOffset[1];
-				const lookZ = target.z + landing.lookAtOffset[2];
+				// Look-At IMMER zur Plattform-Mitte (auf Augenhöhe)
+				const lookX = target.x;
+				const lookY = target.y + 5;  // Augenhöhe über Plattform
+				const lookZ = target.z;
 				
 				// Fliege zur Ziel-Plattform mit individuellem Landepunkt
 				cameraControls.setLookAt(
 					camX, camY, camZ,    // Kamera-Position
-					lookX, lookY, lookZ, // Look-At Ziel
+					lookX, lookY, lookZ, // Look-At zur Mitte
 					true                 // animiert
 				);
 			}
@@ -48,6 +73,9 @@
 	});
 
 	// Lokale Kamera-Bewegung auf der Plattform (Klick auf Boden)
+	// Regel: Kamera positioniert sich so, dass sie ZUM KLICKPUNKT schaut
+	// - Klick am Rand → Kamera bleibt innen, schaut nach außen
+	// - Klick in der Mitte → Kamera bleibt außen, schaut nach innen
 	$effect(() => {
 		const target = worldStore.state.localCameraTarget;
 		if (target && cameraControls && !worldStore.state.isTransporting) {
@@ -58,38 +86,55 @@
 				const dz = target.z - currentPlatform.z;
 				const distFromCenter = Math.sqrt(dx * dx + dz * dz);
 				
-				// Schwellwert: Innerhalb von 40% des Radius = "innen"
-				const innerThreshold = currentPlatform.size * 0.4;
-				const isInnerArea = distFromCenter < innerThreshold;
+				// Schwellwert: Innerhalb von 35% des Radius = "Mitte"
+				const innerThreshold = currentPlatform.size * 0.35;
+				const isClickingCenter = distFromCenter < innerThreshold;
 				
-				let camX: number, camZ: number, lookX: number, lookZ: number;
+				let camX: number, camZ: number;
 				
-				if (isInnerArea) {
-					// Innerer Bereich: Kamera hinter Klickpunkt, schaut zur Mitte
-					const dirX = dx / (distFromCenter || 1);
-					const dirZ = dz / (distFromCenter || 1);
-					camX = target.x + dirX * 15;  // Hinter dem Klickpunkt (von Mitte aus)
-					camZ = target.z + dirZ * 15;
-					lookX = currentPlatform.x;    // Schaut zur Plattform-Mitte
-					lookZ = currentPlatform.z;
+				if (isClickingCenter) {
+					// KLICK IN DER MITTE: Kamera von außen, schaut zur Mitte
+					// Behalte aktuelle Kamera-Richtung oder nutze Standard-Richtung
+					const camAngle = Math.atan2(
+						cameraControls.camera.position.z - currentPlatform.z,
+						cameraControls.camera.position.x - currentPlatform.x
+					);
+					const camDist = currentPlatform.size * 0.5; // Mittlerer Abstand
+					camX = currentPlatform.x + Math.cos(camAngle) * camDist;
+					camZ = currentPlatform.z + Math.sin(camAngle) * camDist;
 				} else {
-					// Äußerer Bereich: Kamera zwischen Mitte und Klickpunkt, schaut nach außen
+					// KLICK AM RAND: Kamera zwischen Mitte und Klickpunkt
 					const dirX = dx / distFromCenter;
 					const dirZ = dz / distFromCenter;
-					camX = target.x - dirX * 20;  // Zwischen Mitte und Klickpunkt
-					camZ = target.z - dirZ * 20;
-					lookX = target.x;             // Schaut zum Klickpunkt (Rand)
-					lookZ = target.z;
+					const cameraDistFromCenter = Math.min(distFromCenter * 0.4, currentPlatform.size * 0.3);
+					camX = currentPlatform.x + dirX * cameraDistFromCenter;
+					camZ = currentPlatform.z + dirZ * cameraDistFromCenter;
 				}
 				
+				// Kamera schaut IMMER zum Klickpunkt
 				cameraControls.setLookAt(
-					camX, target.y + 10, camZ,    // Kamera-Position
-					lookX, target.y + 2, lookZ,   // Look-At Ziel
+					camX, currentPlatform.y + 8, camZ,          // Kamera-Position
+					target.x, currentPlatform.y + 4, target.z, // Schaut zum Klickpunkt
 					true
 				);
 			}
 			// Target zurücksetzen nach Animation
 			setTimeout(() => worldStore.clearLocalCameraTarget(), 100);
+		}
+	});
+
+	// NEU: Direkte Kamera-Ansicht für Poster/Rollup-Klicks
+	// Verwendet exakte Welt-Koordinaten für Kamera und LookAt
+	$effect(() => {
+		const view = worldStore.state.viewTarget;
+		if (view && cameraControls && !worldStore.state.isTransporting) {
+			cameraControls.setLookAt(
+				view.camera.x, view.camera.y, view.camera.z,
+				view.lookAt.x, view.lookAt.y, view.lookAt.z,
+				true // animiert
+			);
+			// Target zurücksetzen nach kurzer Verzögerung
+			setTimeout(() => worldStore.clearViewTarget(), 100);
 		}
 	});
 
@@ -115,15 +160,19 @@
 <div class="w-screen h-screen" style="position: fixed; top: 0; left: 0;">
 	<Canvas>
 		<!-- Kamera mit CameraControls für smooth Transport -->
-		<T.PerspectiveCamera makeDefault position={[0, 15, -80]} fov={60} near={1} far={2000}>
+		<!-- Startposition: Marktplatz-Landepunkt -->
+		<T.PerspectiveCamera makeDefault position={initialCamPos} fov={60} near={1} far={2000}>
 			<CameraControls 
 				bind:ref={cameraControls}
-				smoothTime={1.5}
-				draggingSmoothTime={0.2}
+				smoothTime={2.0}
+				draggingSmoothTime={0.5}
 				maxPolarAngle={Math.PI / 2.1}
 				minPolarAngle={Math.PI / 8}
 				maxDistance={400}
 				minDistance={8}
+				azimuthRotateSpeed={0.5}
+				polarRotateSpeed={0.5}
+				dollySpeed={0.5}
 			/>
 		</T.PerspectiveCamera>
 

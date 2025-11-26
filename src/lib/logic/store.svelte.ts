@@ -12,8 +12,10 @@ export class WorldStore {
         isTransporting: false,
         transportTarget: null,
         hoveredDestination: null, // Für Lichtlinien-Highlight
-        // NEU: Lokale Kamera-Bewegung auf Plattform
+        // NEU: Lokale Kamera-Bewegung auf Plattform (Boden-Klick)
         localCameraTarget: null, // {x, y, z} Position auf der Plattform
+        // NEU: Direkte Kamera-Ansicht (Poster/Rollup-Klick)
+        viewTarget: null, // { camera: {x,y,z}, lookAt: {x,y,z} }
         // NEU: Chat-Modal
         isChatOpen: false
     });
@@ -134,6 +136,18 @@ export class WorldStore {
 
     clearLocalCameraTarget() {
         this.state.localCameraTarget = null;
+    }
+
+    // NEU: Direkte Kamera-Ansicht für Poster/Rollup-Klicks
+    setViewTarget(
+        camera: { x: number; y: number; z: number },
+        lookAt: { x: number; y: number; z: number }
+    ) {
+        this.state.viewTarget = { camera, lookAt };
+    }
+
+    clearViewTarget() {
+        this.state.viewTarget = null;
     }
 
     // Algorithmus: Finde verwandte Projekte

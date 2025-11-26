@@ -6,11 +6,17 @@
      * - Gebogene/segmentierte Wand am Plattformrand
      * - Poster-Slots für Projekt-Plakate
      * - Halbtransparentes Material (Glas-Effekt)
-     * - Poster zeigen posterImage, Slogan, Logo
+     * - InteractionPillar vor jedem Poster
+     * 
+     * Interaktion:
+     * - Klick auf Poster → Kamera fährt davor
+     * - Klick auf Pillar-Knopf (bei Nähe) → Öffnet Link
      */
     import { T } from '@threlte/core';
     import { Text, useCursor, HTML } from '@threlte/extras';
     import type { ProjectData } from '$lib/types/project';
+    import { worldStore } from '$lib/logic/store.svelte';
+    import InteractionPillar from './InteractionPillar.svelte';
 
     interface WallPoster {
         project: ProjectData;
@@ -24,6 +30,7 @@
         wallHeight?: number;
         wallCount?: number; // Anzahl der Wände (1-6, entspricht Hexagon-Kanten)
         startEdge?: number; // Welche Hexagon-Kante als Start (0-5)
+        platformPosition?: [number, number, number]; // Welt-Position der Plattform
     }
 
     let { 
@@ -32,7 +39,8 @@
         platformColor = '#1e293b',
         wallHeight = 8,
         wallCount = 3, // Standard: 3 Wände (halbes Hexagon)
-        startEdge = 3 // Standard: "hinten" (gegenüber vom Eingang)
+        startEdge = 3, // Standard: "hinten" (gegenüber vom Eingang)
+        platformPosition = [0, 0, 0]
     }: Props = $props();
 
     const { hovering, onPointerEnter, onPointerLeave } = useCursor('pointer');
@@ -95,10 +103,47 @@
         };
     }));
 
-    function handlePosterClick(project: ProjectData) {
-        if (project.externalUrl) {
-            window.open(project.externalUrl, '_blank');
-        }
+    // Klick auf Poster: Kamera fährt davor
+    function handlePosterClick(posterX: number, posterZ: number, wallRotY: number, offsetX: number) {
+        // Die Wand ist bei (posterX, posterZ) positioniert und um wallRotY rotiert
+        // Das Poster hat einen zusätzlichen offsetX entlang der lokalen X-Achse der Wand
+        
+        // Bei Y-Rotation: lokale X-Achse → Welt-Koordinaten
+        // Lokales X nach Welt: (cos(rotY), 0, -sin(rotY)) - ACHTUNG: Three.js Y-Rotation ist gegen Uhrzeigersinn
+        // Also: weltX = lokalX * cos(rotY), weltZ = lokalX * (-sin(rotY))
+        const cosR = Math.cos(wallRotY);
+        const sinR = Math.sin(wallRotY);
+        
+        // Offset von der Wand-Mitte zum Poster (in Weltkoordinaten)
+        const offsetWorldX = offsetX * cosR;
+        const offsetWorldZ = -offsetX * sinR;  // Negativ wegen Three.js Koordinatensystem
+        
+        // Tatsächliche Poster-Position in Weltkoordinaten
+        const worldPosterX = platformPosition[0] + posterX + offsetWorldX;
+        const worldPosterY = platformPosition[1] + wallHeight / 2 + 1.5;
+        const worldPosterZ = platformPosition[2] + posterZ + offsetWorldZ;
+        
+        // Die Wand-Normale (lokales +Z) zeigt zur Plattform-Mitte
+        // Lokales +Z nach Welt: (sin(rotY), 0, cos(rotY))
+        const viewDistance = 5;
+        const normalX = sinR;
+        const normalZ = cosR;
+        
+        // Kamera steht VOR dem Poster (in Richtung der Wand-Normale)
+        const cameraPos = {
+            x: worldPosterX + normalX * viewDistance,
+            y: worldPosterY,
+            z: worldPosterZ + normalZ * viewDistance
+        };
+        
+        // Kamera schaut ZUM Poster
+        const lookAtPos = {
+            x: worldPosterX,
+            y: worldPosterY,
+            z: worldPosterZ
+        };
+        
+        worldStore.setViewTarget(cameraPos, lookAtPos);
     }
 </script>
 
@@ -151,16 +196,33 @@
         {@const isHovered = hoveredPosterId === project.id}
         {@const displayColor = project.display?.color || project.color || '#3b82f6'}
         {@const titleFontSize = project.title.length > 20 ? 0.28 : project.title.length > 12 ? 0.32 : 0.38}
+        {@const pillarDirX = -Math.sin(rotY)}
+        {@const pillarDirZ = -Math.cos(rotY)}
         
         <T.Group position={[x, wallHeight / 2 + 1.5, z]} rotation.y={rotY}>
             <!-- Offset für Position auf der Wand -->
             <T.Group position.x={offsetX}>
+                <!-- InteractionPillar vor dem Poster -->
+                <!-- Berechne Welt-Position für den Pillar -->
+                {@const pillarLocalZ = 3}
+                {@const cosR = Math.cos(rotY)}
+                {@const sinR = Math.sin(rotY)}
+                <!-- Lokales X → Welt: (cos, 0, -sin), Lokales Z → Welt: (sin, 0, cos) -->
+                {@const pillarWorldX = platformPosition[0] + x + offsetX * cosR + pillarLocalZ * sinR}
+                {@const pillarWorldZ = platformPosition[2] + z - offsetX * sinR + pillarLocalZ * cosR}
+                <InteractionPillar 
+                    {project}
+                    position={[0, -wallHeight / 2 - 0.3, pillarLocalZ]}
+                    height={1.0}
+                    worldPosition={[pillarWorldX, platformPosition[1] + 1.2, pillarWorldZ]}
+                />
+                
                 <!-- Poster-Hintergrund (farbiger Rahmen) - QUADRATISCH -->
                 <T.Mesh
                     position.z={0.2}
                     onpointerenter={() => { hoveredPosterId = project.id; onPointerEnter(); }}
                     onpointerleave={() => { hoveredPosterId = null; onPointerLeave(); }}
-                    onclick={() => handlePosterClick(project)}
+                    onclick={() => handlePosterClick(x, z, rotY, offsetX)}
                 >
                     <T.PlaneGeometry args={[posterSize, posterSize]} />
                     <T.MeshBasicMaterial 
@@ -245,7 +307,7 @@
                                 </p>
                             {/if}
                             <p style="font-size: 0.7rem; color: {displayColor}; margin: 0; font-weight: 500;">
-                                Klicken um Projekt zu öffnen →
+                                Klicken zum Heranfahren →
                             </p>
                         </div>
                     </HTML>

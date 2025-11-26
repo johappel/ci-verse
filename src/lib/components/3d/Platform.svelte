@@ -273,6 +273,7 @@
                 wallHeight={10}
                 wallCount={Math.min(wallPosters.length, 3)}
                 startEdge={3}
+                platformPosition={[platform.x, platform.y, platform.z]}
             />
         {/if}
 
@@ -289,6 +290,7 @@
                 position={[Math.cos(angle) * radius, 1.5, Math.sin(angle) * radius]}
                 rotation={-angle + Math.PI / 2}
                 size={boothCount > 3 ? 'small' : 'medium'}
+                platformPosition={[platform.x, platform.y, platform.z]}
             />
         {/each}
     {:else}
