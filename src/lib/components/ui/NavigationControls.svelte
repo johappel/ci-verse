@@ -11,6 +11,14 @@
 	// Aktive Tasten für visuelles Feedback
 	let activeKeys = $state<Set<string>>(new Set());
 	
+	// Draggable Panel Position
+	let panelX = $state(0);  // Offset von Mitte
+	let panelY = $state(0);  // Offset von unten
+	let isDragging = $state(false);
+	let dragStartX = $state(0);
+	let dragStartY = $state(0);
+	let panelRef: HTMLDivElement | null = $state(null);
+	
 	// Bewegungs-Geschwindigkeiten
 	const MOVE_SPEED = 2;      // Vorwärts/Rückwärts
 	const ROTATE_SPEED = 0.03; // Drehung in Radians
@@ -142,19 +150,85 @@
 		if (key === 'c') return activeKeys.has('c');
 		return activeKeys.has(key) || activeKeys.has(key === 'w' ? 'arrowup' : key === 's' ? 'arrowdown' : key === 'a' ? 'arrowleft' : key === 'd' ? 'arrowright' : '');
 	}
+	
+	// Drag & Drop Funktionen
+	function startDrag(e: MouseEvent | TouchEvent) {
+		isDragging = true;
+		
+		if (e instanceof MouseEvent) {
+			dragStartX = e.clientX - panelX;
+			dragStartY = e.clientY + panelY;
+		} else {
+			dragStartX = e.touches[0].clientX - panelX;
+			dragStartY = e.touches[0].clientY + panelY;
+		}
+		
+		window.addEventListener('mousemove', onDrag);
+		window.addEventListener('mouseup', stopDrag);
+		window.addEventListener('touchmove', onDrag);
+		window.addEventListener('touchend', stopDrag);
+	}
+	
+	function onDrag(e: MouseEvent | TouchEvent) {
+		if (!isDragging) return;
+		
+		e.preventDefault();
+		
+		let clientX: number, clientY: number;
+		if (e instanceof MouseEvent) {
+			clientX = e.clientX;
+			clientY = e.clientY;
+		} else {
+			clientX = e.touches[0].clientX;
+			clientY = e.touches[0].clientY;
+		}
+		
+		panelX = clientX - dragStartX;
+		// Y ist invertiert (von unten gemessen)
+		panelY = dragStartY - clientY;
+		
+		// Begrenze auf Bildschirm
+		const maxX = window.innerWidth / 2 - 100;
+		const maxY = window.innerHeight - 150;
+		panelX = Math.max(-maxX, Math.min(maxX, panelX));
+		panelY = Math.max(0, Math.min(maxY, panelY));
+	}
+	
+	function stopDrag() {
+		isDragging = false;
+		window.removeEventListener('mousemove', onDrag);
+		window.removeEventListener('mouseup', stopDrag);
+		window.removeEventListener('touchmove', onDrag);
+		window.removeEventListener('touchend', stopDrag);
+	}
+	
+	// Doppelklick zum Zurücksetzen
+	function resetPosition() {
+		panelX = 0;
+		panelY = 0;
+	}
 </script>
 
-<!-- Kompakte 6-Tasten Navigation -->
+<!-- Kompakte 6-Tasten Navigation - DRAGGABLE -->
 <div 
-	class="fixed left-1/2 -translate-x-1/2 z-30"
-	style="bottom: 24px !important; top: auto !important;"
+	bind:this={panelRef}
+	class="fixed z-30 select-none"
+	style="left: calc(50% + {panelX}px); bottom: calc(24px + {panelY}px); transform: translateX(-50%); top: auto !important;"
 	class:opacity-50={isInputFocused}
 	class:pointer-events-none={isInputFocused}
+	class:cursor-grabbing={isDragging}
 >
 	<div style="display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px; border-radius: 16px; background: rgba(0,0,0,0.2); backdrop-filter: blur(16px); box-shadow: 0 0 30px rgba(0,0,0,0.5);">
-        <!-- Standort-Anzeige (kompakt unter den Tasten) -->
-		<div class="mt-0.5 text-white/70 text-xs font-medium">
-			{currentPlatformName}
+        <!-- Drag Handle / Standort-Anzeige -->
+		<div 
+			class="w-full px-3 py-1 text-white/70 text-xs font-medium text-center cursor-grab rounded-t-lg hover:bg-white/10 transition-colors"
+			class:cursor-grabbing={isDragging}
+			onmousedown={startDrag}
+			ontouchstart={startDrag}
+			ondblclick={resetPosition}
+			title="Ziehen zum Verschieben, Doppelklick zum Zurücksetzen"
+		>
+			<span class="select-none">{currentPlatformName}</span>
 		</div>
 		<!-- Obere Reihe: H - W - C -->
 		<div style="display: flex; gap: 12px;">
