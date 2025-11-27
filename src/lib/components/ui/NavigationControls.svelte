@@ -118,11 +118,15 @@
 		const currentPlatform = platforms[worldStore.state.currentPlatform];
 		if (currentPlatform) {
 			// Kamera zum InfoHexagon der aktuellen Plattform bewegen
-			const pos = currentPlatform.position;
+			// Plattform hat x, y, z als separate Properties
+			const px = currentPlatform.x;
+			const py = currentPlatform.y;
+			const pz = currentPlatform.z;
+			
 			cameraControls.setLookAt(
-				pos[0], pos[1] + 12, pos[2] + 15,  // Kamera-Position
-				pos[0], pos[1] + 2, pos[2],        // Blickziel (InfoHexagon)
-				true                                // animiert
+				px, py + 12, pz + 18,    // Kamera-Position (etwas höher und weiter weg)
+				px, py + 3, pz,          // Blickziel (InfoHexagon in der Mitte)
+				true                      // animiert
 			);
 		}
 	}
@@ -147,9 +151,13 @@
 	class:opacity-50={isInputFocused}
 	class:pointer-events-none={isInputFocused}
 >
-	<div class="flex flex-col items-center gap-1 p-2.5 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/25 shadow-[0_0_25px_rgba(0,0,0,0.6)]">
+	<div style="display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px; border-radius: 16px; background: rgba(0,0,0,0.2); backdrop-filter: blur(16px); box-shadow: 0 0 30px rgba(0,0,0,0.5);">
+        <!-- Standort-Anzeige (kompakt unter den Tasten) -->
+		<div class="mt-0.5 text-white/70 text-xs font-medium">
+			{currentPlatformName}
+		</div>
 		<!-- Obere Reihe: H - W - C -->
-		<div class="flex gap-1">
+		<div style="display: flex; gap: 12px;">
 			<!-- H = Home -->
 			<button
 				onclick={goHome}
@@ -188,7 +196,7 @@
 		</div>
 		
 		<!-- Untere Reihe: A - S - D -->
-		<div class="flex gap-1">
+		<div style="display: flex; gap: 12px;">
 			<!-- A = Links drehen -->
 			<button
 				onmousedown={() => handleButtonPress('a')}
@@ -223,11 +231,7 @@
 			</button>
 		</div>
 		
-		<!-- Standort-Anzeige (kompakt unter den Tasten) -->
-		<div class="mt-1 px-3 py-1 text-white/80 text-xs flex items-center gap-1.5">
-			<span class="text-white/50">📍</span>
-			<span class="font-medium">{currentPlatformName}</span>
-		</div>
+		
 	</div>
 </div>
 
