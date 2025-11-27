@@ -11,10 +11,11 @@
      */
     import { T } from '@threlte/core';
     import { Text, useCursor, HTML } from '@threlte/extras';
+    import { BadgeInfo } from 'lucide-svelte';
     import type { PlatformAspect } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
-    import InteractionPillar from './InteractionPillar.svelte';
+    import AspectPillar from './AspectPillar.svelte';
 
     interface Props {
         platformName: string;
@@ -149,7 +150,7 @@
             position={[transform.x, height / 2, transform.z]}
             rotation.y={transform.rotY}
         >
-            <!-- InteractionPillar vor Aspect-Seiten (nicht vor Titel-Seite) -->
+            <!-- AspectPillar vor Aspect-Seiten (nicht vor Titel-Seite) -->
             {#if side.type === 'aspect' && side.aspect?.contentUrl}
                 {@const pillarDistance = 2.5}
                 {@const normalX = Math.cos(transform.angle)}
@@ -158,19 +159,8 @@
                 {@const hexWorldZ = platformPosition[2] + position[2]}
                 {@const pillarWorldX = hexWorldX + transform.x + normalX * pillarDistance}
                 {@const pillarWorldZ = hexWorldZ + transform.z + normalZ * pillarDistance}
-                <InteractionPillar 
-                    project={{
-                        id: side.aspect.id,
-                        title: side.aspect.title,
-                        slug: side.aspect.id,
-                        externalUrl: side.aspect.contentUrl || '',
-                        departments: [],
-                        perspectives: [],
-                        targetGroups: [],
-                        type: 'ground',
-                        staff: [],
-                        display: { slogan: side.aspect.description, color: '#60a5fa' }
-                    }}
+                <AspectPillar 
+                    aspect={side.aspect}
                     position={[0, -height / 2 + 0.5, pillarDistance]}
                     size={1.0}
                     worldPosition={[pillarWorldX, platformPosition[1] + 0.5, pillarWorldZ]}
@@ -193,25 +183,38 @@
             </T.Mesh>
 
             {#if side.type === 'aspect' && side.aspect}
-                <!-- Aspect: Icon oben, Titel unten - mit Abstand vom Rand -->
+                <!-- Aspect: Icon oben, Titel, Description -->
                 <Text
                     text={side.aspect.icon}
-                    fontSize={1.2}
+                    fontSize={0.9}
                     anchorX="center"
                     anchorY="middle"
-                    position={[0, height * 0.15, 0.02]}
+                    position={[0, height * 0.28, 0.02]}
                 />
-                <!-- Titel-Schriftgröße basierend auf Textlänge -->
-                {@const titleFontSize = side.aspect.title.length > 12 ? 0.28 : 0.35}
+                <!-- Titel -->
+                {@const titleFontSize = side.aspect.title.length > 12 ? 0.24 : 0.30}
                 <Text
                     text={side.aspect.title}
                     fontSize={titleFontSize}
                     anchorX="center"
-                    anchorY="middle"
-                    position={[0, -height * 0.25, 0.02]}
-                    color={isHovered ? '#ffffff' : '#94a3b8'}
+                    anchorY="top"
+                    position={[0, height * 0.08, 0.02]}
+                    color={isHovered ? '#ffffff' : '#e2e8f0'}
+                    fontWeight="bold"
+                    maxWidth={radius * 0.95}
+                    textAlign="center"
+                />
+                <!-- Description (unter Titel) -->
+                <Text
+                    text={side.aspect.description}
+                    fontSize={0.16}
+                    anchorX="center"
+                    anchorY="top"
+                    position={[0, -height * 0.08, 0.02]}
+                    color={isHovered ? '#cbd5e1' : '#64748b'}
                     maxWidth={radius * 0.9}
                     textAlign="center"
+                    lineHeight={1.4}
                 />
             {:else}
                 <!-- Titel-Seite: Plattform-Name mit dynamischer Schriftgröße -->
@@ -230,35 +233,4 @@
             {/if}
         </T.Group>
     {/each}
-
-    <!-- Hover-Tooltip mit Description (HTML-Overlay) -->
-    {#if hoveredSide !== null && sides[hoveredSide]?.type === 'aspect' && sides[hoveredSide]?.aspect}
-        {@const hoveredAspect = sides[hoveredSide].aspect!}
-        <HTML position={[0, height + 1.5, 0]} center transform={false}>
-            <div style="background: #0f172a; border-radius: 16px; padding: 4px;">
-                <div 
-                    style="
-                        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-                        color: white;
-                        padding: 20px 24px;
-                        border-radius: 12px;
-                        width: 320px;
-                        border: 2px solid #475569;
-                        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0,0,0,0.5);
-                    "
-                >
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                        <span style="font-size: 2rem;">{hoveredAspect.icon}</span>
-                        <span style="font-weight: 700; font-size: 1.125rem; color: #f1f5f9;">{hoveredAspect.title}</span>
-                    </div>
-                    <p style="font-size: 1rem; color: #cbd5e1; line-height: 1.6; margin: 0;">{hoveredAspect.description}</p>
-                    {#if hoveredAspect.contentUrl}
-                        <p style="font-size: 0.875rem; color: #60a5fa; margin-top: 16px; font-weight: 500;">
-                            Panel klicken für mehr Info →
-                        </p>
-                    {/if}
-                </div>
-            </div>
-        </HTML>
-    {/if}
 </T.Group>

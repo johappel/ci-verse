@@ -105,4 +105,6 @@ export interface AppState {
     } | null;
     // Chat-Modal
     isChatOpen: boolean;
+    // Content-Card für Aspects
+    selectedAspect: PlatformAspect | null;
 }

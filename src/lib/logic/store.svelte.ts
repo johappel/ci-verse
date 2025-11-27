@@ -1,4 +1,4 @@
-import type { AppState, ProjectData, Perspective, Department } from '../types/project';
+import type { AppState, ProjectData, Perspective, Department, PlatformAspect } from '../types/project';
 
 export class WorldStore {
     state = $state<AppState>({
@@ -17,7 +17,9 @@ export class WorldStore {
         // NEU: Direkte Kamera-Ansicht (Poster/Rollup-Klick)
         viewTarget: null, // { camera: {x,y,z}, lookAt: {x,y,z} }
         // NEU: Chat-Modal
-        isChatOpen: false
+        isChatOpen: false,
+        // NEU: Content-Card für Aspects
+        selectedAspect: null
     });
 
     // Derived: Theme-Farbe basierend auf aktiver Perspektive
@@ -76,6 +78,17 @@ export class WorldStore {
         // Reset Q-Platform wenn Projekt gewählt wird
         if (id !== null) {
             this.state.activeQPlatform = null;
+            this.state.selectedAspect = null; // Schließe Aspect-Card
+        }
+    }
+
+    // NEU: Aspect für ContentCard auswählen
+    selectAspect(aspect: PlatformAspect | null) {
+        this.state.selectedAspect = aspect;
+        // Schließe andere Modals
+        if (aspect !== null) {
+            this.state.selectedId = null;
+            this.state.isChatOpen = false;
         }
     }
 

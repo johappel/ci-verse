@@ -280,10 +280,15 @@
                 </T.Mesh>
             {/if}
 
-            <!-- === POSTER-BILD (rechts, großflächig) === -->
+            <!-- === POSTER-BILD (rechts, großflächig, klickbar) === -->
             {#if posterImage}
                 {@const imageOffsetX = s.width / 2 - s.imageWidth / 2 - 0.2}
-                <T.Mesh position={[imageOffsetX, 0, 0.02]}>
+                <T.Mesh 
+                    position={[imageOffsetX, 0, 0.02]}
+                    onpointerenter={handlePointerEnter}
+                    onpointerleave={handlePointerLeave}
+                    onclick={handleBannerClick}
+                >
                     <T.PlaneGeometry args={[s.imageWidth, s.height * 0.92]} />
                     <ImageMaterial 
                         url={posterImage}
@@ -399,10 +404,15 @@
                 </T.Mesh>
             {/if}
 
-            <!-- === POSTER-BILD (rechts auf Rückseite, großflächig) === -->
+            <!-- === POSTER-BILD (rechts auf Rückseite, großflächig, klickbar) === -->
             {#if posterImage}
                 {@const imageOffsetX = s.width / 2 - s.imageWidth / 2 - 0.2}
-                <T.Mesh position={[imageOffsetX, 0, 0.02]}>
+                <T.Mesh 
+                    position={[imageOffsetX, 0, 0.02]}
+                    onpointerenter={handlePointerEnter}
+                    onpointerleave={handlePointerLeave}
+                    onclick={handleBannerClick}
+                >
                     <T.PlaneGeometry args={[s.imageWidth, s.height * 0.92]} />
                     <ImageMaterial 
                         url={posterImage}

@@ -75,14 +75,14 @@
 		}
 		
 		// === PHASE 3: Zurück zum Marktplatz ===
-		updateLoading(70, 'Zurück zum Startpunkt...');
+		updateLoading(70, 'Fliege zum Startpunkt...');
 		
 		worldStore.startTransport('S');
 		
 		// Progress animieren während Rückflug
 		for (let i = 25; i <= 50; i++) {
 			tourProgress = i / 50;
-			updateLoading(70 + ((i - 25) * 1.2), 'Zurück zum Marktplatz...');
+			updateLoading(70 + ((i - 25) * 1.2), 'fliege zum Start...');
 			await new Promise(resolve => setTimeout(resolve, 60));
 		}
 		

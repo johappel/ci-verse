@@ -2,6 +2,7 @@
     import Scene from "$lib/components/3d/Scene.svelte";
     import MinimalScene from "$lib/components/3d/MinimalScene.svelte";
     import ProjectCard from "$lib/components/ui/ProjectCard.svelte";
+    import ContentCard from "$lib/components/ui/ContentCard.svelte";
     import FilterBar from "$lib/components/ui/FilterBar.svelte";
     import NavigationControls from "$lib/components/ui/NavigationControls.svelte";
     import { initWorldStore } from "$lib/logic/store.svelte";
@@ -122,6 +123,7 @@
     <!-- UI Overlays (nur wenn geladen) -->
     {#if !isLoading}
         <ProjectCard />
+        <ContentCard />
         <FilterBar />
         <NavigationControls {cameraControls} />
 
