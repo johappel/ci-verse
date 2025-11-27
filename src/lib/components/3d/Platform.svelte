@@ -1,7 +1,7 @@
 <script lang="ts">
     import { T, useTask } from '@threlte/core';
     import { useCursor, Text, Billboard } from '@threlte/extras';
-    import { spring } from 'svelte/motion';
+    import { Spring } from 'svelte/motion';
     import type { Platform as PlatformType } from '$lib/logic/platforms';
     import type { ProjectData, PlatformContent } from '$lib/types/project';
     import ExhibitStand from './ExhibitStand.svelte';
@@ -42,11 +42,11 @@
     const { hovering, onPointerEnter, onPointerLeave } = useCursor();
     
     // Glow-Intensität für den Ring bei Hover
-    let glowOpacity = spring(0.15, { stiffness: 0.4, damping: 0.7 });
+    const glowOpacity = new Spring(0.15, { stiffness: 0.4, damping: 0.7 });
 
     $effect(() => {
         const baseOpacity = isCurrentPlatform ? 0.5 : 0.15;
-        glowOpacity.set($hovering ? 0.9 : baseOpacity);
+        glowOpacity.target = $hovering ? 0.9 : baseOpacity;
     });
 
     // Layout für Projekt-Stände auf der Plattform
@@ -148,7 +148,7 @@
         <T.MeshBasicMaterial
             color={platform.glowColor}
             transparent
-            opacity={$glowOpacity}
+            opacity={glowOpacity.current}
             side={2}
         />
     </T.Mesh>

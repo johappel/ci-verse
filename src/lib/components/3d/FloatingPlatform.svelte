@@ -4,7 +4,7 @@
     import type { ProjectData, Department } from "$lib/types/project";
     import type { Vector3 } from "three";
     import { worldStore } from "$lib/logic/store.svelte";
-    import { spring } from "svelte/motion";
+    import { Spring } from "svelte/motion";
 
     interface Props {
         project: ProjectData;
@@ -30,12 +30,12 @@
     });
 
     // Animierte Werte
-    let scale = spring(1, { stiffness: 0.3, damping: 0.6 });
-    let glowIntensity = spring(0.2, { stiffness: 0.4, damping: 0.7 });
+    const scale = new Spring(1, { stiffness: 0.3, damping: 0.6 });
+    const glowIntensity = new Spring(0.2, { stiffness: 0.4, damping: 0.7 });
 
     $effect(() => {
-        scale.set(isHovered || isActive ? 1.3 : 1);
-        glowIntensity.set(isActive ? 1.2 : isHovered ? 0.6 : 0.2);
+        scale.target = isHovered || isActive ? 1.3 : 1;
+        glowIntensity.target = isActive ? 1.2 : isHovered ? 0.6 : 0.2;
     });
 
     // Farbe basierend auf Q-Department
@@ -77,13 +77,13 @@
         onclick={handleClick}
         onpointerenter={handlePointerEnter}
         onpointerleave={handlePointerLeave}
-        scale={$scale}
+        scale={scale.current}
     >
         <T.IcosahedronGeometry args={[2, 0]} />
         <T.MeshStandardMaterial
             color={platformColor}
             emissive={platformColor}
-            emissiveIntensity={$glowIntensity}
+            emissiveIntensity={glowIntensity.current}
             transparent
             opacity={0.85}
             metalness={0.4}
@@ -102,7 +102,7 @@
     </T.Mesh>
 
     <!-- Glow-Ring um den Kristall (dicker, heller) -->
-    <T.Mesh rotation.x={Math.PI / 2} scale={$scale}>
+    <T.Mesh rotation.x={Math.PI / 2} scale={scale.current}>
         <T.TorusGeometry args={[3.5, 0.15, 8, 24]} />
         <T.MeshBasicMaterial
             color={platformColor}
@@ -112,7 +112,7 @@
     </T.Mesh>
 
     <!-- Zweiter Ring (gekippt, rotiert mit) -->
-    <T.Mesh rotation.x={Math.PI / 3} rotation.z={rotation * 0.5} scale={$scale}>
+    <T.Mesh rotation.x={Math.PI / 3} rotation.z={rotation * 0.5} scale={scale.current}>
         <T.TorusGeometry args={[4.2, 0.1, 8, 24]} />
         <T.MeshBasicMaterial
             color={platformColor}

@@ -3,7 +3,7 @@
     import { HTML } from "@threlte/extras";
     import type { ProjectData } from "$lib/types/project";
     import { worldStore } from "$lib/logic/store.svelte";
-    import { spring } from "svelte/motion";
+    import { Spring } from "svelte/motion";
 
     interface Props {
         project: ProjectData;
@@ -21,12 +21,12 @@
     );
 
     // Animierte Werte
-    let scaleY = spring(1, { stiffness: 0.3, damping: 0.6 });
-    let emissiveIntensity = spring(0, { stiffness: 0.4, damping: 0.7 });
+    const scaleY = new Spring(1, { stiffness: 0.3, damping: 0.6 });
+    const emissiveIntensity = new Spring(0, { stiffness: 0.4, damping: 0.7 });
 
     $effect(() => {
-        scaleY.set(isHovered ? 1.15 : 1);
-        emissiveIntensity.set(isHovered ? 0.4 : 0);
+        scaleY.target = isHovered ? 1.15 : 1;
+        emissiveIntensity.target = isHovered ? 0.4 : 0;
     });
 
     // Event Handlers
@@ -55,7 +55,7 @@
     </T.Mesh>
 
     <!-- Haupt-Panel (Vorne) mit Screenshot -->
-    <T.Group scale.y={$scaleY}>
+    <T.Group scale.y={scaleY.current}>
         <!-- Hinterwand - INTERAKTIV -->
         <T.Mesh 
             position={[0, 2.5, -2.5]} 
@@ -68,7 +68,7 @@
             <T.MeshStandardMaterial
                 color={project.color || "#ffffff"}
                 emissive={project.color || "#ffffff"}
-                emissiveIntensity={$emissiveIntensity}
+                emissiveIntensity={emissiveIntensity.current}
                 transparent
                 opacity={isDimmed ? 0.3 : 1}
             />
