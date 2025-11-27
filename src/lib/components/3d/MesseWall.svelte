@@ -51,31 +51,12 @@
     
     let hoveredButtonId = $state<string | null>(null);
     
-    // Distanz-Check wie bei InteractionPillar
-    // Aktivierungsdistanz = Plattform-Größe + Puffer (User muss auf Plattform stehen)
-    const ACTIVATION_DISTANCE = platformSize + 15;
+    // Distanz-Check: Wie nah ist die Kamera an den Wänden?
+    // Aktivierung nur wenn Kamera nahe genug an einer Wand ist
+    const WALL_ACTIVATION_DISTANCE = 12; // Distanz zur Wand für Aktivierung
     let isNearWall = $state(false);
     let frameCounter = 0;
     
-    useTask(() => {
-        frameCounter++;
-        if (frameCounter % 6 !== 0) return; // Alle 6 Frames
-        
-        const camPos = $camera.position;
-        const px = platformPosition[0];
-        const py = platformPosition[1] + 3.3; // Augenhöhe
-        const pz = platformPosition[2];
-        
-        const dx = camPos.x - px;
-        const dy = camPos.y - py;
-        const dz = camPos.z - pz;
-        const distSq = dx * dx + dy * dy + dz * dz;
-        const maxDistSq = ACTIVATION_DISTANCE * ACTIVATION_DISTANCE;
-        
-        // console.log('MesseWall Dist:', Math.sqrt(distSq).toFixed(1), 'Max:', ACTIVATION_DISTANCE, 'Near:', distSq <= maxDistSq);
-        isNearWall = distSq <= maxDistSq;
-    });
-
     // Hexagon-Geometrie: Kantenlänge = Radius
     const hexEdgeLength = platformSize; // Kantenlänge des Hexagons
     const hexInnerRadius = platformSize * Math.cos(Math.PI / 6); // Apothem (Abstand Mitte zu Kante)
@@ -104,6 +85,35 @@
             };
         })
     );
+    
+    useTask(() => {
+        frameCounter++;
+        if (frameCounter % 6 !== 0) return; // Alle 6 Frames
+        
+        const camPos = $camera.position;
+        const px = platformPosition[0];
+        const py = platformPosition[1];
+        const pz = platformPosition[2];
+        
+        // Berechne minimale Distanz zu einer der Wände
+        let minDistSq = Infinity;
+        for (const wall of wallPositions) {
+            // Wand-Position in Weltkoordinaten
+            const wallWorldX = px + wall.x;
+            const wallWorldZ = pz + wall.z;
+            
+            const dx = camPos.x - wallWorldX;
+            const dz = camPos.z - wallWorldZ;
+            const distSq = dx * dx + dz * dz; // Nur horizontale Distanz
+            
+            if (distSq < minDistSq) {
+                minDistSq = distSq;
+            }
+        }
+        
+        const maxDistSq = WALL_ACTIVATION_DISTANCE * WALL_ACTIVATION_DISTANCE;
+        isNearWall = minDistSq <= maxDistSq;
+    });
 
     // Poster auf die Wände verteilen (mehrere pro Wand möglich)
     // Berechne wie viele Poster pro Wand und deren Position
