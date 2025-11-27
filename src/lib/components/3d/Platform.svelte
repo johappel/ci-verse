@@ -35,6 +35,9 @@
         }
     });
 
+    // Oktaeder-Hover-State für Lichtlinien-Aktivierung
+    let oktaederHovered = $state(false);
+
     // Cursor-Änderung bei Hover
     const { hovering, onPointerEnter, onPointerLeave } = useCursor();
     
@@ -164,12 +167,19 @@
                 }
             }}
             onpointerenter={() => {
-                if (platform.id !== 'S') {
+                if (platform.id !== 'S' && isCurrentPlatform) {
                     document.body.style.cursor = 'pointer';
+                    oktaederHovered = true;
+                    // Setze hoveredDestination auf 'S' (Marktplatz) für LightBridge-Aktivierung
+                    worldStore.setHoveredDestination('S');
                 }
             }}
             onpointerleave={() => {
                 document.body.style.cursor = 'auto';
+                oktaederHovered = false;
+                if (isCurrentPlatform) {
+                    worldStore.setHoveredDestination(null);
+                }
             }}
         >
             <T.OctahedronGeometry args={[1.2, 0]} />

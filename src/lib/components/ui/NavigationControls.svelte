@@ -227,6 +227,10 @@
 			ontouchstart={startDrag}
 			ondblclick={resetPosition}
 			title="Ziehen zum Verschieben, Doppelklick zum Zurücksetzen"
+			role="slider"
+			aria-label="Navigations-Panel verschieben"
+			aria-valuenow={panelX}
+			tabindex="0"
 		>
 			<span class="select-none">{currentPlatformName}</span>
 		</div>

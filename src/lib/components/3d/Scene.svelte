@@ -70,12 +70,12 @@
 		// Progress animieren während Flug
 		for (let i = 0; i <= 25; i++) {
 			tourProgress = i / 50;
-			updateLoading(20 + (i * 2), 'Fliege zu Europa...');
+			updateLoading(20 + (i * 2), 'Bereite die Plattformen vor...');
 			await new Promise(resolve => setTimeout(resolve, 100));
 		}
 		
 		// === PHASE 3: Zurück zum Marktplatz ===
-		updateLoading(70, 'Zurück zum Marktplatz...');
+		updateLoading(70, 'Zurück zum Startpunkt...');
 		
 		worldStore.startTransport('S');
 		
@@ -109,32 +109,66 @@
 	});
 
 	// Transport-Animation wenn sich die Plattform ändert
+	// Die Kamera fliegt auf Höhe der Lichtlinien (Oktaeder-Höhe Y+15)
 	$effect(() => {
 		if (worldStore.state.isTransporting && worldStore.state.transportTarget && cameraControls) {
 			const target = platforms[worldStore.state.transportTarget];
-			if (target) {
-				// Landepunkt: Entweder custom oder Fallback
+			const current = platforms[worldStore.state.currentPlatform];
+			if (target && current) {
+				// Lichtlinien-Höhe: Oktaeder sind bei platform.y + 15
+				const LIGHT_LINE_HEIGHT = 15;
+				
+				// Berechne Flughöhe: Höhere der beiden Plattformen + Lichtlinien-Offset + etwas darüber
+				const flightAltitude = Math.max(current.y, target.y) + LIGHT_LINE_HEIGHT + 5;
+				
+				// Landepunkt auf Ziel-Plattform
 				const landing = target.landing || {
 					offset: [0, 15, -40],
 					lookAtOffset: [0, 3, 0]
 				};
 				
-				// Berechne absolute Kamera-Position
-				const camX = target.x + landing.offset[0];
-				const camY = target.y + landing.offset[1];
-				const camZ = target.z + landing.offset[2];
+				// Finale Kamera-Position
+				const finalCamX = target.x + landing.offset[0];
+				const finalCamY = target.y + landing.offset[1];
+				const finalCamZ = target.z + landing.offset[2];
 				
-				// Look-At IMMER zur Plattform-Mitte (auf Augenhöhe)
-				const lookX = target.x;
-				const lookY = target.y + 5;  // Augenhöhe über Plattform
-				const lookZ = target.z;
+				// Aktuelle Kamera-Position
+				const startX = cameraControls.camera.position.x;
+				const startY = cameraControls.camera.position.y;
+				const startZ = cameraControls.camera.position.z;
 				
-				// Fliege zur Ziel-Plattform mit individuellem Landepunkt
-				cameraControls.setLookAt(
-					camX, camY, camZ,    // Kamera-Position
-					lookX, lookY, lookZ, // Look-At zur Mitte
-					true                 // animiert
-				);
+				// Mittelpunkt der Strecke (für Bogenkurve)
+				const midX = (startX + finalCamX) / 2;
+				const midZ = (startZ + finalCamZ) / 2;
+				
+				// 3-Stufen-Animation: Aufsteigen → Gleiten → Landen
+				async function flyAlongLightBridge() {
+					// Stufe 1: Sanft auf Flughöhe steigen (0.8s)
+					cameraControls!.smoothTime = 0.2;
+					await cameraControls!.setLookAt(
+						startX, flightAltitude, startZ,  // Aufsteigen
+						midX, flightAltitude - 5, midZ,  // Vorausschauen Richtung Ziel
+						true
+					);
+					
+					// Stufe 2: Auf Flughöhe zum Ziel gleiten (1.5s)
+					cameraControls!.smoothTime = 0.6;
+					await cameraControls!.setLookAt(
+						finalCamX, flightAltitude, finalCamZ,  // Über dem Ziel
+						target.x, target.y + 5, target.z,      // Schaut zur Plattform runter
+						true
+					);
+					
+					// Stufe 3: Sanft zur Landeposition absenken (0.8s)
+					cameraControls!.smoothTime = 0.3;
+					await cameraControls!.setLookAt(
+						finalCamX, finalCamY, finalCamZ,        // Finale Position
+						target.x, target.y + 5, target.z,      // Look-At zur Mitte
+						true
+					);
+				}
+				
+				flyAlongLightBridge();
 			}
 		}
 	});
