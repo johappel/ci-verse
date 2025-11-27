@@ -108,7 +108,7 @@
     <InteractionPillar 
         {project}
         position={[0, 0, pillarLocalZ]}
-        height={1.0}
+        size={1.0}
         worldPosition={[
             platformPosition[0] + position[0] + pillarLocalZ * sin,
             platformPosition[1] + position[1],

@@ -172,7 +172,7 @@
                         display: { slogan: side.aspect.description, color: '#60a5fa' }
                     }}
                     position={[0, -height / 2 + 0.5, pillarDistance]}
-                    height={1.0}
+                    size={1.0}
                     worldPosition={[pillarWorldX, platformPosition[1] + 0.5, pillarWorldZ]}
                 />
             {/if}
