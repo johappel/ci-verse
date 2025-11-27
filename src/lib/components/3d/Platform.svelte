@@ -323,7 +323,11 @@
     {:else if shouldRenderContent}
         <!-- Fallback: Alte ExhibitStand-Komponente für Projekte ohne PlatformContent -->
         {#each projects as project, i}
-            <ExhibitStand {project} position={[standPositions[i]?.x ?? 0, 2, standPositions[i]?.z ?? 0]} />
+            <ExhibitStand 
+                {project} 
+                position={[standPositions[i]?.x ?? 0, 2, standPositions[i]?.z ?? 0]} 
+                platformPosition={[platform.x, platform.y, platform.z]}
+            />
         {/each}
     {/if}
 

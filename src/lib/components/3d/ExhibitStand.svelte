@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { T } from "@threlte/core";
-    import { HTML, ImageMaterial, Text } from "@threlte/extras";
+    import { T, useThrelte, useTask } from "@threlte/core";
+    import { HTML, ImageMaterial, Text, useCursor } from "@threlte/extras";
+    import { BadgeInfo } from 'lucide-svelte';
     import type { ProjectData } from "$lib/types/project";
     import { worldStore } from "$lib/logic/store.svelte";
     import { Spring } from "svelte/motion";
@@ -8,15 +9,43 @@
     interface Props {
         project: ProjectData;
         position: [number, number, number];
+        platformPosition?: [number, number, number]; // Für Distanz-Check
     }
 
-    let { project, position }: Props = $props();
+    let { project, position, platformPosition = [0, 0, 0] }: Props = $props();
 
     // Display-Daten
     const posterUrl = project.display?.posterImage;
     const screenshotUrl = project.display?.screenshotUrl;
     const displayColor = project.display?.color || project.color || '#3b82f6';
     const slogan = project.display?.slogan;
+    const shortTeaser = project.shortTeaser;
+
+    // Distanz-Check für Button-Aktivierung
+    const { camera } = useThrelte();
+    const { onPointerEnter, onPointerLeave } = useCursor('pointer');
+    const ACTIVATION_DISTANCE = 15;
+    let isNearby = $state(false);
+    let isButtonHovered = $state(false);
+    let frameCounter = 0;
+    
+    useTask(() => {
+        frameCounter++;
+        if (frameCounter % 6 !== 0) return;
+        
+        const camPos = $camera.position;
+        // Weltposition = Plattform + lokale Position
+        const wx = platformPosition[0] + position[0];
+        const wy = platformPosition[1] + position[1];
+        const wz = platformPosition[2] + position[2];
+        
+        const dx = camPos.x - wx;
+        const dy = camPos.y - wy;
+        const dz = camPos.z - wz;
+        const distSq = dx * dx + dy * dy + dz * dz;
+        
+        isNearby = distSq <= ACTIVATION_DISTANCE * ACTIVATION_DISTANCE;
+    });
 
     // Zustandsableitungen
     let isHovered = $derived(worldStore.state.hoveredId === project.id);
@@ -31,91 +60,253 @@
     const emissiveIntensity = new Spring(0, { stiffness: 0.4, damping: 0.7 });
 
     $effect(() => {
-        scaleY.target = isHovered ? 1.15 : 1;
+        scaleY.target = isHovered ? 1.05 : 1;
         emissiveIntensity.target = isHovered ? 0.4 : 0;
     });
 
     // Event Handlers
     function handleClick(e: any) {
-        console.log("ExhibitStand clicked!", project.id);
         e.stopPropagation();
         worldStore.selectProject(project.id);
     }
+    
+    function handleButtonClick() {
+        if (isNearby) {
+            worldStore.selectProject(project.id);
+        }
+    }
 
     function handlePointerEnter() {
-        console.log("ExhibitStand hover enter!", project.id);
         worldStore.setHovered(project.id);
     }
 
     function handlePointerLeave() {
-        console.log("ExhibitStand hover leave!", project.id);
         worldStore.setHovered(null);
     }
+    
+    // Titel-Schriftgröße basierend auf Länge
+    const titleFontSize = $derived(
+        project.title.length > 25 ? 0.22 : 
+        project.title.length > 18 ? 0.26 : 0.32
+    );
 </script>
 
 <T.Group position={position}>
     <!-- Basis-Plattform -->
     <T.Mesh position.y={0.1} receiveShadow>
-        <T.BoxGeometry args={[6, 0.2, 6]} />
+        <T.BoxGeometry args={[8, 0.2, 6]} />
         <T.MeshStandardMaterial color="#d4d4d8" roughness={0.7} />
     </T.Mesh>
 
     <!-- Messestand mit Rollup-Banner -->
     <T.Group scale.y={scaleY.current}>
         
-        <!-- === ROLLUP-BANNER (Hauptelement) === -->
+        <!-- === ROLLUP-BEREICH (Breiter für Text + Bild) === -->
         <T.Group position={[0, 0, -2.5]}>
-            <!-- Rollup-Ständer (Metall-Basis) -->
+            <!-- Rollup-Ständer (Metall-Basis) - breiter -->
             <T.Mesh position.y={0.1}>
-                <T.BoxGeometry args={[2.8, 0.2, 0.4]} />
+                <T.BoxGeometry args={[7, 0.2, 0.4]} />
                 <T.MeshStandardMaterial color="#374151" metalness={0.7} roughness={0.3} />
             </T.Mesh>
             
-            <!-- Rollup-Banner mit Poster-Bild -->
-            <T.Mesh 
-                position.y={2.8}
-                onclick={handleClick}
-                onpointerenter={handlePointerEnter}
-                onpointerleave={handlePointerLeave}
-            >
-                <!-- Banner-Größe: 2.5 breit x 5 hoch (typisches Rollup-Format) -->
-                <T.PlaneGeometry args={[2.5, 5]} />
-                {#if posterUrl}
-                    <ImageMaterial 
-                        url={posterUrl}
+            <!-- === TEXT-POSTER (links) === -->
+            <T.Group position={[-1.8, 0, 0]}>
+                <!-- Poster-Hintergrund (farbiger Rahmen) -->
+                <T.Mesh position.y={3}>
+                    <T.PlaneGeometry args={[3, 5.5]} />
+                    <T.MeshBasicMaterial 
+                        color={displayColor}
                         transparent
-                        opacity={isDimmed ? 0.4 : 1}
+                        opacity={isDimmed ? 0.4 : 0.9}
                     />
-                {:else}
-                    <!-- Fallback: Farbiger Hintergrund -->
+                </T.Mesh>
+                
+                <!-- Poster-Inhalt (dunkel) -->
+                <T.Mesh position={[0, 3, 0.02]}>
+                    <T.PlaneGeometry args={[2.7, 5.2]} />
+                    <T.MeshBasicMaterial color="#0f172a" />
+                </T.Mesh>
+                
+                <!-- Projekt-Titel -->
+                <Text
+                    text={project.title}
+                    fontSize={titleFontSize}
+                    anchorX="center"
+                    anchorY="top"
+                    position={[0, 5.3, 0.05]}
+                    color="#ffffff"
+                    fontWeight="bold"
+                    maxWidth={2.4}
+                    textAlign="center"
+                />
+                
+                <!-- Trennlinie -->
+                <T.Mesh position={[0, 4.5, 0.04]}>
+                    <T.PlaneGeometry args={[2, 0.02]} />
+                    <T.MeshBasicMaterial color={displayColor} />
+                </T.Mesh>
+                
+                <!-- Beschreibung (shortTeaser) -->
+                {#if shortTeaser}
+                    <Text
+                        text={shortTeaser}
+                        fontSize={0.16}
+                        anchorX="center"
+                        anchorY="top"
+                        position={[0, 4.3, 0.05]}
+                        color="#cbd5e1"
+                        maxWidth={2.4}
+                        textAlign="center"
+                        lineHeight={1.4}
+                    />
+                {/if}
+                
+                <!-- Slogan (unten) -->
+                {#if slogan}
+                    <Text
+                        text={slogan}
+                        fontSize={0.18}
+                        anchorX="center"
+                        anchorY="bottom"
+                        position={[0, 0.9, 0.05]}
+                        color={displayColor}
+                        fontStyle="italic"
+                        maxWidth={2.4}
+                        textAlign="center"
+                    />
+                {/if}
+                
+                <!-- === INFO-BUTTON unter dem Text-Poster === -->
+                <T.Group position={[0, -0.2, 0.1]}>
+                    <!-- Knopf-Gehäuse -->
+                    <T.Mesh rotation.x={Math.PI / 2}>
+                        <T.CylinderGeometry args={[0.35, 0.35, 0.12, 8]} />
+                        <T.MeshStandardMaterial 
+                            color={isNearby ? '#1e293b' : '#0f172a'}
+                            metalness={0.5}
+                            roughness={0.5}
+                        />
+                    </T.Mesh>
+                    
+                    <!-- Leuchtender Knopf -->
+                    <T.Mesh 
+                        position.z={0.08}
+                        onclick={handleButtonClick}
+                        onpointerenter={() => { isButtonHovered = true; if (isNearby) onPointerEnter(); }}
+                        onpointerleave={() => { isButtonHovered = false; onPointerLeave(); }}
+                    >
+                        <T.CircleGeometry args={[0.28, 16]} />
+                        <T.MeshBasicMaterial 
+                            color={isNearby ? displayColor : '#475569'}
+                            transparent
+                            opacity={isButtonHovered ? 1 : 0.8}
+                        />
+                    </T.Mesh>
+                    
+                    <!-- Glow-Ring (nur wenn nah) -->
+                    {#if isNearby}
+                        <T.Mesh position.z={0.01}>
+                            <T.RingGeometry args={[0.3, 0.45, 16]} />
+                            <T.MeshBasicMaterial 
+                                color={displayColor}
+                                transparent
+                                opacity={isButtonHovered ? 0.6 : 0.3}
+                            />
+                        </T.Mesh>
+                    {/if}
+                    
+                    <!-- Info-Icon (Lucide BadgeInfo) -->
+                    <HTML position={[0, 0, 0.1]} center transform scale={0.25} pointerEvents="none">
+                        <div style="pointer-events: none;">
+                            <BadgeInfo 
+                                size={48} 
+                                strokeWidth={2}
+                                color={isNearby ? '#ffffff' : '#94a3b8'}
+                            />
+                        </div>
+                    </HTML>
+                    
+                    <!-- Hover-Tooltip -->
+                    {#if isButtonHovered}
+                        <HTML position={[0.7, 0.2, 0]} center={false} transform={false}>
+                            <div style="
+                                background: {isNearby ? '#ffffff' : 'rgba(15, 23, 42, 0.9)'};
+                                color: {isNearby ? '#0f172a' : '#94a3b8'};
+                                padding: 6px 10px;
+                                border-radius: 4px;
+                                font-size: 0.75rem;
+                                font-weight: 600;
+                                white-space: nowrap;
+                                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                                border-bottom: 2px solid {isNearby ? displayColor : '#475569'};
+                            ">
+                                {isNearby ? 'Details anzeigen' : 'Näher kommen...'}
+                            </div>
+                        </HTML>
+                    {/if}
+                </T.Group>
+            </T.Group>
+            
+            <!-- === POSTER-BILD (rechts) === -->
+            {#if posterUrl}
+                <T.Group position={[1.8, 0, 0]}>
+                    <!-- Rahmen für Poster-Bild -->
+                    <T.Mesh position.y={3}>
+                        <T.PlaneGeometry args={[3.2, 5.5]} />
+                        <T.MeshBasicMaterial 
+                            color={displayColor}
+                            transparent
+                            opacity={isDimmed ? 0.4 : 0.8}
+                        />
+                    </T.Mesh>
+                    
+                    <!-- Poster-Bild -->
+                    <T.Mesh 
+                        position={[0, 3, 0.02]}
+                        onclick={handleClick}
+                        onpointerenter={handlePointerEnter}
+                        onpointerleave={handlePointerLeave}
+                    >
+                        <T.PlaneGeometry args={[3, 5.2]} />
+                        <ImageMaterial 
+                            url={posterUrl}
+                            transparent
+                            opacity={isDimmed ? 0.4 : 0.95}
+                        />
+                    </T.Mesh>
+                </T.Group>
+            {:else}
+                <!-- Fallback wenn kein posterImage: nur Text-Poster zentriert -->
+                <T.Mesh position={[1.8, 3, 0]}>
+                    <T.PlaneGeometry args={[3, 5.5]} />
                     <T.MeshStandardMaterial
                         color={displayColor}
                         emissive={displayColor}
                         emissiveIntensity={emissiveIntensity.current}
                         transparent
-                        opacity={isDimmed ? 0.4 : 1}
+                        opacity={isDimmed ? 0.4 : 0.6}
                     />
-                {/if}
-            </T.Mesh>
+                </T.Mesh>
+            {/if}
             
             <!-- Rollup-Rahmen oben -->
-            <T.Mesh position.y={5.35}>
-                <T.BoxGeometry args={[2.7, 0.1, 0.05]} />
+            <T.Mesh position.y={5.8}>
+                <T.BoxGeometry args={[7.2, 0.1, 0.05]} />
                 <T.MeshStandardMaterial color="#374151" metalness={0.7} roughness={0.3} />
             </T.Mesh>
             
             <!-- Stützstange hinten -->
-            <T.Mesh position={[0, 2.7, -0.15]} rotation.x={Math.PI * 0.03}>
-                <T.CylinderGeometry args={[0.02, 0.02, 5.2, 8]} />
+            <T.Mesh position={[0, 3, -0.15]} rotation.x={Math.PI * 0.02}>
+                <T.CylinderGeometry args={[0.02, 0.02, 5.8, 8]} />
                 <T.MeshStandardMaterial color="#6b7280" metalness={0.8} roughness={0.2} />
             </T.Mesh>
         </T.Group>
         
         <!-- === HINTERWAND MIT SCREENSHOT === -->
-        <T.Group position={[0, 0, -3.2]}>
+        <T.Group position={[0, 0, -3.5]}>
             <!-- Wand-Rahmen -->
             <T.Mesh position.y={2.5}>
-                <T.BoxGeometry args={[6, 4.5, 0.15]} />
+                <T.BoxGeometry args={[8, 4.5, 0.15]} />
                 <T.MeshStandardMaterial
                     color="#1e293b"
                     transparent
@@ -131,7 +322,7 @@
                     onpointerenter={handlePointerEnter}
                     onpointerleave={handlePointerLeave}
                 >
-                    <T.PlaneGeometry args={[5.5, 4]} />
+                    <T.PlaneGeometry args={[7.5, 4]} />
                     <ImageMaterial 
                         url={screenshotUrl}
                         transparent
@@ -142,13 +333,10 @@
         </T.Group>
         
         <!-- === SEITEN-PANELS === -->
-        <!-- Linkes Panel mit Projekt-Info -->
+        <!-- Linkes Panel -->
         <T.Mesh
-            position={[-3.2, 2.5, -1]}
+            position={[-4.2, 2.5, -1]}
             rotation.y={Math.PI / 2}
-            onclick={handleClick}
-            onpointerenter={handlePointerEnter}
-            onpointerleave={handlePointerLeave}
         >
             <T.PlaneGeometry args={[4, 4]} />
             <T.MeshStandardMaterial
@@ -160,11 +348,8 @@
 
         <!-- Rechtes Panel -->
         <T.Mesh
-            position={[3.2, 2.5, -1]}
+            position={[4.2, 2.5, -1]}
             rotation.y={-Math.PI / 2}
-            onclick={handleClick}
-            onpointerenter={handlePointerEnter}
-            onpointerleave={handlePointerLeave}
         >
             <T.PlaneGeometry args={[4, 4]} />
             <T.MeshStandardMaterial
@@ -174,46 +359,19 @@
             />
         </T.Mesh>
         
-        <!-- === TEXT-ELEMENTE === -->
-        <!-- Projekt-Titel auf dem Boden vor dem Rollup -->
+        <!-- === TITEL AUF DEM BODEN === -->
         <Text
             text={project.title}
-            fontSize={0.35}
+            fontSize={0.3}
             anchorX="center"
             anchorY="middle"
-            position={[0, 0.15, 1]}
+            position={[0, 0.15, 1.5]}
             rotation.x={-Math.PI / 2}
             color="#ffffff"
             outlineWidth={0.02}
             outlineColor="#000000"
-            maxWidth={5}
+            maxWidth={6}
             textAlign="center"
         />
-        
-        <!-- Slogan über dem Rollup -->
-        {#if slogan}
-            <Text
-                text={slogan}
-                fontSize={0.25}
-                anchorX="center"
-                anchorY="bottom"
-                position={[0, 5.6, -2.5]}
-                color={displayColor}
-                fontStyle="italic"
-                maxWidth={3}
-                textAlign="center"
-            />
-        {/if}
     </T.Group>
-
-    <!-- Hover-Label (HTML Overlay) -->
-    {#if isHovered}
-        <HTML transform position={[0, 5.5, 0]} center>
-            <div
-                class="bg-black/80 text-white px-3 py-1.5 rounded-lg text-sm font-medium backdrop-blur-sm pointer-events-none whitespace-nowrap"
-            >
-                {project.title}
-            </div>
-        </HTML>
-    {/if}
 </T.Group>

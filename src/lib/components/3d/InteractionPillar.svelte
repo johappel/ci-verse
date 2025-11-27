@@ -6,11 +6,13 @@
      * - Flache hexagonale Platte im Boden
      * - Leuchtender Ring + Kern
      * - Aktiviert sich bei Nähe (<12 Einheiten)
-     * - Klick öffnet URL oder ProjectCard
+     * - Klick öffnet ProjectCard
      */
     import { T, useThrelte, useTask } from '@threlte/core';
     import { HTML, useCursor } from '@threlte/extras';
+    import { BadgeInfo } from 'lucide-svelte';
     import type { ProjectData } from '$lib/types/project';
+    import { worldStore } from '$lib/logic/store.svelte';
 
     interface Props {
         project: ProjectData;
@@ -66,10 +68,8 @@
 
     function handleClick() {
         if (!isNearby) return;
-        
-        if (project.externalUrl) {
-            window.open(project.externalUrl, '_blank');
-        }
+        // Öffne ProjectCard statt externe URL
+        worldStore.selectProject(project.id);
     }
 
     // Puls-Animation
@@ -115,14 +115,24 @@
         />
     </T.Mesh>
 
-    <!-- Link-Symbol in der Mitte (nur wenn nah) -->
+    <!-- Link-Symbol in der Mitte (BadgeInfo Icon) -->
     {#if isNearby}
+        <HTML position={[0, 0.15, 0]} center transform scale={0.015} pointerEvents="none">
+            <div style="pointer-events: none;">
+                <BadgeInfo 
+                    size={48} 
+                    strokeWidth={2}
+                    color="#ffffff"
+                />
+            </div>
+        </HTML>
+    {:else}
         <T.Mesh position.y={0.05} rotation.x={-Math.PI / 2}>
             <T.RingGeometry args={[size * 0.08, size * 0.15, 16]} />
             <T.MeshBasicMaterial 
-                color="#ffffff"
+                color="#94a3b8"
                 transparent
-                opacity={pulseIntensity * 0.9}
+                opacity={0.3}
             />
         </T.Mesh>
     {/if}
@@ -152,7 +162,7 @@
                 box-shadow: 0 4px 20px rgba(0,0,0,0.3);
                 border-bottom: 3px solid {displayColor};
             ">
-                🔗 Projekt öffnen
+                Details anzeigen
             </div>
         </HTML>
     {/if}
@@ -168,7 +178,7 @@
                 font-size: 0.7rem;
                 white-space: nowrap;
             ">
-                Näher kommen zum Aktivieren
+                Näher kommen...
             </div>
         </HTML>
     {/if}
