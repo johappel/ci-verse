@@ -21,7 +21,7 @@
 	
 	// Bewegungs-Geschwindigkeiten
 	const MOVE_SPEED = 2;      // Vorwärts/Rückwärts
-	const ROTATE_SPEED = 0.03; // Drehung in Radians
+	const ROTATE_SPEED = 0.3; // Drehung in Radians (erhöht von 0.03)
 	
 	// Keyboard-Listener
 	$effect(() => {

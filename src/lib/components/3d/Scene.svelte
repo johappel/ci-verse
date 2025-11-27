@@ -231,7 +231,7 @@
 		<T.PerspectiveCamera makeDefault position={initialCamPos} fov={80} near={1} far={2000}>
 			<CameraControls 
 				bind:ref={cameraControls}
-				smoothTime={3.0}
+				smoothTime={0.5}
 				draggingSmoothTime={0.5}
 				maxPolarAngle={Math.PI / 2}
 				minPolarAngle={Math.PI / 8}
