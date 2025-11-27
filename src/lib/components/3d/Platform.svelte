@@ -96,15 +96,8 @@
             if (!isCurrentPlatform) {
                 // Wenn nicht aktuelle Plattform, navigiere dorthin
                 worldStore.startTransport(platform.id);
-            } else {
-                // Auf aktueller Plattform: Bewege Kamera zum Klickpunkt
-                const clickPoint = event.point;
-                worldStore.moveToLocalPosition({
-                    x: clickPoint.x,
-                    y: clickPoint.y,
-                    z: clickPoint.z
-                });
             }
+            // Auf aktueller Plattform: Kein Kamera-Move mehr (führte zu merkwürdigen Rotationen)
         }
         
         pointerDownPos = null;
