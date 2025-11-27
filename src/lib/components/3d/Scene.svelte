@@ -8,13 +8,21 @@
 	import { worldStore } from '$lib/logic/store.svelte';
 	import { platforms, getCameraY } from '$lib/logic/platforms';
 
-	// Props: Callback für Loading-Updates
-	let { onLoadingUpdate }: { 
-		onLoadingUpdate?: (data: { progress: number; message: string; done: boolean }) => void 
+	// Props: Callback für Loading-Updates und CameraControls
+	let { onLoadingUpdate, onCameraReady }: { 
+		onLoadingUpdate?: (data: { progress: number; message: string; done: boolean }) => void;
+		onCameraReady?: (controls: CameraControlsRef) => void;
 	} = $props();
 
 	// CameraControls Referenz für Transport-Animation
 	let cameraControls = $state<CameraControlsRef>();
+	
+	// Benachrichtige Parent wenn CameraControls bereit
+	$effect(() => {
+		if (cameraControls) {
+			onCameraReady?.(cameraControls);
+		}
+	});
 
 	// Preload-Status (intern)
 	let isPreloading = $state(true);

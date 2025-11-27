@@ -3,6 +3,7 @@
     import MinimalScene from "$lib/components/3d/MinimalScene.svelte";
     import ProjectCard from "$lib/components/ui/ProjectCard.svelte";
     import FilterBar from "$lib/components/ui/FilterBar.svelte";
+    import NavigationControls from "$lib/components/ui/NavigationControls.svelte";
     import { initWorldStore } from "$lib/logic/store.svelte";
     import { mockProjects } from "$lib/data/mockProjects";
     import { onMount } from "svelte";
@@ -15,6 +16,9 @@
     let isLoading = $state(true);
     let loadingProgress = $state(0);
     let loadingMessage = $state('Starte...');
+    
+    // CameraControls Referenz (von Scene)
+    let cameraControls = $state<any>(null);
 
     function handleLoadingUpdate(data: { progress: number; message: string; done: boolean }) {
         loadingProgress = data.progress;
@@ -22,6 +26,10 @@
         if (data.done) {
             isLoading = false;
         }
+    }
+    
+    function handleCameraReady(controls: any) {
+        cameraControls = controls;
     }
 
     // URL-Parameter beim Mount lesen
@@ -109,12 +117,13 @@
     {/if}
 
     <!-- 3D Canvas (Vollbild) - immer rendern -->
-    <Scene onLoadingUpdate={handleLoadingUpdate} />
+    <Scene onLoadingUpdate={handleLoadingUpdate} onCameraReady={handleCameraReady} />
 
     <!-- UI Overlays (nur wenn geladen) -->
     {#if !isLoading}
         <ProjectCard />
         <FilterBar />
+        <NavigationControls {cameraControls} />
 
         <!-- Logo/Title Overlay -->
         <div class="absolute top-6 left-6 z-20">

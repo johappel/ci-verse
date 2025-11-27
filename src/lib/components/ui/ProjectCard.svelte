@@ -37,13 +37,13 @@
 
 {#if project}
     <!-- Backdrop mit Glass Effect -->
-    <div
-        class="fixed inset-0 bg-black/40 backdrop-blur-md z-40"
+    <button
+        type="button"
+        class="fixed inset-0 w-full h-full bg-black/40 backdrop-blur-md z-40 cursor-default"
         onclick={close}
-        role="button"
-        tabindex="-1"
+        aria-label="Schließen"
         transition:fade={{ duration: 200 }}
-    ></div>
+    ></button>
 
     <!-- Die Card -->
     <article

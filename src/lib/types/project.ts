@@ -26,6 +26,7 @@ export interface ProjectDisplay {
     logoUrl?: string;          // Projekt-Logo
     color: string;             // Primärfarbe
     screenshotUrl?: string;    // Website-Screenshot
+    icon?: string;             // Emoji oder Icon-Name
 }
 
 export interface ProjectData {
