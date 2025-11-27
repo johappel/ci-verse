@@ -17,6 +17,9 @@ importers:
       '@threlte/extras':
         specifier: ^9.7.1
         version: 9.7.1(@types/three@0.181.0)(svelte@5.44.1)(three@0.172.0)
+      lucide-svelte:
+        specifier: ^0.555.0
+        version: 0.555.0(svelte@5.44.1)
       three:
         specifier: ^0.172.0
         version: 0.172.0
@@ -732,6 +735,11 @@ packages:
 
   locate-character@3.0.0:
     resolution: {integrity: sha512-SW13ws7BjaeJ6p7Q6CO2nchbYEc3X3J6WrmTTDto7yMPqVSZTUyY5Tjbid+Ab8gLnATtygYtiDIJGQRRn2ZOiA==}
+
+  lucide-svelte@0.555.0:
+    resolution: {integrity: sha512-2kWIcstKGgQObLGpYXmcYwm/Y83Am+AQcP7MnybrmaRU1+QUJ/WSEpv/wAbwaSkrWUiN1TX/9FuWQKLeEeWCrQ==}
+    peerDependencies:
+      svelte: ^3 || ^4 || ^5.0.0-next.42
 
   maath@0.10.8:
     resolution: {integrity: sha512-tRvbDF0Pgqz+9XUa4jjfgAQ8/aPKmQdWXilFu2tMy4GWj4NOsx99HlULO4IeREfbO3a0sA145DZYyvXPkybm0g==}
@@ -1462,6 +1470,10 @@ snapshots:
       lightningcss-win32-x64-msvc: 1.30.2
 
   locate-character@3.0.0: {}
+
+  lucide-svelte@0.555.0(svelte@5.44.1):
+    dependencies:
+      svelte: 5.44.1
 
   maath@0.10.8(@types/three@0.181.0)(three@0.172.0):
     dependencies:

@@ -13,7 +13,8 @@
      * - Klick auf Wandknopf → Öffnet externe URL
      */
     import { T, useThrelte, useTask } from '@threlte/core';
-    import { Text, useCursor, HTML } from '@threlte/extras';
+    import { Text, useCursor, HTML, ImageMaterial } from '@threlte/extras';
+    import { BadgeInfo } from 'lucide-svelte';
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
@@ -48,7 +49,6 @@
     const { camera } = useThrelte();
     const { hovering, onPointerEnter, onPointerLeave } = useCursor('pointer');
     
-    let hoveredPosterId = $state<string | null>(null);
     let hoveredButtonId = $state<string | null>(null);
     
     // Distanz-Check wie bei InteractionPillar
@@ -224,7 +224,6 @@
 
     <!-- Poster auf der Wand -->
     {#each posterPositions as { project, x, z, rotY, offsetX }}
-        {@const isHovered = hoveredPosterId === project.id}
         {@const isButtonHovered = hoveredButtonId === project.id}
         {@const displayColor = project.display?.color || project.color || '#3b82f6'}
         {@const titleFontSize = project.title.length > 20 ? 0.28 : project.title.length > 12 ? 0.32 : 0.38}
@@ -232,9 +231,8 @@
         <T.Group position={[x, wallHeight / 2 + 1.5, z]} rotation.y={rotY}>
             <!-- Offset für Position auf der Wand -->
             <T.Group position.x={offsetX}>
-                <!-- Wandknopf unter dem Poster (ersetzt InteractionPillar) -->
-                {#if project.externalUrl}
-                    <T.Group position={[0, -posterSize / 2 - 0.8, 0.25]}>
+                <!-- Wandknopf unter dem Poster - öffnet ProjectCard -->
+                <T.Group position={[0, -posterSize / 2 - 0.8, 0.25]}>
                         <!-- Knopf-Gehäuse (flach an der Wand) -->
                         <T.Mesh rotation.x={Math.PI / 2}>
                             <T.CylinderGeometry args={[0.4, 0.4, 0.15, 8]} />
@@ -249,8 +247,8 @@
                         <T.Mesh 
                             position.z={0.12}
                             onclick={() => { 
-                                if (isNearWall && project.externalUrl) {
-                                    window.open(project.externalUrl, '_blank'); 
+                                if (isNearWall) {
+                                    worldStore.selectProject(project.id); 
                                 }
                             }}
                             onpointerenter={() => { hoveredButtonId = project.id; if (isNearWall) onPointerEnter(); }}
@@ -264,10 +262,10 @@
                             />
                         </T.Mesh>
                         
-                        <!-- Glow-Ring (nur wenn nah) -->
+                        <!-- Glow-Ring (nur wenn nah) - direkt an der Wand -->
                         {#if isNearWall}
-                            <T.Mesh position.z={0.08} rotation.x={Math.PI / 2}>
-                                <T.RingGeometry args={[0.32, 0.45, 16]} />
+                            <T.Mesh position.z={0.01}>
+                                <T.RingGeometry args={[0.35, 0.55, 16]} />
                                 <T.MeshBasicMaterial 
                                     color={displayColor}
                                     transparent
@@ -276,14 +274,14 @@
                             </T.Mesh>
                         {/if}
                         
-                        <!-- Link-Icon (🔗) -->
-                        <Text
-                            text="🔗"
-                            fontSize={0.25}
-                            anchorX="center"
-                            anchorY="middle"
-                            position.z={0.15}
-                        />
+                        <!-- Info-Icon (Lucide BadgeInfo) -->
+                        <HTML position={[0, 0, 0.15]} center transform scale={0.6}>
+                            <BadgeInfo 
+                                size={24} 
+                                strokeWidth={2}
+                                color={isNearWall ? '#ffffff' : '#94a3b8'}
+                            />
+                        </HTML>
                         
                         <!-- Hover-Tooltip (immer bei Hover, unterschiedlicher Text) -->
                         {#if isButtonHovered}
@@ -299,55 +297,74 @@
                                     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
                                     border-bottom: 2px solid {isNearWall ? displayColor : '#475569'};
                                 ">
-                                    {isNearWall ? 'Projekt öffnen →' : 'Näher kommen...'}
+                                    {isNearWall ? 'Details anzeigen' : 'Näher kommen...'}
                                 </div>
                             </HTML>
                         {/if}
                     </T.Group>
-                {/if}
                 
+                <!-- === TEXT-POSTER (Hauptelement) === -->
                 <!-- Poster-Hintergrund (farbiger Rahmen) - QUADRATISCH -->
                 <T.Mesh
                     position.z={0.2}
-                    onpointerenter={() => { hoveredPosterId = project.id; onPointerEnter(); }}
-                    onpointerleave={() => { hoveredPosterId = null; onPointerLeave(); }}
                     onclick={() => handlePosterClick(x, z, rotY, offsetX)}
                 >
                     <T.PlaneGeometry args={[posterSize, posterSize]} />
                     <T.MeshBasicMaterial 
-                        color={isHovered ? '#ffffff' : displayColor}
+                        color={displayColor}
                         transparent
-                        opacity={isHovered ? 1 : 0.9}
+                        opacity={0.9}
                     />
                 </T.Mesh>
 
-                <!-- Poster-Inhalt (dunkel) - QUADRATISCH -->
+                <!-- Poster-Inhalt (dunkel) -->
                 <T.Mesh position.z={0.22}>
                     <T.PlaneGeometry args={[posterSize * 0.9, posterSize * 0.9]} />
-                    <T.MeshBasicMaterial color={isHovered ? '#1e293b' : '#0f172a'} />
+                    <T.MeshBasicMaterial color="#0f172a" />
                 </T.Mesh>
 
-                <!-- Projekt-Titel - dynamische Schriftgröße -->
+                <!-- Projekt-Titel -->
                 <Text
                     text={project.title}
                     fontSize={titleFontSize}
                     anchorX="center"
                     anchorY="top"
-                    position={[0, posterSize * 0.35, 0.25]}
+                    position={[0, posterSize * 0.38, 0.25]}
                     color="#ffffff"
                     fontWeight="bold"
-                    maxWidth={posterSize * 0.75}
+                    maxWidth={posterSize * 0.8}
                     textAlign="center"
                 />
 
-                <!-- Slogan (falls vorhanden) -->
+                <!-- Trennlinie unter dem Titel -->
+                <T.Mesh position={[0, posterSize * 0.18, 0.24]}>
+                    <T.PlaneGeometry args={[posterSize * 0.6, 0.02]} />
+                    <T.MeshBasicMaterial color={displayColor} />
+                </T.Mesh>
+
+                <!-- Beschreibung (shortTeaser) -->
+                {#if project.shortTeaser}
+                    <Text
+                        text={project.shortTeaser}
+                        fontSize={0.18}
+                        anchorX="center"
+                        anchorY="top"
+                        position={[0, posterSize * 0.12, 0.25]}
+                        color="#cbd5e1"
+                        maxWidth={posterSize * 0.75}
+                        textAlign="center"
+                        lineHeight={1.4}
+                    />
+                {/if}
+
+                <!-- Slogan (falls vorhanden) - unten -->
                 {#if project.display?.slogan}
                     <Text
                         text={project.display.slogan}
-                        fontSize={0.22}
+                        fontSize={0.2}
                         anchorX="center"
-                        anchorY="middle"
-                        position={[0, -0.2, 0.25]}
+                        anchorY="bottom"
+                        position={[0, -posterSize * 0.32, 0.25]}
                         color={displayColor}
                         maxWidth={posterSize * 0.75}
                         textAlign="center"
@@ -355,41 +372,36 @@
                     />
                 {/if}
 
-                <!-- "Mehr erfahren" Link-Hinweis -->
-                <Text
-                    text="→ Mehr erfahren"
-                    fontSize={0.18}
-                    anchorX="center"
-                    anchorY="bottom"
-                    position={[0, -posterSize * 0.38, 0.25]}
-                    color={isHovered ? '#ffffff' : '#64748b'}
-                />
-
-                <!-- Hover-Tooltip rechts neben dem Poster -->
-                {#if isHovered}
-                    <HTML position={[posterSize * 0.7, posterSize * 0.3, 0.3]} center={false}>
-                        <div style="
-                            background: #ffffff;
-                            color: #0f172a;
-                            padding: 16px 20px;
-                            border-radius: 8px;
-                            width: 220px;
-                            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-                            border-left: 4px solid {displayColor};
-                        ">
-                            <h3 style="font-weight: 700; font-size: 0.95rem; margin: 0 0 8px 0; color: #0f172a;">
-                                {project.title}
-                            </h3>
-                            {#if project.shortTeaser}
-                                <p style="font-size: 0.8rem; color: #374151; line-height: 1.5; margin: 0 0 10px 0;">
-                                    {project.shortTeaser}
-                                </p>
-                            {/if}
-                            <p style="font-size: 0.7rem; color: {displayColor}; margin: 0; font-weight: 500;">
-                                Klicken zum Heranfahren →
-                            </p>
-                        </div>
-                    </HTML>
+                <!-- === GROẞFLÄCHIGES POSTER-BILD NEBEN DEM TEXT-POSTER === -->
+                {#if project.display?.posterImage}
+                    {@const imageWidth = posterSize * 1.2}
+                    {@const imageHeight = posterSize * 1.8}
+                    
+                    <!-- Poster-Bild rechts neben dem Text-Poster -->
+                    <T.Group position.x={posterSize * 0.5 + imageWidth * 0.5 + 0.3}>
+                        <!-- Rahmen für Poster-Bild -->
+                        <T.Mesh position.z={0.18}>
+                            <T.PlaneGeometry args={[imageWidth + 0.2, imageHeight + 0.2]} />
+                            <T.MeshBasicMaterial 
+                                color={displayColor}
+                                transparent
+                                opacity={0.8}
+                            />
+                        </T.Mesh>
+                        
+                        <!-- Poster-Bild (hochformat 800x1200) -->
+                        <T.Mesh 
+                            position.z={0.2}
+                            onclick={() => handlePosterClick(x, z, rotY, offsetX)}
+                        >
+                            <T.PlaneGeometry args={[imageWidth, imageHeight]} />
+                            <ImageMaterial 
+                                url={project.display.posterImage}
+                                transparent
+                                opacity={0.95}
+                            />
+                        </T.Mesh>
+                    </T.Group>
                 {/if}
             </T.Group>
         </T.Group>

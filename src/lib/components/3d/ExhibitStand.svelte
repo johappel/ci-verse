@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { T, useTask } from "@threlte/core";
-    import { HTML } from "@threlte/extras";
+    import { T } from "@threlte/core";
+    import { HTML, ImageMaterial, Text } from "@threlte/extras";
     import type { ProjectData } from "$lib/types/project";
     import { worldStore } from "$lib/logic/store.svelte";
     import { Spring } from "svelte/motion";
@@ -11,6 +11,12 @@
     }
 
     let { project, position }: Props = $props();
+
+    // Display-Daten
+    const posterUrl = project.display?.posterImage;
+    const screenshotUrl = project.display?.screenshotUrl;
+    const displayColor = project.display?.color || project.color || '#3b82f6';
+    const slogan = project.display?.slogan;
 
     // Zustandsableitungen
     let isHovered = $derived(worldStore.state.hoveredId === project.id);
@@ -54,94 +60,150 @@
         <T.MeshStandardMaterial color="#d4d4d8" roughness={0.7} />
     </T.Mesh>
 
-    <!-- Haupt-Panel (Vorne) mit Screenshot -->
+    <!-- Messestand mit Rollup-Banner -->
     <T.Group scale.y={scaleY.current}>
-        <!-- Hinterwand - INTERAKTIV -->
-        <T.Mesh 
-            position={[0, 2.5, -2.5]} 
-            castShadow
-            onclick={handleClick}
-            onpointerenter={handlePointerEnter}
-            onpointerleave={handlePointerLeave}
-        >
-            <T.BoxGeometry args={[5.5, 4, 0.2]} />
-            <T.MeshStandardMaterial
-                color={project.color || "#ffffff"}
-                emissive={project.color || "#ffffff"}
-                emissiveIntensity={emissiveIntensity.current}
-                transparent
-                opacity={isDimmed ? 0.3 : 1}
-            />
-        </T.Mesh>
-
-        <!-- Vorderes Display-Panel (Screenshot) - INTERAKTIV -->
-        <T.Mesh 
-            position={[0, 2.5, -2.3]} 
-            castShadow
-            onclick={handleClick}
-            onpointerenter={handlePointerEnter}
-            onpointerleave={handlePointerLeave}
-        >
-            <T.PlaneGeometry args={[5, 3.5]} />
-            <T.MeshStandardMaterial
-                color="#ffffff"
-                transparent
-                opacity={isDimmed ? 0.25 : 0.95}
-            />
-        </T.Mesh>
-
-        <!-- Linkes Seiten-Panel - INTERAKTIV -->
+        
+        <!-- === ROLLUP-BANNER (Hauptelement) === -->
+        <T.Group position={[0, 0, -2.5]}>
+            <!-- Rollup-Ständer (Metall-Basis) -->
+            <T.Mesh position.y={0.1}>
+                <T.BoxGeometry args={[2.8, 0.2, 0.4]} />
+                <T.MeshStandardMaterial color="#374151" metalness={0.7} roughness={0.3} />
+            </T.Mesh>
+            
+            <!-- Rollup-Banner mit Poster-Bild -->
+            <T.Mesh 
+                position.y={2.8}
+                onclick={handleClick}
+                onpointerenter={handlePointerEnter}
+                onpointerleave={handlePointerLeave}
+            >
+                <!-- Banner-Größe: 2.5 breit x 5 hoch (typisches Rollup-Format) -->
+                <T.PlaneGeometry args={[2.5, 5]} />
+                {#if posterUrl}
+                    <ImageMaterial 
+                        url={posterUrl}
+                        transparent
+                        opacity={isDimmed ? 0.4 : 1}
+                    />
+                {:else}
+                    <!-- Fallback: Farbiger Hintergrund -->
+                    <T.MeshStandardMaterial
+                        color={displayColor}
+                        emissive={displayColor}
+                        emissiveIntensity={emissiveIntensity.current}
+                        transparent
+                        opacity={isDimmed ? 0.4 : 1}
+                    />
+                {/if}
+            </T.Mesh>
+            
+            <!-- Rollup-Rahmen oben -->
+            <T.Mesh position.y={5.35}>
+                <T.BoxGeometry args={[2.7, 0.1, 0.05]} />
+                <T.MeshStandardMaterial color="#374151" metalness={0.7} roughness={0.3} />
+            </T.Mesh>
+            
+            <!-- Stützstange hinten -->
+            <T.Mesh position={[0, 2.7, -0.15]} rotation.x={Math.PI * 0.03}>
+                <T.CylinderGeometry args={[0.02, 0.02, 5.2, 8]} />
+                <T.MeshStandardMaterial color="#6b7280" metalness={0.8} roughness={0.2} />
+            </T.Mesh>
+        </T.Group>
+        
+        <!-- === HINTERWAND MIT SCREENSHOT === -->
+        <T.Group position={[0, 0, -3.2]}>
+            <!-- Wand-Rahmen -->
+            <T.Mesh position.y={2.5}>
+                <T.BoxGeometry args={[6, 4.5, 0.15]} />
+                <T.MeshStandardMaterial
+                    color="#1e293b"
+                    transparent
+                    opacity={isDimmed ? 0.3 : 0.95}
+                />
+            </T.Mesh>
+            
+            <!-- Screenshot-Display (wenn vorhanden) -->
+            {#if screenshotUrl}
+                <T.Mesh 
+                    position={[0, 2.5, 0.1]}
+                    onclick={handleClick}
+                    onpointerenter={handlePointerEnter}
+                    onpointerleave={handlePointerLeave}
+                >
+                    <T.PlaneGeometry args={[5.5, 4]} />
+                    <ImageMaterial 
+                        url={screenshotUrl}
+                        transparent
+                        opacity={isDimmed ? 0.3 : 0.95}
+                    />
+                </T.Mesh>
+            {/if}
+        </T.Group>
+        
+        <!-- === SEITEN-PANELS === -->
+        <!-- Linkes Panel mit Projekt-Info -->
         <T.Mesh
-            position={[-2.8, 2.5, -0.5]}
+            position={[-3.2, 2.5, -1]}
             rotation.y={Math.PI / 2}
-            castShadow
             onclick={handleClick}
             onpointerenter={handlePointerEnter}
             onpointerleave={handlePointerLeave}
         >
-            <T.PlaneGeometry args={[4, 3.5]} />
+            <T.PlaneGeometry args={[4, 4]} />
             <T.MeshStandardMaterial
-                color="#f5f5f5"
+                color={displayColor}
                 transparent
-                opacity={isDimmed ? 0.2 : 0.8}
+                opacity={isDimmed ? 0.2 : 0.3}
             />
         </T.Mesh>
 
-        <!-- Rechtes Seiten-Panel - INTERAKTIV -->
+        <!-- Rechtes Panel -->
         <T.Mesh
-            position={[2.8, 2.5, -0.5]}
+            position={[3.2, 2.5, -1]}
             rotation.y={-Math.PI / 2}
-            castShadow
             onclick={handleClick}
             onpointerenter={handlePointerEnter}
             onpointerleave={handlePointerLeave}
         >
-            <T.PlaneGeometry args={[4, 3.5]} />
+            <T.PlaneGeometry args={[4, 4]} />
             <T.MeshStandardMaterial
-                color="#f5f5f5"
+                color={displayColor}
                 transparent
-                opacity={isDimmed ? 0.2 : 0.8}
+                opacity={isDimmed ? 0.2 : 0.3}
             />
         </T.Mesh>
-
-        <!-- Rahmen-Streben (Holz-Optik) -->
-        <!-- Linke Säule -->
-        <T.Mesh position={[-2.7, 2, -2.5]} castShadow>
-            <T.BoxGeometry args={[0.15, 4, 0.15]} />
-            <T.MeshStandardMaterial color="#8b5a3c" roughness={0.8} />
-        </T.Mesh>
-
-        <!-- Rechte Säule -->
-        <T.Mesh position={[2.7, 2, -2.5]} castShadow>
-            <T.BoxGeometry args={[0.15, 4, 0.15]} />
-            <T.MeshStandardMaterial color="#8b5a3c" roughness={0.8} />
-        </T.Mesh>
-
-        <!-- Obere Querstrebe -->
-        <T.Mesh position={[0, 4.5, -2.5]} castShadow>
-            <T.BoxGeometry args={[5.5, 0.15, 0.15]} />
-            <T.MeshStandardMaterial color="#8b5a3c" roughness={0.8} />
-        </T.Mesh>
+        
+        <!-- === TEXT-ELEMENTE === -->
+        <!-- Projekt-Titel auf dem Boden vor dem Rollup -->
+        <Text
+            text={project.title}
+            fontSize={0.35}
+            anchorX="center"
+            anchorY="middle"
+            position={[0, 0.15, 1]}
+            rotation.x={-Math.PI / 2}
+            color="#ffffff"
+            outlineWidth={0.02}
+            outlineColor="#000000"
+            maxWidth={5}
+            textAlign="center"
+        />
+        
+        <!-- Slogan über dem Rollup -->
+        {#if slogan}
+            <Text
+                text={slogan}
+                fontSize={0.25}
+                anchorX="center"
+                anchorY="bottom"
+                position={[0, 5.6, -2.5]}
+                color={displayColor}
+                fontStyle="italic"
+                maxWidth={3}
+                textAlign="center"
+            />
+        {/if}
     </T.Group>
 
     <!-- Hover-Label (HTML Overlay) -->
