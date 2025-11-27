@@ -6,10 +6,23 @@
     import { initWorldStore } from "$lib/logic/store.svelte";
     import { mockProjects } from "$lib/data/mockProjects";
     import { onMount } from "svelte";
+    import { fade } from "svelte/transition";
 
     // Initialisiere Store sofort
     const store = initWorldStore(mockProjects);
-    let ready = $state(true); // SOFORT rendern!
+    
+    // Loading State (von Scene gemeldet)
+    let isLoading = $state(true);
+    let loadingProgress = $state(0);
+    let loadingMessage = $state('Starte...');
+
+    function handleLoadingUpdate(data: { progress: number; message: string; done: boolean }) {
+        loadingProgress = data.progress;
+        loadingMessage = data.message;
+        if (data.done) {
+            isLoading = false;
+        }
+    }
 
     // URL-Parameter beim Mount lesen
     onMount(() => {
@@ -46,11 +59,60 @@
 </svelte:head>
 
 <main class="w-screen h-screen overflow-hidden relative">
-    {#if ready}
-        <!-- 3D Canvas (Vollbild) -->
-        <Scene />
+    <!-- Loading Overlay - ZUERST, damit es über allem liegt -->
+    {#if isLoading}
+        <div 
+            style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgb(15, 23, 42);
+                z-index: 99999;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            "
+        >
+            <!-- Logo/Titel -->
+            <div style="margin-bottom: 2rem; text-align: center;">
+                <h1 style="font-size: 2.25rem; font-weight: bold; color: white; margin-bottom: 0.5rem;">
+                    Comenius <span style="color: #22d3ee;">Orbital</span>
+                </h1>
+                <p style="color: #cbd5e1;">Bildungslandschaft wird geladen...</p>
+            </div>
+            
+            <!-- Fortschrittsbalken -->
+            <div style="width: 20rem; margin-bottom: 1rem;">
+                <div style="height: 0.5rem; background: #334155; border-radius: 9999px; overflow: hidden;">
+                    <div 
+                        style="
+                            height: 100%;
+                            background: linear-gradient(to right, #3b82f6, #22d3ee);
+                            transition: width 150ms;
+                            width: {loadingProgress}%;
+                        "
+                    ></div>
+                </div>
+                <p style="text-align: right; font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">
+                    {Math.round(loadingProgress)}%
+                </p>
+            </div>
+            
+            <!-- Status-Text -->
+            <p style="color: white; font-size: 0.875rem;">{loadingMessage}</p>
+        </div>
+    {/if}
 
-        <!-- UI Overlays -->
+    <!-- 3D Canvas (Vollbild) - immer rendern -->
+    <Scene onLoadingUpdate={handleLoadingUpdate} />
+
+    <!-- UI Overlays (nur wenn geladen) -->
+    {#if !isLoading}
         <ProjectCard />
         <FilterBar />
 
@@ -62,18 +124,6 @@
             <p class="text-sm text-white/80 drop-shadow">
                 Entdecke die Bildungslandschaft
             </p>
-        </div>
-    {:else}
-        <!-- Loading State -->
-        <div
-            class="absolute inset-0 flex items-center justify-center bg-gray-100"
-        >
-            <div class="text-center">
-                <div class="text-4xl mb-4">🌐</div>
-                <p class="text-xl font-semibold text-gray-700">
-                    Lade Comenius Orbital...
-                </p>
-            </div>
         </div>
     {/if}
 </main>

@@ -5,12 +5,38 @@
     import { platforms } from '$lib/logic/platforms';
     import { CylinderGeometry } from 'three';
 
-    // Rotationswinkel für Animation - nur wenn Portal sichtbar (isOnS)
+    // Zeit-basierte Animation (unabhängig von Frame-Rate)
+    let animationStartTime = $state(0);
     let rotationY = $state(0);
+    let pulseIntensity = $state(0);
     
-    useTask((delta) => {
-        if (isOnS) {
-            rotationY += delta * 0.3; // Langsame Rotation des Rings
+    // Starte Animation-Timer wenn Transport beginnt
+    $effect(() => {
+        if (isTransporting && animationStartTime === 0) {
+            animationStartTime = performance.now();
+        }
+        if (!isTransporting && !isOnS) {
+            animationStartTime = 0;
+        }
+    });
+    
+    // Animation basierend auf absoluter Zeit (nicht delta)
+    useTask(() => {
+        const now = performance.now();
+        
+        if (isTransporting) {
+            // Zeit seit Animation-Start
+            const elapsed = (now - animationStartTime) / 1000; // Sekunden
+            
+            // Schnelle Rotation während Transport
+            rotationY = elapsed * 2.0;
+            
+            // Puls basierend auf Zeit
+            pulseIntensity = 0.5 + Math.sin(elapsed * 8) * 0.5;
+        } else if (isOnS) {
+            // Normale langsame Rotation
+            rotationY = (now / 1000) * 0.3;
+            pulseIntensity = 0;
         }
     });
 
@@ -36,12 +62,25 @@
     // Ist der User gerade auf S?
     let isOnS = $derived(worldStore.state.currentPlatform === 'S');
     
+    // Ist Transport aktiv? (Animation während Flug)
+    let isTransporting = $derived(worldStore.state.isTransporting && worldStore.state.currentPlatform === 'S');
+    
+    // Soll Animation laufen? (Normal auf S, schnell beim Transport)
+    let shouldAnimate = $derived(isTransporting);
+    
+    // Ziel-Plattform für Anzeige
+    let targetPlatform = $derived(
+        worldStore.state.transportTarget 
+            ? platforms[worldStore.state.transportTarget] 
+            : null
+    );
+    
     // Hexagonale Button-Geometrie (6-seitiger flacher Zylinder)
     const hexButtonGeometry = new CylinderGeometry(1.3, 1.3, 0.5, 6);
 </script>
 
-<!-- Transport-Portal nur sichtbar wenn auf S-Plattform -->
-{#if isOnS}
+<!-- Transport-Portal nur sichtbar wenn auf S-Plattform ODER beim Aufladen/Transport -->
+{#if isOnS || shouldAnimate}
     <T.Group position={[0, 2, 0]}>
         <!-- Basis-Plattform (rund, flach) - auf der Plattform-Oberfläche -->
         <T.Mesh position.y={0.1} rotation.x={-Math.PI / 2}>
@@ -53,26 +92,64 @@
             />
         </T.Mesh>
 
-        <!-- Leuchtender Ring um die Basis -->
+        <!-- Leuchtender Ring um die Basis - pulsiert beim Aufladen/Transport -->
         <T.Mesh position.y={0.05} rotation.x={-Math.PI / 2}>
             <T.RingGeometry args={[7.5, 8, 32]} />
-            <T.MeshBasicMaterial color="#60a5fa" transparent opacity={0.8} />
+            <T.MeshBasicMaterial 
+                color={shouldAnimate && targetPlatform ? targetPlatform.glowColor : "#60a5fa"} 
+                transparent 
+                opacity={shouldAnimate ? 0.5 + pulseIntensity * 0.5 : 0.8} 
+            />
         </T.Mesh>
 
-        <!-- Holografischer Ring (rotierend) -->
+        <!-- Holografischer Ring (rotierend) - mehrere Ringe beim Aufladen/Transport -->
         <T.Group rotation.y={rotationY}>
             <T.Mesh position.y={3} rotation.x={Math.PI / 2}>
                 <T.TorusGeometry args={[5, 0.08, 8, 32]} />
-                <T.MeshBasicMaterial color="#60a5fa" transparent opacity={0.6} />
+                <T.MeshBasicMaterial 
+                    color={shouldAnimate && targetPlatform ? targetPlatform.glowColor : "#60a5fa"} 
+                    transparent 
+                    opacity={shouldAnimate ? 0.8 : 0.6} 
+                />
             </T.Mesh>
         </T.Group>
+        
+        <!-- Zweiter Ring (gegenläufig) - nur beim Aufladen/Transport -->
+        {#if shouldAnimate}
+            <T.Group rotation.y={-rotationY * 1.5}>
+                <T.Mesh position.y={3.5} rotation.x={Math.PI / 2}>
+                    <T.TorusGeometry args={[4, 0.06, 8, 32]} />
+                    <T.MeshBasicMaterial 
+                        color={targetPlatform?.glowColor || "#60a5fa"} 
+                        transparent 
+                        opacity={0.4 + pulseIntensity * 0.4} 
+                    />
+                </T.Mesh>
+            </T.Group>
+            <!-- Dritter Ring (noch schneller) -->
+            <T.Group rotation.y={rotationY * 2}>
+                <T.Mesh position.y={2.5} rotation.x={Math.PI / 2}>
+                    <T.TorusGeometry args={[6, 0.05, 8, 32]} />
+                    <T.MeshBasicMaterial 
+                        color={targetPlatform?.glowColor || "#60a5fa"} 
+                        transparent 
+                        opacity={0.3 + pulseIntensity * 0.3} 
+                    />
+                </T.Mesh>
+            </T.Group>
+        {/if}
 
-        <!-- Zentraler Leuchtpunkt -->
-        <T.Mesh position.y={3}>
+        <!-- Zentraler Leuchtpunkt - größer und heller beim Aufladen/Transport -->
+        <T.Mesh position.y={3} scale={shouldAnimate ? 1 + pulseIntensity * 0.5 : 1}>
             <T.SphereGeometry args={[0.4, 16, 16]} />
-            <T.MeshBasicMaterial color="#ffffff" />
+            <T.MeshBasicMaterial color={shouldAnimate && targetPlatform ? targetPlatform.glowColor : "#ffffff"} />
         </T.Mesh>
-        <T.PointLight position={[0, 3, 0]} color="#60a5fa" intensity={20} distance={30} />
+        <T.PointLight 
+            position={[0, 3, 0]} 
+            color={shouldAnimate && targetPlatform ? targetPlatform.glowColor : "#60a5fa"} 
+            intensity={shouldAnimate ? 40 + pulseIntensity * 40 : 20} 
+            distance={shouldAnimate ? 50 : 30} 
+        />
 
         <!-- B-Plattform Buttons (Bildung - vordere Reihe) -->
         <T.Group position.y={0.5}>
@@ -154,17 +231,29 @@
             {/each}
         </T.Group>
 
-        <!-- Portal-Titel über der Konsole -->
+        <!-- Portal-Titel über der Konsole - zeigt Ziel beim Transport -->
         <Billboard position={[0, 5, 0]}>
-            <Text
-                text="Transport"
-                color="#60a5fa"
-                fontSize={0.8}
-                anchorX="center"
-                anchorY="middle"
-                outlineWidth={0.04}
-                outlineColor="#1e1b4b"
-            />
+            {#if isTransporting && targetPlatform}
+                <Text
+                    text={`→ ${targetPlatform.name}`}
+                    color={targetPlatform.glowColor}
+                    fontSize={0.9}
+                    anchorX="center"
+                    anchorY="middle"
+                    outlineWidth={0.04}
+                    outlineColor="#1e1b4b"
+                />
+            {:else}
+                <Text
+                    text="Transport"
+                    color="#60a5fa"
+                    fontSize={0.8}
+                    anchorX="center"
+                    anchorY="middle"
+                    outlineWidth={0.04}
+                    outlineColor="#1e1b4b"
+                />
+            {/if}
         </Billboard>
     </T.Group>
 {/if}

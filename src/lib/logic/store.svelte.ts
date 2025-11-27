@@ -94,7 +94,7 @@ export class WorldStore {
         }
     }
 
-    // NEU: Transport-System
+    // NEU: Transport-System (vereinfacht - alle Plattformen sind vorgeladen)
     startTransport(targetId: string) {
         if (this.state.isTransporting) return; // Bereits unterwegs
         if (this.state.currentPlatform === targetId) return; // Schon dort

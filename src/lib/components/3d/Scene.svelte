@@ -8,8 +8,17 @@
 	import { worldStore } from '$lib/logic/store.svelte';
 	import { platforms, getCameraY } from '$lib/logic/platforms';
 
+	// Props: Callback für Loading-Updates
+	let { onLoadingUpdate }: { 
+		onLoadingUpdate?: (data: { progress: number; message: string; done: boolean }) => void 
+	} = $props();
+
 	// CameraControls Referenz für Transport-Animation
 	let cameraControls = $state<CameraControlsRef>();
+
+	// Preload-Status (intern)
+	let isPreloading = $state(true);
+	let tourProgress = $state(0);
 
 	// Startposition: Marktplatz-Landepunkt
 	const startPlatform = platforms['S'];
@@ -24,20 +33,70 @@
 	export function getCameraControls() {
 		return cameraControls;
 	}
+	
+	// Helper: Update an Parent senden
+	function updateLoading(progress: number, message: string, done = false) {
+		onLoadingUpdate?.({ progress, message, done });
+	}
+	
+	// Sofort beim Mount den ersten Update senden
+	$effect(() => {
+		// Sende sofort initialen Status
+		updateLoading(5, 'Initialisiere 3D-Szene...');
+	});
 
-	// Initial-Setup: Kamera richtig ausrichten beim Start
+	// Preload-Rundflug
+	async function runPreloadFlight() {
+		if (!cameraControls) return;
+		
+		// === PHASE 1: Start ===
+		updateLoading(10, 'Starte...');
+		await new Promise(resolve => setTimeout(resolve, 200));
+		
+		// === PHASE 2: Tour zu Q2 ===
+		updateLoading(20, 'Fliege zu Europa...');
+		
+		cameraControls.smoothTime = 1.5;
+		worldStore.startTransport('Q2');
+		
+		// Progress animieren während Flug
+		for (let i = 0; i <= 25; i++) {
+			tourProgress = i / 50;
+			updateLoading(20 + (i * 2), 'Fliege zu Europa...');
+			await new Promise(resolve => setTimeout(resolve, 100));
+		}
+		
+		// === PHASE 3: Zurück zum Marktplatz ===
+		updateLoading(70, 'Zurück zum Marktplatz...');
+		
+		worldStore.startTransport('S');
+		
+		// Progress animieren während Rückflug
+		for (let i = 25; i <= 50; i++) {
+			tourProgress = i / 50;
+			updateLoading(70 + ((i - 25) * 1.2), 'Zurück zum Marktplatz...');
+			await new Promise(resolve => setTimeout(resolve, 60));
+		}
+		
+		// === FERTIG ===
+		updateLoading(100, 'Bereit!', true);
+		isPreloading = false;
+	}
+
+	// Initial-Setup: Starte Preload-Flug SOFORT
 	let hasInitialized = $state(false);
 	$effect(() => {
 		if (cameraControls && !hasInitialized) {
 			hasInitialized = true;
-			// Setze initiale Kamera-Ausrichtung zur Plattform-Mitte
+			// Setze Startposition
+			const q2 = platforms['Q2'];
 			cameraControls.setLookAt(
-				initialCamPos[0], initialCamPos[1], initialCamPos[2],
-				startPlatform.x + startLanding.lookAtOffset[0],
-				startPlatform.y + startLanding.lookAtOffset[1],
-				startPlatform.z + startLanding.lookAtOffset[2],
-				false // Nicht animiert beim Start
+				0, 80, 60,
+				q2.x, q2.y, q2.z,
+				false
 			);
+			// Starte SOFORT
+			runPreloadFlight();
 		}
 	});
 
@@ -161,18 +220,17 @@
 <div class="w-screen h-screen" style="position: fixed; top: 0; left: 0;">
 	<Canvas>
 		<!-- Kamera mit CameraControls für smooth Transport -->
-		<!-- Startposition: Marktplatz-Landepunkt -->
-		<T.PerspectiveCamera makeDefault position={initialCamPos} fov={60} near={1} far={2000}>
+		<T.PerspectiveCamera makeDefault position={initialCamPos} fov={80} near={1} far={2000}>
 			<CameraControls 
 				bind:ref={cameraControls}
-				smoothTime={2.0}
+				smoothTime={3.0}
 				draggingSmoothTime={0.5}
-				maxPolarAngle={Math.PI / 2.1}
+				maxPolarAngle={Math.PI / 2}
 				minPolarAngle={Math.PI / 8}
 				maxDistance={400}
 				minDistance={8}
 				azimuthRotateSpeed={0.5}
-				polarRotateSpeed={0.5}
+				polarRotateSpeed={0.9}
 				dollySpeed={0.5}
 			/>
 		</T.PerspectiveCamera>

@@ -51,6 +51,15 @@
 
     // Ist diese Plattform die aktuelle?
     let isCurrentPlatform = $derived(worldStore.state.currentPlatform === platform.id);
+    
+    // Ist diese Plattform das Transport-Ziel?
+    let isTransportTarget = $derived(worldStore.state.transportTarget === platform.id);
+    
+    // ALLE Plattformen rendern immer ihre Inhalte (für flüssige Übergänge)
+    let shouldRenderContent = true;
+    
+    // Spotlights nur auf aktueller ODER Ziel-Plattform (WebGL-Limit: max 2×6=12 Spots)
+    let shouldRenderSpotlights = $derived(isCurrentPlatform || isTransportTarget);
 
     // Drag-Detection: Unterscheide zwischen Klick und Kamera-Drehen
     let pointerDownPos = $state<{ x: number; y: number } | null>(null);
@@ -197,8 +206,8 @@
             distance={20}
             decay={2}
         />
-        <!-- Tooltip bei Hover (nur wenn nicht Marktplatz) -->
-        {#if platform.id !== 'S'}
+        <!-- Tooltip bei Hover (nur wenn nicht Marktplatz und gehovered) -->
+        {#if platform.id !== 'S' && $hovering}
             <Billboard position={[0, 2.5, 0]}>
                 <Text
                     text="→ Marktplatz"
@@ -251,10 +260,13 @@
     </Billboard>
 
     <!-- ============================================ -->
-    <!-- PLATTFORM-INHALTE (nur für B- und Q-Plattformen) -->
+    <!-- PLATTFORM-INHALTE (nur für aktuelle/Ziel-Plattform!) -->
+    <!-- Inhalte werden gerendert wenn: -->
+    <!-- - Wir auf dieser Plattform sind (und nicht wegtransportieren) -->
+    <!-- - ODER wir zu dieser Plattform transportieren (Vorrendern) -->
     <!-- ============================================ -->
     
-    {#if platformContent && platform.id !== 'S'}
+    {#if platformContent && platform.id !== 'S' && shouldRenderContent}
         <!-- Info-Hexagon im Zentrum -->
         {#if platformContent.aspects.length > 0}
             <InfoHexagon
@@ -298,15 +310,15 @@
                 platformPosition={[platform.x, platform.y, platform.z]}
             />
         {/each}
-    {:else}
+    {:else if shouldRenderContent}
         <!-- Fallback: Alte ExhibitStand-Komponente für Projekte ohne PlatformContent -->
         {#each projects as project, i}
             <ExhibitStand {project} position={[standPositions[i]?.x ?? 0, 2, standPositions[i]?.z ?? 0]} />
         {/each}
     {/if}
 
-    <!-- 6 Spotlights wie in einer Messehalle (nur für aktive Plattform) -->
-    {#if isCurrentPlatform}
+    <!-- 6 Spotlights wie in einer Messehalle (aktuelle + Ziel-Plattform) -->
+    {#if shouldRenderSpotlights}
         {#each spotlightPositions as spot, i}
             <!-- Target-Objekt direkt unter dem Spot (leicht zur Mitte versetzt) -->
             <T.Object3D 
@@ -350,8 +362,8 @@
         </T.Mesh>
     {/if}
 
-    <!-- Dezentes Ambient-Licht für nicht-aktive Plattformen -->
-    {#if !isCurrentPlatform}
+    <!-- Dezentes Ambient-Licht für Plattformen ohne Spotlights -->
+    {#if !shouldRenderSpotlights}
         <T.PointLight
             position={[0, 10, 0]}
             color={platform.glowColor}
