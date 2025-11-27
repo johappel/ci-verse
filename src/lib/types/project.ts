@@ -23,6 +23,7 @@ export interface StaffMember {
 export interface ProjectDisplay {
     slogan: string;
     posterImage?: string;      // Großes Bild für Messewand
+    posterImageFormat?: 'portrait' | 'landscape'; // Bildformat (default: portrait)
     logoUrl?: string;          // Projekt-Logo
     color: string;             // Primärfarbe
     screenshotUrl?: string;    // Website-Screenshot

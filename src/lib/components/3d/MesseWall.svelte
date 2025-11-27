@@ -117,21 +117,39 @@
 
     // Poster auf die Wände verteilen (mehrere pro Wand möglich)
     // Berechne wie viele Poster pro Wand und deren Position
-    const posterSize = 4; // Quadratische Poster
-    const postersPerWall = 3; // Max 3 Poster pro Wand
-    const posterSpacing = hexEdgeLength * 0.9 / postersPerWall; // Abstand zwischen Postern
+    // NEU: Poster + Bild nebeneinander = ca. 7.8 Einheiten breit
+    const posterSize = 4; // Quadratische Text-Poster
+    const imageWidth = posterSize * 0.9; // Bildbreite (3.6)
+    const combinedPosterWidth = posterSize + imageWidth + 0.4; // Text + Bild + Gap ≈ 8
+    
+    // Bei wenigen Postern: 1 Poster pro Wand, mittig platziert
+    // Bei 3+ Postern: maximal 2 pro Wand (hexEdgeLength ≈ 35-45)
+    const maxPostersPerWall = Math.floor(hexEdgeLength / (combinedPosterWidth + 2)); // +2 für Abstand
+    const postersPerWall = Math.max(1, Math.min(maxPostersPerWall, 2)); // Max 2 pro Wand
+    const posterSpacing = combinedPosterWidth + 3; // Abstand zwischen Postern
     
     const posterPositions = $derived(posters.map((poster, i) => {
         const wallIndex = Math.floor(i / postersPerWall) % wallCount;
-        const positionOnWall = i % postersPerWall; // 0, 1, oder 2
+        const positionOnWall = i % postersPerWall; // 0 oder 1
         const wall = wallPositions[wallIndex];
         
-        // Horizontale Offset-Position auf der Wand (-1, 0, 1) * spacing
-        const totalPostersOnThisWall = Math.min(
-            posters.filter((_, idx) => Math.floor(idx / postersPerWall) % wallCount === wallIndex).length,
-            postersPerWall
-        );
-        const offsetX = (positionOnWall - (totalPostersOnThisWall - 1) / 2) * posterSpacing;
+        // Wie viele Poster sind tatsächlich auf dieser Wand?
+        const postersOnThisWall = posters.filter((_, idx) => 
+            Math.floor(idx / postersPerWall) % wallCount === wallIndex
+        ).length;
+        const actualPostersOnWall = Math.min(postersOnThisWall, postersPerWall);
+        
+        // Zentriere die Poster auf der Wand
+        // Bei 1 Poster: mittig (offsetX = 0)
+        // Bei 2 Postern: links und rechts von der Mitte
+        let offsetX: number;
+        if (actualPostersOnWall === 1) {
+            offsetX = 0; // Einzelnes Poster mittig
+        } else {
+            // Mehrere Poster: gleichmäßig verteilen
+            const startOffset = -((actualPostersOnWall - 1) * posterSpacing) / 2;
+            offsetX = startOffset + positionOnWall * posterSpacing;
+        }
         
         return {
             ...poster,
@@ -386,36 +404,67 @@
                     />
                 {/if}
 
-                <!-- === GROẞFLÄCHIGES POSTER-BILD NEBEN DEM TEXT-POSTER === -->
+                <!-- === GROẞFLÄCHIGES POSTER-BILD === -->
+                <!-- Portrait: rechts neben dem Text-Poster -->
+                <!-- Landscape: unter dem Text-Poster -->
                 {#if project.display?.posterImage}
-                    {@const imageWidth = posterSize * 1.2}
-                    {@const imageHeight = posterSize * 1.8}
+                    {@const isLandscape = project.display?.posterImageFormat === 'landscape'}
+                    {@const imageWidth = isLandscape ? posterSize * 1.6 : posterSize * 0.9}
+                    {@const imageHeight = isLandscape ? posterSize * 0.9 : posterSize * 1.35}
                     
-                    <!-- Poster-Bild rechts neben dem Text-Poster -->
-                    <T.Group position.x={posterSize * 0.5 + imageWidth * 0.5 + 0.3}>
-                        <!-- Rahmen für Poster-Bild -->
-                        <T.Mesh position.z={0.18}>
-                            <T.PlaneGeometry args={[imageWidth + 0.2, imageHeight + 0.2]} />
-                            <T.MeshBasicMaterial 
-                                color={displayColor}
-                                transparent
-                                opacity={0.8}
-                            />
-                        </T.Mesh>
-                        
-                        <!-- Poster-Bild (hochformat 800x1200) -->
-                        <T.Mesh 
-                            position.z={0.2}
-                            onclick={() => handlePosterClick(x, z, rotY, offsetX)}
-                        >
-                            <T.PlaneGeometry args={[imageWidth, imageHeight]} />
-                            <ImageMaterial 
-                                url={project.display.posterImage}
-                                transparent
-                                opacity={0.95}
-                            />
-                        </T.Mesh>
-                    </T.Group>
+                    {#if isLandscape}
+                        <!-- LANDSCAPE: Bild unter dem Text-Poster -->
+                        <T.Group position={[0, -posterSize * 0.5 - imageHeight * 0.5 - 0.3, 0]}>
+                            <!-- Rahmen für Poster-Bild -->
+                            <T.Mesh position.z={0.18}>
+                                <T.PlaneGeometry args={[imageWidth + 0.15, imageHeight + 0.15]} />
+                                <T.MeshBasicMaterial 
+                                    color={displayColor}
+                                    transparent
+                                    opacity={0.8}
+                                />
+                            </T.Mesh>
+                            
+                            <!-- Poster-Bild (Landscape 1200x800) -->
+                            <T.Mesh 
+                                position.z={0.2}
+                                onclick={() => handlePosterClick(x, z, rotY, offsetX)}
+                            >
+                                <T.PlaneGeometry args={[imageWidth, imageHeight]} />
+                                <ImageMaterial 
+                                    url={project.display.posterImage}
+                                    transparent
+                                    opacity={0.95}
+                                />
+                            </T.Mesh>
+                        </T.Group>
+                    {:else}
+                        <!-- PORTRAIT: Bild rechts neben dem Text-Poster -->
+                        <T.Group position.x={posterSize * 0.5 + imageWidth * 0.5 + 0.2}>
+                            <!-- Rahmen für Poster-Bild -->
+                            <T.Mesh position.z={0.18}>
+                                <T.PlaneGeometry args={[imageWidth + 0.15, imageHeight + 0.15]} />
+                                <T.MeshBasicMaterial 
+                                    color={displayColor}
+                                    transparent
+                                    opacity={0.8}
+                                />
+                            </T.Mesh>
+                            
+                            <!-- Poster-Bild (Portrait 800x1200) -->
+                            <T.Mesh 
+                                position.z={0.2}
+                                onclick={() => handlePosterClick(x, z, rotY, offsetX)}
+                            >
+                                <T.PlaneGeometry args={[imageWidth, imageHeight]} />
+                                <ImageMaterial 
+                                    url={project.display.posterImage}
+                                    transparent
+                                    opacity={0.95}
+                                />
+                            </T.Mesh>
+                        </T.Group>
+                    {/if}
                 {/if}
             </T.Group>
         </T.Group>
