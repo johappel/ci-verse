@@ -154,8 +154,10 @@
         const sinR = Math.sin(wallRotY);
         
         // Offset von der Wand-Mitte zum Poster (in Weltkoordinaten)
-        const offsetWorldX = offsetX * cosR;
-        const offsetWorldZ = -offsetX * sinR;  // Negativ wegen Three.js Koordinatensystem
+        // Extra Offset nach rechts (+3), um Text-Poster + Bild besser zu sehen
+        const viewOffsetX = offsetX + 3;
+        const offsetWorldX = viewOffsetX * cosR;
+        const offsetWorldZ = -viewOffsetX * sinR;  // Negativ wegen Three.js Koordinatensystem
         
         // Tatsächliche Poster-Position in Weltkoordinaten
         const worldPosterX = platformPosition[0] + posterX + offsetWorldX;
@@ -166,7 +168,7 @@
         
         // Die Wand-Normale (lokales +Z) zeigt zur Plattform-Mitte
         // Lokales +Z nach Welt: (sin(rotY), 0, cos(rotY))
-        const viewDistance = 10;
+        const viewDistance = 6; // Nah genug für Wandknopf-Aktivierung (< WALL_ACTIVATION_DISTANCE)
         const normalX = sinR;
         const normalZ = cosR;
         
