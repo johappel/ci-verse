@@ -56,7 +56,8 @@ export const mockProjects: ProjectData[] = [
         shortTeaser: 'Evidenzbasierte Forschung zur evangelischen Bildungslandschaft in Deutschland.',
         display: {
             slogan: 'Wissen schafft Bildung',
-            posterImage: 'https://picsum.photos/seed/research-poster/800/1200',
+            posterImage: 'https://picsum.photos/seed/research-poster/1200/800',
+            posterImageFormat: 'landscape',
             logoUrl: '/logos/comenius.svg',
             color: '#8b5cf6',
             screenshotUrl: 'https://picsum.photos/seed/research/800/600'
@@ -189,7 +190,8 @@ export const mockProjects: ProjectData[] = [
         shortTeaser: 'Interaktive Karte aller evangelischen Bildungseinrichtungen.',
         display: {
             slogan: 'Bildung sichtbar machen',
-            posterImage: 'https://picsum.photos/seed/atlas-poster/800/1200',
+            posterImage: 'https://picsum.photos/seed/atlas-poster/1200/800',
+            posterImageFormat: 'landscape',
             logoUrl: '/logos/bildungsatlas.svg',
             color: '#7c3aed',
             screenshotUrl: 'https://picsum.photos/seed/atlas/800/600'
@@ -227,7 +229,8 @@ export const mockProjects: ProjectData[] = [
         shortTeaser: 'Europäische Zusammenarbeit in der religiösen Bildung.',
         display: {
             slogan: 'Bildung ohne Grenzen',
-            posterImage: 'https://picsum.photos/seed/erasmus-poster/800/1200',
+            posterImage: 'https://picsum.photos/seed/erasmus-poster/1200/800',
+            posterImageFormat: 'landscape',
             logoUrl: '/logos/erasmus.svg',
             color: '#2563eb',
             screenshotUrl: 'https://picsum.photos/seed/erasmus/800/600'

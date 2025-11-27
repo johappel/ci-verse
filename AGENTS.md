@@ -204,7 +204,47 @@ src/lib/
 
 ---
 
-## 4. Komponenten-Übersicht
+## 4. Datenmodell
+
+### ProjectDisplay Interface
+```typescript
+interface ProjectDisplay {
+    slogan: string;               // Slogan für das Poster
+    posterImage?: string;         // URL zum Poster-Bild
+    posterImageFormat?: 'portrait' | 'landscape'; // Bildformat (default: portrait)
+    logoUrl?: string;             // Projekt-Logo
+    color: string;                // Primärfarbe (Hex)
+    screenshotUrl?: string;       // Website-Screenshot
+    icon?: string;                // Emoji oder Icon-Name
+}
+```
+
+### Poster-Bildformate
+
+| Format | Empfohlene Größe | Position auf MesseWall |
+|--------|------------------|------------------------|
+| **portrait** (Standard) | 800×1200 px | Rechts neben dem Text-Poster (schmal, hoch) |
+| **landscape** | 1200×800 px | Rechts neben dem Text-Poster (breit, flach) |
+
+**Wichtig:** Poster und Bild sind **immer nebeneinander** (nicht untereinander)!
+
+**Beispiel (mockProjects.ts):**
+```typescript
+{
+    id: 'p3',
+    title: 'Forschungsstelle Bildungsbericht',
+    display: {
+        slogan: 'Wissen schafft Bildung',
+        posterImage: 'https://picsum.photos/seed/research/1200/800',
+        posterImageFormat: 'landscape',  // ← Bild erscheint UNTER dem Text
+        color: '#8b5cf6'
+    }
+}
+```
+
+---
+
+## 5. Komponenten-Übersicht
 
 ### Platform.svelte
 Generische schwebende Plattform mit hexagonaler Basis.
