@@ -144,7 +144,7 @@
 				// 3-Stufen-Animation: Aufsteigen → Gleiten → Landen
 				async function flyAlongLightBridge() {
 					// Stufe 1: Sanft auf Flughöhe steigen (0.8s)
-					cameraControls!.smoothTime = 0.2;
+					cameraControls!.smoothTime = 0.3;
 					await cameraControls!.setLookAt(
 						startX, flightAltitude, startZ,  // Aufsteigen
 						midX, flightAltitude - 5, midZ,  // Vorausschauen Richtung Ziel
