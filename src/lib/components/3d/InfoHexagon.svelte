@@ -110,23 +110,23 @@
 <T.Group position={position}>
     <!-- Hexagonale Säule - rotation.y um 30° damit Kanten zu den Seiten passen -->
     <T.Mesh position.y={height / 2} rotation.y={Math.PI / 6} castShadow receiveShadow>
-        <T.CylinderGeometry args={[radius, radius * 1.1, height, 6]} />
+        <T.CylinderGeometry args={[radius * 1.1, radius * 1.1, height, 6]} />
         <T.MeshStandardMaterial 
             color={color}
-            metalness={0.2}
-            roughness={0.8}
-            transparent
-            opacity={0.9}
+            metalness={0.90}
+            roughness={0.6}
+            
+            opacity={0.96}
         />
     </T.Mesh>
 
     <!-- Leuchtender Ring oben - rotation.x kippt flach, keine Z-Rotation nötig -->
-    <T.Mesh position.y={height + 0.1} rotation.x={Math.PI / 2}>
+    <T.Mesh position.y={height - 0.1} rotation.x={Math.PI / 2}>
         <T.TorusGeometry args={[radius * 0.97, 0.12, 8, 6]} />
         <T.MeshStandardMaterial 
             color="#60a5fa" 
             emissive="#60a5fa"
-            emissiveIntensity={1.0}
+            emissiveIntensity={6.0}
         />
     </T.Mesh>
 
