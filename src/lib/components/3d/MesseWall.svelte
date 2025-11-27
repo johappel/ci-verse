@@ -286,13 +286,15 @@
                             </T.Mesh>
                         {/if}
                         
-                        <!-- Info-Icon (Lucide BadgeInfo) -->
-                        <HTML position={[0, 0, 0.15]} center transform scale={0.6}>
-                            <BadgeInfo 
-                                size={24} 
-                                strokeWidth={2}
-                                color={isNearWall ? '#ffffff' : '#94a3b8'}
-                            />
+                        <!-- Info-Icon (Lucide BadgeInfo) - pointer-events: none damit Klicks zum Button durchgehen -->
+                        <HTML position={[0, 0, 0.15]} center transform scale={0.3} pointerEvents="none">
+                            <div style="pointer-events: none;">
+                                <BadgeInfo 
+                                    size={48} 
+                                    strokeWidth={2}
+                                    color={isNearWall ? '#ffffff' : '#94a3b8'}
+                                />
+                            </div>
                         </HTML>
                         
                         <!-- Hover-Tooltip (immer bei Hover, unterschiedlicher Text) -->
