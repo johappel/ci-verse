@@ -3,6 +3,7 @@
 	import { T } from '@threlte/core';
 	import { CameraControls } from '@threlte/extras';
 	import type { CameraControlsRef } from '@threlte/extras';
+	import { Box3, Vector3 } from 'three';
 	import WorldLayout from './WorldLayout.svelte';
 	import BottomFog from './BottomFog.svelte';
 	import { worldStore } from '$lib/logic/store.svelte';
@@ -240,6 +241,59 @@
 		}
 	});
 
+	// ============================================
+	// KAMERA-BEGRENZUNG mit setBoundary
+	// ============================================
+	// Setzt eine Box-Boundary um die aktuelle Plattform
+	// Die Boundary wird bei Plattformwechsel aktualisiert
+	const BOUNDARY_MARGIN = 8; // Meter vor dem Rand stoppen
+	
+	// Setze Boundary für eine Plattform
+	function updateCameraBoundary(platformId: string) {
+		if (!cameraControls) return;
+		
+		const platform = platforms[platformId];
+		if (!platform) return;
+		
+		const boundarySize = platform.size - BOUNDARY_MARGIN;
+		const minY = platform.y + 2;  // Mindesthöhe über Plattform
+		const maxY = platform.y + 50; // Maximale Höhe
+		
+		const boundaryBox = new Box3(
+			new Vector3(
+				platform.x - boundarySize,
+				minY,
+				platform.z - boundarySize
+			),
+			new Vector3(
+				platform.x + boundarySize,
+				maxY,
+				platform.z + boundarySize
+			)
+		);
+		
+		cameraControls.setBoundary(boundaryBox);
+	}
+	
+	// Entferne Boundary (für Transport)
+	function clearCameraBoundary() {
+		if (!cameraControls) return;
+		cameraControls.setBoundary(undefined);
+	}
+	
+	// Boundary aktualisieren wenn sich die Plattform ändert
+	$effect(() => {
+		if (!cameraControls) return;
+		
+		// Während Transport oder Preload: keine Boundary
+		if (worldStore.state.isTransporting || isPreloading) {
+			clearCameraBoundary();
+		} else {
+			// Setze Boundary für aktuelle Plattform
+			updateCameraBoundary(worldStore.state.currentPlatform);
+		}
+	});
+
 	// Nebel-Farben je nach Perspektive
 	const fogColors: Record<string, string> = {
 		default: '#0d1117',
@@ -262,6 +316,7 @@
 <div class="w-screen h-screen" style="position: fixed; top: 0; left: 0;">
 	<Canvas>
 		<!-- Kamera mit CameraControls für smooth Transport -->
+		<!-- WASD-Navigation aktiviert, Boundary begrenzt Bewegungsbereich auf Plattform -->
 		<T.PerspectiveCamera makeDefault position={initialCamPos} fov={80} near={1} far={2000}>
 			<CameraControls 
 				bind:ref={cameraControls}
@@ -269,11 +324,12 @@
 				draggingSmoothTime={0.5}
 				maxPolarAngle={Math.PI / 2}
 				minPolarAngle={Math.PI / 8}
-				maxDistance={400}
+				maxDistance={80}
 				minDistance={8}
 				azimuthRotateSpeed={0.5}
 				polarRotateSpeed={0.9}
 				dollySpeed={0.5}
+				truckSpeed={2.0}
 			/>
 		</T.PerspectiveCamera>
 
