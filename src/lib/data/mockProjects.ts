@@ -1,4 +1,4 @@
-import type { ProjectData, StaffMember, PlatformContent, WorldData, Department } from '../types/project';
+import type { ProjectData, StaffMember, PlatformContent, WorldData, Department, MarketplaceContent, MarketplaceStand } from '../types/project';
 
 // ============================================================================
 // PROJEKTE (15 Stück)
@@ -351,6 +351,9 @@ export const mockStaff: StaffMember[] = [
 export const mockPlatformContents: Record<string, PlatformContent> = {
     B1: {
         id: 'B1',
+        title: 'Frühkindliche Bildung',
+        short: 'Kita',
+        description: 'Religiöse Bildung für Kinder von 0-6 Jahren',
         aspects: [
             { id: 'b1-a1', title: 'Religiöse Bildung', icon: '🙏', description: 'Grundlagen religiöser Erziehung im Kita-Alter', contentUrl: '/content/b1-religioes.html' },
             { id: 'b1-a2', title: 'Spielerisches Lernen', icon: '🎮', description: 'Spielbasierte pädagogische Konzepte', contentUrl: '/content/b1-spielen.html' },
@@ -358,15 +361,14 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
             { id: 'b1-a4', title: 'Inklusion', icon: '🤝', description: 'Vielfalt als Bereicherung', contentUrl: '/content/b1-inklusion.html' },
             { id: 'b1-a5', title: 'Fachkräfte', icon: '👩‍🏫', description: 'Fortbildung und Qualifizierung', contentUrl: '/content/b1-fachkraefte.html' }
         ],
-        wallPosters: [
-            { projectId: 'p1', position: 0 },
-            { projectId: 'p4', position: 1 },
-            { projectId: 'p7', position: 2 }
-        ],
+        wallPosters: ['p1', 'p4', 'p7'],
         boothProjects: ['p1', 'p4']
     },
     B2: {
         id: 'B2',
+        title: 'Schule & Jugend',
+        short: 'Schule',
+        description: 'Bildungsangebote für Schule und Jugendarbeit',
         aspects: [
             { id: 'b2-a1', title: 'Konfirmandenarbeit', icon: '⛪', description: 'Begleitung junger Menschen im Glauben', contentUrl: '/content/b2-konfi.html' },
             { id: 'b2-a2', title: 'Schulseelsorge', icon: '💚', description: 'Unterstützung in schulischen Krisen', contentUrl: '/content/b2-seelsorge.html' },
@@ -374,14 +376,14 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
             { id: 'b2-a4', title: 'Religionsunterricht', icon: '📖', description: 'Didaktik und Methodik', contentUrl: '/content/b2-ru.html' },
             { id: 'b2-a5', title: 'Medienkompetenz', icon: '📱', description: 'Digitale Bildung für Jugendliche', contentUrl: '/content/b2-medien.html' }
         ],
-        wallPosters: [
-            { projectId: 'p5', position: 0 },
-            { projectId: 'p8', position: 1 }
-        ],
+        wallPosters: ['p5', 'p8'],
         boothProjects: ['p5', 'p8', 'p11']
     },
     B3: {
         id: 'B3',
+        title: 'Erwachsenenbildung',
+        short: 'Erwachsene',
+        description: 'Fortbildung und Lebenslanges Lernen',
         aspects: [
             { id: 'b3-a1', title: 'Gemeindebildung', icon: '🏛️', description: 'Bildungsangebote in Kirchengemeinden', contentUrl: '/content/b3-gemeinde.html' },
             { id: 'b3-a2', title: 'Ehrenamtliche', icon: '🤲', description: 'Qualifizierung freiwillig Engagierter', contentUrl: '/content/b3-ehrenamt.html' },
@@ -389,15 +391,14 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
             { id: 'b3-a4', title: 'Familienbildung', icon: '👪', description: 'Angebote für die ganze Familie', contentUrl: '/content/b3-familie.html' },
             { id: 'b3-a5', title: 'Berufliche Bildung', icon: '💼', description: 'Fortbildung für Hauptamtliche', contentUrl: '/content/b3-beruf.html' }
         ],
-        wallPosters: [
-            { projectId: 'p2', position: 0 },
-            { projectId: 'p6', position: 1 },
-            { projectId: 'p9', position: 2 }
-        ],
+        wallPosters: ['p2', 'p6', 'p9'],
         boothProjects: ['p2', 'p6', 'p9']
     },
     Q1: {
         id: 'Q1',
+        title: 'Forschung',
+        short: 'Forschung',
+        description: 'Wissenschaftliche Studien und Publikationen',
         aspects: [
             { id: 'q1-a1', title: 'Empirische Forschung', icon: '📊', description: 'Datenbasierte Studien zur Bildung', contentUrl: '/content/q1-empirisch.html' },
             { id: 'q1-a2', title: 'Bildungsmonitoring', icon: '📈', description: 'Kontinuierliche Beobachtung des Bildungssystems', contentUrl: '/content/q1-monitoring.html' },
@@ -405,14 +406,14 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
             { id: 'q1-a4', title: 'Kooperationen', icon: '🤝', description: 'Zusammenarbeit mit Hochschulen', contentUrl: '/content/q1-kooperation.html' },
             { id: 'q1-a5', title: 'Transfer', icon: '🔄', description: 'Wissenstransfer in die Praxis', contentUrl: '/content/q1-transfer.html' }
         ],
-        wallPosters: [
-            { projectId: 'p3', position: 0 },
-            { projectId: 'p10', position: 1 }
-        ],
+        wallPosters: ['p3', 'p10'],
         boothProjects: ['p3', 'p10']
     },
     Q2: {
         id: 'Q2',
+        title: 'Europa & Internationales',
+        short: 'Europa',
+        description: 'Internationale Kooperationen und EU-Projekte',
         aspects: [
             { id: 'q2-a1', title: 'EU-Projekte', icon: '🇪🇺', description: 'Erasmus+ und andere Förderprogramme', contentUrl: '/content/q2-eu.html' },
             { id: 'q2-a2', title: 'Ökumene', icon: '🌍', description: 'Interkirchliche Zusammenarbeit', contentUrl: '/content/q2-oekumene.html' },
@@ -420,14 +421,14 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
             { id: 'q2-a4', title: 'Austausch', icon: '✈️', description: 'Begegnungsprogramme', contentUrl: '/content/q2-austausch.html' },
             { id: 'q2-a5', title: 'Mehrsprachigkeit', icon: '🗣️', description: 'Sprachförderung und Interkulturalität', contentUrl: '/content/q2-sprache.html' }
         ],
-        wallPosters: [
-            { projectId: 'p12', position: 0 },
-            { projectId: 'p13', position: 1 }
-        ],
+        wallPosters: ['p12', 'p13'],
         boothProjects: ['p12', 'p13']
     },
     Q3: {
         id: 'Q3',
+        title: 'Digitalisierung',
+        short: 'Digital',
+        description: 'Digitale Transformation und E-Learning',
         aspects: [
             { id: 'q3-a1', title: 'E-Learning', icon: '💻', description: 'Digitale Lernplattformen', contentUrl: '/content/q3-elearning.html' },
             { id: 'q3-a2', title: 'KI in der Bildung', icon: '🤖', description: 'Künstliche Intelligenz als Werkzeug', contentUrl: '/content/q3-ki.html' },
@@ -435,13 +436,94 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
             { id: 'q3-a4', title: 'Tools & Apps', icon: '📲', description: 'Digitale Werkzeuge für die Praxis', contentUrl: '/content/q3-tools.html' },
             { id: 'q3-a5', title: 'Medienpädagogik', icon: '🎬', description: 'Kritischer Umgang mit Medien', contentUrl: '/content/q3-medienpaed.html' }
         ],
-        wallPosters: [
-            { projectId: 'p2', position: 0 },
-            { projectId: 'p14', position: 1 },
-            { projectId: 'p15', position: 2 }
-        ],
+        wallPosters: ['p2', 'p14', 'p15'],
         boothProjects: ['p2', 'p14', 'p15']
     }
+};
+
+// ============================================================================
+// MARKTPLATZ (S-PLATTFORM)
+// ============================================================================
+
+export const mockMarketplace: MarketplaceContent = {
+    id: 'S',
+    stands: [
+        {
+            id: 's-institut',
+            title: 'Comenius-Institut',
+            type: 'institution',
+            icon: '🏛️',
+            description: 'Evangelische Arbeitsstätte für Erziehungswissenschaft e.V. – Ihr Kompetenzzentrum für religiöse Bildung seit 1954.',
+            display: {
+                color: '#1e40af',
+                logoUrl: '/logos/comenius.svg',
+                bannerImage: 'https://picsum.photos/seed/comenius-banner/1200/400'
+            },
+            chatWebhook: 'https://n8n.comenius.de/webhook/ci-chat',
+            externalUrl: 'https://comenius.de'
+        },
+        {
+            id: 's-publications',
+            title: 'Publikationen & News',
+            type: 'publications',
+            icon: '📚',
+            description: 'Aktuelle Veröffentlichungen, Neuigkeiten und Forschungsergebnisse aus dem Comenius-Institut.',
+            display: {
+                color: '#059669',
+                logoUrl: '/logos/publikationen.svg',
+                bannerImage: 'https://picsum.photos/seed/publications-banner/1200/400'
+            },
+            rssFeedUrls: [
+                'https://comenius.de/feed/',
+                'https://comenius.de/publikationen/feed/'
+            ],
+            externalUrl: 'https://comenius.de/publikationen'
+        },
+        {
+            id: 's-events',
+            title: 'Veranstaltungen',
+            type: 'events',
+            icon: '📅',
+            description: 'Aktuelle Termine, Tagungen, Fortbildungen und Workshops des Comenius-Instituts.',
+            display: {
+                color: '#dc2626',
+                logoUrl: '/logos/events.svg',
+                bannerImage: 'https://picsum.photos/seed/events-banner/1200/400'
+            },
+            calendarUrl: 'https://comenius.de/termine/events.ics',
+            externalUrl: 'https://comenius.de/termine'
+        }
+    ],
+    wallPosters: [
+        {
+            id: 'leitlinie-justice',
+            title: 'Gerechtigkeit',
+            imageUrl: 'https://picsum.photos/seed/leitlinie-justice/800/1200',
+            perspective: 'justice',
+            position: 0
+        },
+        {
+            id: 'leitlinie-sustainability',
+            title: 'Nachhaltigkeit',
+            imageUrl: 'https://picsum.photos/seed/leitlinie-sustainability/800/1200',
+            perspective: 'sustainability',
+            position: 1
+        },
+        {
+            id: 'leitlinie-digitality',
+            title: 'Digitalität',
+            imageUrl: 'https://picsum.photos/seed/leitlinie-digitality/800/1200',
+            perspective: 'digitality',
+            position: 2
+        },
+        {
+            id: 'leitlinie-structure',
+            title: 'Strukturen',
+            imageUrl: 'https://picsum.photos/seed/leitlinie-structure/800/1200',
+            perspective: 'structure',
+            position: 3
+        }
+    ]
 };
 
 // ============================================================================
@@ -450,6 +532,7 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
 
 export const mockWorldData: WorldData = {
     platforms: mockPlatformContents,
+    marketplace: mockMarketplace,
     projects: mockProjects,
     staff: mockStaff
 };
@@ -487,14 +570,38 @@ export function getBoothProjectsForPlatform(platformId: string): ProjectData[] {
         .filter((p): p is ProjectData => p !== undefined);
 }
 
-/** Wall-Poster einer Plattform mit vollständigen Projektdaten */
+/** Wall-Poster einer Plattform mit vollständigen Projektdaten (Position = Array-Index) */
 export function getWallPostersForPlatform(platformId: string): Array<{ project: ProjectData; position: number }> {
     const content = mockPlatformContents[platformId];
     if (!content) return [];
     return content.wallPosters
-        .map(wp => {
-            const project = getProjectById(wp.projectId);
-            return project ? { project, position: wp.position } : null;
+        .map((projectId, index) => {
+            const project = getProjectById(projectId);
+            return project ? { project, position: index } : null;
         })
         .filter((item): item is { project: ProjectData; position: number } => item !== null);
+}
+
+// ============================================================================
+// MARKTPLATZ HELPER FUNKTIONEN
+// ============================================================================
+
+/** Alle Stände auf dem Marktplatz */
+export function getMarketplaceStands(): MarketplaceStand[] {
+    return mockMarketplace.stands;
+}
+
+/** Stand nach ID finden */
+export function getMarketplaceStandById(id: string): MarketplaceStand | undefined {
+    return mockMarketplace.stands.find(s => s.id === id);
+}
+
+/** Marktplatz-Inhalte abrufen */
+export function getMarketplaceContent(): MarketplaceContent {
+    return mockMarketplace;
+}
+
+/** Leitlinien-Poster vom Marktplatz */
+export function getMarketplaceWallPosters() {
+    return mockMarketplace.wallPosters;
 }

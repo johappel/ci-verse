@@ -60,16 +60,62 @@ export interface PlatformAspect {
     contentUrl?: string;       // Link zu HTML-Content
 }
 
-export interface WallPoster {
-    projectId: string;
-    position: number;          // 0-5 für 6 Wand-Segmente
-}
+// WallPoster Interface entfernt - Position = Array-Index
 
 export interface PlatformContent {
     id: Department;
+    title: string;             // Voller Name, z.B. "Schule & Jugend"
+    short: string;             // Kurzname für Buttons, z.B. "Schule"
+    description: string;       // Kurzbeschreibung der Plattform
     aspects: PlatformAspect[]; // Max 5 thematische Aspekte
-    wallPosters: WallPoster[]; // Projekte auf den Messewänden
-    boothProjects: string[];   // Projekt-IDs für freie Messestände
+    wallPosters: string[];     // Projekt-IDs für Messewände (Position = Index)
+    boothProjects: string[];   // Projekt-IDs für freie Messestände (Position = Index)
+}
+
+// ============================================
+// MARKTPLATZ (S-PLATTFORM)
+// ============================================
+
+/** Stand-Typen auf dem Marktplatz */
+export type MarketplaceStandType = 
+    | 'institution'    // Das Institut selbst (mit KI-Chat)
+    | 'publications'   // Publikationen/News-Terminal (RSS)
+    | 'events'         // Veranstaltungskalender
+    | 'info';          // Allgemeiner Info-Stand
+
+/** Einzelner Stand auf dem Marktplatz */
+export interface MarketplaceStand {
+    id: string;
+    title: string;
+    type: MarketplaceStandType;
+    icon: string;                  // Emoji oder Icon-Name
+    description: string;
+    display: {
+        color: string;
+        logoUrl?: string;
+        bannerImage?: string;      // Großes Bannerbild für den Stand
+    };
+    // Interaktions-Quellen (je nach Typ)
+    chatWebhook?: string;          // n8n Webhook für KI-Chat (type: institution)
+    rssFeedUrls?: string[];        // RSS für News/Publikationen (type: publications)
+    calendarUrl?: string;          // iCal/API für Events (type: events)
+    externalUrl?: string;          // Fallback-Link zur Webseite
+}
+
+/** Atmosphärisches Wandposter für Leitlinien */
+export interface MarketplaceWallPoster {
+    id: string;
+    title: string;                 // z.B. "Gerechtigkeit"
+    imageUrl: string;              // Atmosphärisches Bild
+    perspective: Perspective;      // Zugehörige Leitlinie
+    position: number;              // Wand-Segment (0-5)
+}
+
+/** Inhalt der S-Plattform (Marktplatz) */
+export interface MarketplaceContent {
+    id: 'S';
+    stands: MarketplaceStand[];              // Interaktive Stände
+    wallPosters: MarketplaceWallPoster[];    // Leitlinien-Poster an den Wänden
 }
 
 // ============================================
@@ -78,6 +124,7 @@ export interface PlatformContent {
 
 export interface WorldData {
     platforms: Record<string, PlatformContent>;
+    marketplace: MarketplaceContent;         // S-Plattform separat
     projects: ProjectData[];
     staff: StaffMember[];
 }
