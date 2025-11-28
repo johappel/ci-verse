@@ -101,9 +101,9 @@
     //                     (rechts)    (rechts-vorne)
     
     const institutionPosition = { 
-        x: 0,             // Zentral
-        z: -28,           // Weit hinten, direkt vor der freien Wand
-        rotation: 0       // Schaut nach vorne
+        x: -18,           // Links versetzt
+        z: -18,           // Hinten-links, vor der Wand
+        rotation: Math.PI * 0.15  // Leicht gedreht zur Mitte
     };
     
     // Terminal-Stände (News rechts-vorne, Events links)
@@ -118,9 +118,8 @@
     let terminalStands = $derived(marketplace.stands.filter(s => s.type !== 'institution'));
 
     // ========== WANDSEGMENTE FÜR LEITLINIEN ==========
-    // 4 Wände: hinten-links, hinten-rechts, links, rechts
-    // 6 Leitlinien verteilt auf diese 4 Wände
-    // MesseWall erwartet ProjectData[] - wir konvertieren die Poster zu Projekten
+    // 3 Wände mit 6 Leitlinien, Wand hinter Turm bleibt frei
+    // Aufteilung: Links 2 Wände (4 Poster), Rechts 1 Wand (2 Poster)
     
     // Dummy-Projekte für Leitlinien-Poster erstellen
     const leitlinienProjects = $derived(
@@ -145,6 +144,10 @@
             return { project, position: index };
         })
     );
+
+    // Aufteilen: Linke Wände (Poster 0-3) und Rechte Wand (Poster 4-5)
+    const leftWallPosters = $derived(leitlinienProjects.slice(0, 4).map((p, i) => ({ ...p, position: i })));
+    const rightWallPosters = $derived(leitlinienProjects.slice(4, 6).map((p, i) => ({ ...p, position: i })));
 
     // Perspektiven-Farben
     function getPerspectiveColor(perspective: string): string {
@@ -205,16 +208,33 @@
         />
     </T.Mesh>
 
-    <!-- ========== 3 WANDSEGMENTE FÜR LEITLINIEN ========== -->
-    <!-- MesseWall mit 6 Leitlinien-Postern auf 3 Wänden -->
-    <!-- Wand hinter Turm (Edge 3) bleibt frei -->
+    <!-- ========== WANDSEGMENTE FÜR LEITLINIEN ========== -->
+    <!-- Zwei MesseWall-Gruppen: Links und Rechts vom Turm, Wand dahinter frei -->
+    <!-- Hexagon Edges (mit 30° Rotation): 
+         0 = rechts-vorne, 1 = rechts, 2 = rechts-hinten
+         3 = hinten (FREI für Turm), 4 = links-hinten, 5 = links-vorne
+    -->
+    
+    <!-- Linke Wände (2 Wände, 4 Poster) - Edges 4 und 5 (links-hinten, links-vorne) -->
     <MesseWall
-        posters={leitlinienProjects}
+        posters={leftWallPosters}
         platformSize={platform.size}
         platformColor={platform.color}
         wallHeight={8}
-        wallCount={3}
-        startEdge={4}
+        wallCount={2}
+        startEdge={5}
+        platformPosition={[platform.x, platform.y, platform.z]}
+        platformId={platform.id}
+    />
+    
+    <!-- Rechte Wand (1 Wand, 2 Poster) - Edge 1 (rechts) -->
+    <MesseWall
+        posters={rightWallPosters}
+        platformSize={platform.size}
+        platformColor={platform.color}
+        wallHeight={8}
+        wallCount={1}
+        startEdge={1}
         platformPosition={[platform.x, platform.y, platform.z]}
         platformId={platform.id}
     />
