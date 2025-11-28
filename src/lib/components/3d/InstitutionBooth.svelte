@@ -157,18 +157,18 @@
         />
     </T.Mesh>
 
-    <!-- Turm-Kanten (dekorative Leisten) -->
+    <!-- Turm-Kanten (dekorative Leisten) - leicht nach außen versetzt um Z-Fighting zu vermeiden -->
     {#each [-1, 1] as xDir}
         {#each [-1, 1] as zDir}
             <T.Mesh 
                 position={[
-                    xDir * (tower.width / 2 - 0.05), 
+                    xDir * (tower.width / 2 + 0.02), 
                     tower.height / 2 + tower.baseHeight, 
-                    zDir * (tower.depth / 2 - 0.05)
+                    zDir * (tower.depth / 2 + 0.02)
                 ]}
                 castShadow
             >
-                <T.BoxGeometry args={[0.1, tower.height, 0.1]} />
+                <T.BoxGeometry args={[0.12, tower.height, 0.12]} />
                 <T.MeshStandardMaterial 
                     color={accentColor}
                     metalness={0.6}
@@ -224,12 +224,36 @@
     </T.Group>
 
     <!-- ========== ROTIERENDES NEON-LOGO "CI" ========== -->
+    <!-- Drehstange vom Turm zur Scheibe -->
+    <T.Group position.y={tower.height + tower.baseHeight}>
+        <!-- Stange die aus dem Turm ragt und die Scheibe trägt -->
+        <T.Mesh position.y={logo.height / 2 + 0.5}>
+            <T.CylinderGeometry args={[0.15, 0.2, logo.height + 1, 8]} />
+            <T.MeshStandardMaterial 
+                color={darkColor}
+                metalness={0.8}
+                roughness={0.2}
+            />
+        </T.Mesh>
+        
+        <!-- Halterung/Basis der Stange auf dem Turm -->
+        <T.Mesh position.y={0.15}>
+            <T.CylinderGeometry args={[0.5, 0.6, 0.3, 16]} />
+            <T.MeshStandardMaterial 
+                color={accentColor}
+                metalness={0.6}
+                roughness={0.3}
+            />
+        </T.Mesh>
+    </T.Group>
+
+    <!-- Rotierende Scheibe mit Logo -->
     <T.Group 
-        position.y={tower.height + tower.baseHeight + logo.height}
+        position.y={tower.height + tower.baseHeight + logo.height + 1.2}
         rotation.y={logoRotation}
     >
-        <!-- Logo-Scheibe Hintergrund -->
-        <T.Mesh>
+        <!-- Logo-Scheibe Hintergrund (horizontal liegend) -->
+        <T.Mesh rotation.x={Math.PI / 2}>
             <T.CylinderGeometry args={[logo.size, logo.size, 0.3, 32]} />
             <T.MeshStandardMaterial 
                 color={darkColor}
@@ -238,7 +262,7 @@
             />
         </T.Mesh>
 
-        <!-- Neon-Ring außen -->
+        <!-- Neon-Ring außen (vertikal um die Scheibe) -->
         <T.Mesh>
             <T.TorusGeometry args={[logo.size * 1.1, 0.08, 16, 48]} />
             <T.MeshBasicMaterial 
@@ -246,25 +270,26 @@
             />
         </T.Mesh>
 
-        <!-- Neon-Text "CI" vorne -->
+        <!-- Neon-Text "CI" oben (auf der Scheibe) -->
         <Text
             text="CI"
             color={neonBlue}
             fontSize={1.8}
             font="/fonts/Inter-Bold.woff"
-            position={[0, 0, 0.2]}
+            position={[0, 0.2, 0]}
+            rotation.x={-Math.PI / 2}
             anchorX="center"
             anchorY="middle"
         />
         
-        <!-- Neon-Text "CI" hinten -->
+        <!-- Neon-Text "CI" unten (auf der Unterseite) -->
         <Text
             text="CI"
             color={neonBlue}
             fontSize={1.8}
             font="/fonts/Inter-Bold.woff"
-            position={[0, 0, -0.2]}
-            rotation.y={Math.PI}
+            position={[0, -0.2, 0]}
+            rotation.x={Math.PI / 2}
             anchorX="center"
             anchorY="middle"
         />

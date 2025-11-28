@@ -106,10 +106,12 @@
         rotation: Math.PI * 0.15  // Leicht gedreht zur Mitte
     };
     
-    // Terminal-Stände (News rechts-vorne, Events links)
+    // Terminal-Stände nach Ellipsen-Positionen im Screenshot:
+    // Rot (links-mitte) = Events, Grün (unten-links) = Publications
+    // Chat ist am Turm (InstitutionBooth) integriert
     const terminalPositions: Array<{ x: number; z: number; rotation: number; type: string }> = [
-        { x: 18, z: 8, rotation: -Math.PI * 0.3, type: 'publications' },   // News: rechts vorne
-        { x: -16, z: 0, rotation: Math.PI * 0.4, type: 'events' }          // Events: links
+        { x: -12, z: 22, rotation: Math.PI, type: 'publications' },        // Grün: unten-links (vorne)
+        { x: -24, z: 5, rotation: Math.PI * 0.5, type: 'events' }          // Rot: links-mitte
     ];
 
     // Institution-Stand aus den Daten finden
