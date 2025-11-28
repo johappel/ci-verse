@@ -1,7 +1,13 @@
 import type { AppState, ProjectData, Perspective, Department, PlatformAspect } from '../types/project';
 
+// Erweiterte AppState für Marketplace-Panels
+interface ExtendedAppState extends AppState {
+    isRssPanelOpen: boolean;
+    isEventsPanelOpen: boolean;
+}
+
 export class WorldStore {
-    state = $state<AppState>({
+    state = $state<ExtendedAppState>({
         projects: [],
         activePerspective: 'default',
         hoveredId: null,
@@ -19,7 +25,10 @@ export class WorldStore {
         // NEU: Chat-Modal
         isChatOpen: false,
         // NEU: Content-Card für Aspects
-        selectedAspect: null
+        selectedAspect: null,
+        // NEU: Marketplace-Panels
+        isRssPanelOpen: false,
+        isEventsPanelOpen: false
     });
 
     // Derived: Theme-Farbe basierend auf aktiver Perspektive
@@ -131,10 +140,36 @@ export class WorldStore {
     openChat() {
         this.state.isChatOpen = true;
         this.state.selectedId = null; // Schließe Projekt-Modal
+        this.state.isRssPanelOpen = false;
+        this.state.isEventsPanelOpen = false;
     }
 
     closeChat() {
         this.state.isChatOpen = false;
+    }
+
+    // NEU: RSS-Panel für Publications
+    openRssPanel() {
+        this.state.isRssPanelOpen = true;
+        this.state.selectedId = null;
+        this.state.isChatOpen = false;
+        this.state.isEventsPanelOpen = false;
+    }
+
+    closeRssPanel() {
+        this.state.isRssPanelOpen = false;
+    }
+
+    // NEU: Events-Panel für Veranstaltungen
+    openEventsPanel() {
+        this.state.isEventsPanelOpen = true;
+        this.state.selectedId = null;
+        this.state.isChatOpen = false;
+        this.state.isRssPanelOpen = false;
+    }
+
+    closeEventsPanel() {
+        this.state.isEventsPanelOpen = false;
     }
 
     // NEU: Hover über Transport-Button

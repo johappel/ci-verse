@@ -5,7 +5,10 @@
     import ContentCard from "$lib/components/ui/ContentCard.svelte";
     import FilterBar from "$lib/components/ui/FilterBar.svelte";
     import NavigationControls from "$lib/components/ui/NavigationControls.svelte";
-    import { initWorldStore } from "$lib/logic/store.svelte";
+    import ChatModal from "$lib/components/ui/ChatModal.svelte";
+    import RssFeedPanel from "$lib/components/ui/RssFeedPanel.svelte";
+    import EventsPanel from "$lib/components/ui/EventsPanel.svelte";
+    import { initWorldStore, worldStore } from "$lib/logic/store.svelte";
     import { mockProjects } from "$lib/data/mockProjects";
     import { onMount } from "svelte";
     import { fade } from "svelte/transition";
@@ -90,7 +93,7 @@
             <!-- Logo/Titel -->
             <div style="margin-bottom: 2rem; text-align: center;">
                 <h1 style="font-size: 2.25rem; font-weight: bold; color: white; margin-bottom: 0.5rem;">
-                    Comenius <span style="color: #22d3ee;">Universum</span>
+                    CI<span style="color: #22d3ee;">Versum</span>
                 </h1>
                 <p style="color: #cbd5e1;">Bildungslandschaft wird geladen...</p>
             </div>
@@ -126,6 +129,20 @@
         <ContentCard />
         <!-- <FilterBar /> -->
         <NavigationControls {cameraControls} />
+
+        <!-- Marketplace-Panels -->
+        <ChatModal 
+            isOpen={worldStore.state.isChatOpen} 
+            onClose={() => worldStore.closeChat()} 
+        />
+        <RssFeedPanel 
+            isOpen={worldStore.state.isRssPanelOpen} 
+            onClose={() => worldStore.closeRssPanel()} 
+        />
+        <EventsPanel 
+            isOpen={worldStore.state.isEventsPanelOpen} 
+            onClose={() => worldStore.closeEventsPanel()} 
+        />
 
         <!-- Logo/Title Overlay -->
         <!-- <div class="absolute top-6 left-6 z-20">
