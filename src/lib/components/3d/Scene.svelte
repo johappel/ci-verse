@@ -153,7 +153,7 @@
 					);
 					
 					// Stufe 2: Auf Flughöhe zum Ziel gleiten (1.5s)
-					cameraControls!.smoothTime = 0.6;
+					cameraControls!.smoothTime = 1;
 					await cameraControls!.setLookAt(
 						finalCamX, flightAltitude, finalCamZ,  // Über dem Ziel
 						target.x, target.y + 5, target.z,      // Schaut zur Plattform runter
@@ -167,6 +167,8 @@
 						target.x, target.y + 5, target.z,      // Look-At zur Mitte
 						true
 					);
+
+					cameraControls!.smoothTime = 1.5; //zurücksetzen
 				}
 				
 				flyAlongLightBridge();
@@ -320,7 +322,7 @@
 		<T.PerspectiveCamera makeDefault position={initialCamPos} fov={80} near={1} far={2000}>
 			<CameraControls 
 				bind:ref={cameraControls}
-				smoothTime={0.5}
+				smoothTime={1.5}
 				draggingSmoothTime={0.5}
 				maxPolarAngle={Math.PI / 2}
 				minPolarAngle={Math.PI / 8}

@@ -90,7 +90,7 @@
             <!-- Logo/Titel -->
             <div style="margin-bottom: 2rem; text-align: center;">
                 <h1 style="font-size: 2.25rem; font-weight: bold; color: white; margin-bottom: 0.5rem;">
-                    Comenius <span style="color: #22d3ee;">Orbital</span>
+                    Comenius <span style="color: #22d3ee;">Universum</span>
                 </h1>
                 <p style="color: #cbd5e1;">Bildungslandschaft wird geladen...</p>
             </div>
@@ -124,17 +124,17 @@
     {#if !isLoading}
         <ProjectCard />
         <ContentCard />
-        <FilterBar />
+        <!-- <FilterBar /> -->
         <NavigationControls {cameraControls} />
 
         <!-- Logo/Title Overlay -->
-        <div class="absolute top-6 left-6 z-20">
+        <!-- <div class="absolute top-6 left-6 z-20">
             <h1 class="text-2xl font-bold text-white drop-shadow-lg">
                 Comenius <span class="text-blue-400">Orbital</span>
             </h1>
             <p class="text-sm text-white/80 drop-shadow">
                 Entdecke die Bildungslandschaft
             </p>
-        </div>
+        </div> -->
     {/if}
 </main>
