@@ -79,8 +79,8 @@ export const platforms: Record<string, Platform> = {
         color: '#64748b',      // Slate
         glowColor: '#94a3b8',
         landing: {
-            offset: [0, 10, -25],      // Vor der Plattform, leicht erhöht
-            lookAtOffset: [0, 3, 2]    // Schaut zur Mitte
+            offset: [12, 10, 18],       // Rechts-vorne vom Portal, erhöht
+            lookAtOffset: [0, 4, -12]   // Schaut zum Turm (hinten-mitte)
         }
     },
 

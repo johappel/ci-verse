@@ -1,23 +1,29 @@
 <script lang="ts">
     /**
-     * MarketplacePlatform - Spezielle S-Plattform (Marktplatz)
+     * MarketplacePlatform - S-Plattform (Marktplatz) nach Skizze
      * 
-     * Unterschiede zur normalen Platform:
-     * - 3 Marketplace-Stände (Institution, Publications, Events)
-     * - 4 Leitlinien-Poster an den Wänden
-     * - Zentrales Willkommens-Element
-     * - Keine Projekt-Messewände (stattdessen Leitlinien)
+     * Layout (Hexagon mit Pentagon-artiger Nutzung):
+     * - Transport-Portal: Mitte
+     * - InstitutionBooth (Turm): Hinten-Mitte (vor Wand)
+     * - 4 Wandsegmente: Am Rand für 6 Leitlinien-Poster
+     * - Chatpanel: Oben links (am Turm)
+     * - Newspanel: Unten rechts (separater Stand)
+     * - Eventpanel: Links (separater Stand)
+     * - Stehtische: Verteilt für Atmosphäre
+     * - Start-Position: Rechts vom Portal
      */
     import { T, useTask } from '@threlte/core';
     import { useCursor, Text, Billboard } from '@threlte/extras';
     import { Spring } from 'svelte/motion';
     import type { Platform as PlatformType } from '$lib/logic/platforms';
     import type { MarketplaceContent } from '$lib/types/project';
+    import MesseWall from './MesseWall.svelte';
+    import InstitutionBooth from './InstitutionBooth.svelte';
     import MarketplaceStand from './MarketplaceStand.svelte';
-    import LeitlinienPoster from './LeitlinienPoster.svelte';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getMarketplaceContent } from '$lib/data/mockProjects';
-    import type { Object3D } from 'three';
+    import { mockProjects } from '$lib/data/mockProjects';
+    import type { ProjectData, Department, Perspective, TargetGroup } from '$lib/types/project';
 
     let { platform }: { platform: PlatformType } = $props();
 
@@ -76,30 +82,87 @@
         pointerDownPos = null;
     }
 
-    // ========== STAND-POSITIONEN ==========
-    // 3 Stände in Dreiecks-Formation
-    const standPositions: Array<{ x: number; z: number; rotation: number }> = [
-        { x: 0, z: -6, rotation: 0 },           // Hinten (Institution)
-        { x: -7, z: 4, rotation: Math.PI / 3 }, // Links vorne (Publications)
-        { x: 7, z: 4, rotation: -Math.PI / 3 }  // Rechts vorne (Events)
+    // ========== POSITIONEN NACH SKIZZE ==========
+    // Hexagon: Kamera startet rechts vom Portal, schaut zur Mitte
+    // 
+    // Layout (Draufsicht, X nach rechts, Z nach oben):
+    //
+    //           Wand 3 (hinten-links)    Wand 4 (hinten-rechts)
+    //                    \                    /
+    //                     \   [Turm/CI]      /
+    //                      \      |         /
+    //     [Event]           \     |        /
+    //     (links)   Wand 2   \    |       /   Wand 1
+    //                         \   |      /
+    //                          \  ●     /    ← Transport-Portal (Mitte)
+    //                           \ |    /
+    //                            \|   /
+    //                      [Start] →  [News]
+    //                     (rechts)    (rechts-vorne)
+    
+    const institutionPosition = { 
+        x: 0,             // Zentral
+        z: -28,           // Weit hinten, direkt vor der freien Wand
+        rotation: 0       // Schaut nach vorne
+    };
+    
+    // Terminal-Stände (News rechts-vorne, Events links)
+    const terminalPositions: Array<{ x: number; z: number; rotation: number; type: string }> = [
+        { x: 18, z: 8, rotation: -Math.PI * 0.3, type: 'publications' },   // News: rechts vorne
+        { x: -16, z: 0, rotation: Math.PI * 0.4, type: 'events' }          // Events: links
     ];
 
-    // ========== LEITLINIEN-POSTER POSITIONEN ==========
-    // 4 Poster an den 4 hinteren Hexagon-Kanten
-    const hexInnerRadius = platform.size * Math.cos(Math.PI / 6) * 0.95;
-    const posterPositions = $derived(
-        marketplace.wallPosters.map((poster, i) => {
-            // Verteile auf Kanten 2, 3, 4, 5 (hintere Hälfte des Hexagons)
-            const edgeIndex = i + 2;
-            const angle = (edgeIndex * Math.PI / 3) + Math.PI / 6;
-            return {
-                poster,
-                x: Math.cos(angle) * hexInnerRadius,
-                z: Math.sin(angle) * hexInnerRadius,
-                rotation: -angle - Math.PI / 2
+    // Institution-Stand aus den Daten finden
+    let institutionStand = $derived(marketplace.stands.find(s => s.type === 'institution'));
+    // Terminal-Stände (publications, events)
+    let terminalStands = $derived(marketplace.stands.filter(s => s.type !== 'institution'));
+
+    // ========== WANDSEGMENTE FÜR LEITLINIEN ==========
+    // 4 Wände: hinten-links, hinten-rechts, links, rechts
+    // 6 Leitlinien verteilt auf diese 4 Wände
+    // MesseWall erwartet ProjectData[] - wir konvertieren die Poster zu Projekten
+    
+    // Dummy-Projekte für Leitlinien-Poster erstellen
+    const leitlinienProjects = $derived(
+        marketplace.wallPosters.map((poster, index) => {
+            const project: ProjectData = {
+                id: poster.id,
+                title: poster.title,
+                slug: poster.id,
+                externalUrl: `#perspective-${poster.perspective}`,
+                departments: ['S1' as Department],
+                perspectives: [poster.perspective] as Perspective[],
+                targetGroups: [] as TargetGroup[],
+                type: 'ground',
+                staff: [],
+                shortTeaser: `Leitlinie: ${poster.title}`,
+                display: {
+                    slogan: poster.title,
+                    posterImage: poster.imageUrl,
+                    color: getPerspectiveColor(poster.perspective)
+                }
             };
+            return { project, position: index };
         })
     );
+
+    // Perspektiven-Farben
+    function getPerspectiveColor(perspective: string): string {
+        const colors: Record<string, string> = {
+            justice: '#facc15',
+            sustainability: '#4ade80',
+            digitality: '#22d3ee',
+            structure: '#a78bfa'
+        };
+        return colors[perspective] || '#ffffff';
+    }
+
+    // Stehtisch-Positionen (für Atmosphäre)
+    const stehtischPositions = [
+        { x: -8, z: 8, rotation: 0 },      // Links-vorne
+        { x: 8, z: -5, rotation: Math.PI / 4 },   // Rechts-mitte
+        { x: -5, z: -8, rotation: -Math.PI / 6 }, // Links-hinten
+    ];
 
     // Spotlight-Positionen
     const spotlightHeight = 15;
@@ -142,49 +205,33 @@
         />
     </T.Mesh>
 
-    <!-- ========== ZENTRALES WILLKOMMENS-ELEMENT ========== -->
-    <T.Group position.y={1.5}>
-        <!-- Sockel -->
-        <T.Mesh castShadow>
-            <T.CylinderGeometry args={[2, 2.5, 0.5, 8]} />
-            <T.MeshStandardMaterial 
-                color="#1e3a5f" 
-                metalness={0.4} 
-                roughness={0.5}
-            />
-        </T.Mesh>
-        
-        <!-- Willkommens-Text -->
-        <Billboard position={[0, 2, 0]}>
-            <Text
-                text="🏛️"
-                fontSize={1.5}
-                anchorX="center"
-                anchorY="middle"
-            />
-        </Billboard>
-        <Billboard position={[0, 0.8, 0]}>
-            <Text
-                text="Comenius-Institut"
-                color="#ffffff"
-                fontSize={0.5}
-                font="/fonts/Inter-Bold.woff"
-                anchorX="center"
-            />
-        </Billboard>
-        <Billboard position={[0, 0.2, 0]}>
-            <Text
-                text="Marktplatz"
-                color="#94a3b8"
-                fontSize={0.3}
-                anchorX="center"
-            />
-        </Billboard>
-    </T.Group>
+    <!-- ========== 3 WANDSEGMENTE FÜR LEITLINIEN ========== -->
+    <!-- MesseWall mit 6 Leitlinien-Postern auf 3 Wänden -->
+    <!-- Wand hinter Turm (Edge 3) bleibt frei -->
+    <MesseWall
+        posters={leitlinienProjects}
+        platformSize={platform.size}
+        platformColor={platform.color}
+        wallHeight={8}
+        wallCount={3}
+        startEdge={4}
+        platformPosition={[platform.x, platform.y, platform.z]}
+        platformId={platform.id}
+    />
 
-    <!-- ========== MARKETPLACE STÄNDE ========== -->
-    {#each marketplace.stands as stand, i}
-        {@const pos = standPositions[i]}
+    <!-- ========== INSTITUTION BOOTH (Turm mit CI-Logo) ========== -->
+    {#if institutionStand}
+        <InstitutionBooth
+            stand={institutionStand}
+            position={[institutionPosition.x, 1.5, institutionPosition.z]}
+            rotation={institutionPosition.rotation}
+            platformPosition={[platform.x, platform.y, platform.z]}
+        />
+    {/if}
+
+    <!-- ========== TERMINAL STÄNDE (News rechts, Events links) ========== -->
+    {#each terminalStands as stand, i}
+        {@const pos = terminalPositions.find(p => p.type === stand.type) || terminalPositions[i]}
         {#if pos}
             <MarketplaceStand
                 {stand}
@@ -195,14 +242,25 @@
         {/if}
     {/each}
 
-    <!-- ========== LEITLINIEN-POSTER ========== -->
-    {#each posterPositions as { poster, x, z, rotation }}
-        <LeitlinienPoster
-            {poster}
-            position={[x, 1.5, z]}
-            {rotation}
-            size="medium"
-        />
+    <!-- ========== STEHTISCHE (Atmosphäre) ========== -->
+    {#each stehtischPositions as tisch}
+        <T.Group position={[tisch.x, 1.5, tisch.z]} rotation.y={tisch.rotation}>
+            <!-- Tischplatte -->
+            <T.Mesh position.y={1} castShadow>
+                <T.CylinderGeometry args={[0.4, 0.35, 0.08, 16]} />
+                <T.MeshStandardMaterial color="#f8fafc" metalness={0.3} roughness={0.5} />
+            </T.Mesh>
+            <!-- Tischbein -->
+            <T.Mesh position.y={0.5} castShadow>
+                <T.CylinderGeometry args={[0.05, 0.08, 1, 8]} />
+                <T.MeshStandardMaterial color="#64748b" metalness={0.6} roughness={0.3} />
+            </T.Mesh>
+            <!-- Standfuß -->
+            <T.Mesh position.y={0.02}>
+                <T.CylinderGeometry args={[0.25, 0.25, 0.04, 16]} />
+                <T.MeshStandardMaterial color="#64748b" metalness={0.6} roughness={0.3} />
+            </T.Mesh>
+        </T.Group>
     {/each}
 
     <!-- ========== OKTAEDER (Navigation Hub) ========== -->
