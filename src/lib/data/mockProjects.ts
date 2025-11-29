@@ -498,42 +498,42 @@ export const mockMarketplace: MarketplaceContent = {
         {
             id: 'leitlinie-justice',
             title: 'Gerechtigkeit',
-            imageUrl: 'https://picsum.photos/seed/leitlinie-justice/800/1200',
+            imageUrl: '/assets/leitlinien/leitlinie1.jpg',
             perspective: 'justice',
             position: 0  // Wand 1, links
         },
         {
             id: 'leitlinie-sustainability',
             title: 'Nachhaltigkeit',
-            imageUrl: 'https://picsum.photos/seed/leitlinie-sustainability/800/1200',
+            imageUrl: '/assets/leitlinien/leitlinie2.jpg',
             perspective: 'sustainability',
             position: 1  // Wand 1, rechts
         },
         {
             id: 'leitlinie-digitality',
             title: 'Digitalität',
-            imageUrl: 'https://picsum.photos/seed/leitlinie-digitality/800/1200',
+            imageUrl: '/assets/leitlinien/leitlinie3.jpg',
             perspective: 'digitality',
             position: 2  // Wand 2
         },
         {
             id: 'leitlinie-structure',
             title: 'Strukturen',
-            imageUrl: 'https://picsum.photos/seed/leitlinie-structure/800/1200',
+            imageUrl: '/assets/leitlinien/leitlinie4.jpg',
             perspective: 'structure',
             position: 3  // Wand 3
         },
         {
             id: 'leitlinie-community',
             title: 'Gemeinschaft',
-            imageUrl: 'https://picsum.photos/seed/leitlinie-community/800/1200',
+            imageUrl: '/assets/leitlinien/leitlinie5.jpg',
             perspective: 'justice',
             position: 4  // Wand 4, links
         },
         {
             id: 'leitlinie-tradition',
             title: 'Tradition & Innovation',
-            imageUrl: 'https://picsum.photos/seed/leitlinie-tradition/800/1200',
+            imageUrl: '/assets/leitlinien/leitlinie6.jpg',
             perspective: 'sustainability',
             position: 5  // Wand 4, rechts
         }

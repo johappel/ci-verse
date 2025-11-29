@@ -227,6 +227,7 @@
         startEdge={5}
         platformPosition={[platform.x, platform.y, platform.z]}
         platformId={platform.id}
+        imageOnly={true}
     />
     
     <!-- Rechte Wand (1 Wand, 2 Poster) - Edge 1 (rechts) -->
@@ -239,6 +240,7 @@
         startEdge={1}
         platformPosition={[platform.x, platform.y, platform.z]}
         platformId={platform.id}
+        imageOnly={true}
     />
 
     <!-- ========== INSTITUTION BOOTH (Turm mit CI-Logo) ========== -->

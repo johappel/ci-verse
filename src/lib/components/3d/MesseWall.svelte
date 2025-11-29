@@ -33,6 +33,7 @@
         startEdge?: number; // Welche Hexagon-Kante als Start (0-5)
         platformPosition?: [number, number, number]; // Welt-Position der Plattform
         platformId?: string; // ID der Plattform für Aktivierungs-Check
+        imageOnly?: boolean; // Nur Bild anzeigen (keine Text-Poster, keine Buttons)
     }
 
     let { 
@@ -43,7 +44,8 @@
         wallCount = 3, // Standard: 3 Wände (halbes Hexagon)
         startEdge = 3, // Standard: "hinten" (gegenüber vom Eingang)
         platformPosition = [0, 0, 0],
-        platformId = '' // ID der Plattform für Aktivierungs-Check
+        platformId = '', // ID der Plattform für Aktivierungs-Check
+        imageOnly = false // Nur Bild anzeigen (für Leitlinien)
     }: Props = $props();
 
     const { camera } = useThrelte();
@@ -116,12 +118,13 @@
     });
 
     // Poster auf die Wände verteilen (mehrere pro Wand möglich)
-    // Berechne wie viele Poster pro Wand und deren Position
-    // NEU: Poster + Bild nebeneinander
-    // Portrait: 4 + 3.6 + 0.25 ≈ 7.85 | Landscape: 4 + 8.8 + 0.25 ≈ 13
+    // imageOnly: Nur großes Bild (für Leitlinien) - Landscape 1649x906
+    // Normal: Text-Poster + Bild nebeneinander
     const posterSize = 4; // Quadratische Text-Poster
+    const imageOnlyWidth = 12; // Breite für imageOnly-Modus (Landscape)
+    const imageOnlyHeight = 6.6; // Höhe für imageOnly (1649x906 Verhältnis)
     const maxImageWidth = posterSize * 2.2; // Landscape ist breiter (8.8)
-    const combinedPosterWidth = posterSize + maxImageWidth + 0.5; // Max-Breite ≈ 13.3
+    const combinedPosterWidth = imageOnly ? imageOnlyWidth : (posterSize + maxImageWidth + 0.5); // Max-Breite
     
     // Bei wenigen Postern: 1 Poster pro Wand, mittig platziert
     // Bei 3+ Postern: maximal 2 pro Wand (hexEdgeLength ≈ 35-45)
@@ -184,8 +187,9 @@
         const sinR = Math.sin(wallRotY);
         
         // Offset von der Wand-Mitte zum Poster (in Weltkoordinaten)
-        // Extra Offset nach rechts (+3), um Text-Poster + Bild besser zu sehen
-        const viewOffsetX = offsetX + 3;
+        // imageOnly: Bild ist zentriert, kein Extra-Offset nötig
+        // Normal: Extra Offset nach rechts (+3), um Text-Poster + Bild besser zu sehen
+        const viewOffsetX = imageOnly ? offsetX : (offsetX + 3);
         const offsetWorldX = viewOffsetX * cosR;
         const offsetWorldZ = -viewOffsetX * sinR;  // Negativ wegen Three.js Koordinatensystem
         
@@ -194,11 +198,15 @@
         const worldPosterZ = platformPosition[2] + posterZ + offsetWorldZ;
         
         // Kamera auf Augenhöhe (relativ zur Plattform-Oberfläche)
-        const cameraY = getCameraY(platformPosition[1]);
+        // imageOnly: Etwas höher schauen, da Bilder tiefer hängen (Landscape-Format)
+        const baseY = getCameraY(platformPosition[1]);
+        const cameraY = imageOnly ? baseY - 0.5 : baseY;
+        const lookAtY = imageOnly ? baseY -0.5 : baseY; // Blickpunkt etwas höher für Bildmitte
         
         // Die Wand-Normale (lokales +Z) zeigt zur Plattform-Mitte
         // Lokales +Z nach Welt: (sin(rotY), 0, cos(rotY))
-        const viewDistance = 6; // Nah genug für Wandknopf-Aktivierung (< WALL_ACTIVATION_DISTANCE)
+        // imageOnly: Weiter weg stehen für größeres Bild
+        const viewDistance = imageOnly ? 5 : 6;
         const normalX = sinR;
         const normalZ = cosR;
         
@@ -209,10 +217,10 @@
             z: worldPosterZ + normalZ * viewDistance
         };
         
-        // Kamera schaut ZUM Poster (auf Augenhöhe)
+        // Kamera schaut ZUM Poster
         const lookAtPos = {
             x: worldPosterX,
-            y: cameraY,
+            y: lookAtY,
             z: worldPosterZ
         };
         
@@ -273,8 +281,40 @@
         <T.Group position={[x, wallHeight / 2 + 1.5, z]} rotation.y={rotY}>
             <!-- Offset für Position auf der Wand -->
             <T.Group position.x={offsetX}>
-                <!-- Wandknopf unter dem Poster - öffnet ProjectCard -->
-                <T.Group position={[0, -posterSize / 2 - 0.8, 0.25]}>
+                
+                {#if imageOnly}
+                    <!-- === NUR BILD MODUS (Leitlinien) === -->
+                    {#if project.display?.posterImage}
+                        <!-- Großes Landscape-Bild zentriert -->
+                        <T.Group>
+                            <!-- Rahmen für Poster-Bild -->
+                            <T.Mesh position.z={0.18}>
+                                <T.PlaneGeometry args={[imageOnlyWidth + 0.2, imageOnlyHeight + 0.2]} />
+                                <T.MeshBasicMaterial 
+                                    color={displayColor}
+                                    transparent
+                                    opacity={0.8}
+                                />
+                            </T.Mesh>
+                            
+                            <!-- Poster-Bild -->
+                            <T.Mesh 
+                                position.z={0.2}
+                                onclick={() => handlePosterClick(x, z, rotY, offsetX)}
+                            >
+                                <T.PlaneGeometry args={[imageOnlyWidth, imageOnlyHeight]} />
+                                <ImageMaterial 
+                                    url={project.display.posterImage}
+                                    transparent
+                                    opacity={0.98}
+                                />
+                            </T.Mesh>
+                        </T.Group>
+                    {/if}
+                {:else}
+                    <!-- === NORMAL MODUS (Text + Bild + Button) === -->
+                    <!-- Wandknopf unter dem Poster - öffnet ProjectCard -->
+                    <T.Group position={[0, -posterSize / 2 - 0.8, 0.25]}>
                         <!-- Knopf-Gehäuse (flach an der Wand) -->
                         <T.Mesh rotation.x={Math.PI / 2}>
                             <T.CylinderGeometry args={[0.4, 0.4, 0.15, 8]} />
@@ -450,6 +490,7 @@
                             />
                         </T.Mesh>
                     </T.Group>
+                {/if}
                 {/if}
             </T.Group>
         </T.Group>
