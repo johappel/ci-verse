@@ -272,12 +272,14 @@
         <T.Group 
             position={[0, 0, 0.1]}
             scale={chatScale}
-            onclick={handleChatClick}
             onpointerenter={() => { isChatHovered = true; onPointerEnter(); }}
             onpointerleave={() => { isChatHovered = false; onPointerLeave(); }}
         >
             <HTML center transform scale={0.10}>
-                <div class="flex flex-col items-center cursor-pointer">
+                <button 
+                    class="flex flex-col items-center cursor-pointer bg-transparent border-none"
+                    onclick={handleChatClick}
+                >
                     <!-- Video mit Robot runter kalliert auf 15% -->
                     <video 
                         src="/assets/bot.mp4" 
@@ -294,7 +296,7 @@
                     >
                         {chatGlow > 0.1 ? 'Frag mich!' : '...'}
                     </div>
-                </div>
+                </button>
             </HTML>
         </T.Group>
 
