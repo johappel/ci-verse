@@ -121,8 +121,8 @@
     // Rot (links-mitte) = Events, Grün (unten-links) = Publications
     // Chat ist am Turm (InstitutionBooth) integriert
     const terminalPositions: Array<{ x: number; z: number; rotation: number; type: string }> = [
-        { x: -12, z: 22, rotation: Math.PI, type: 'publications' },        // Grün: unten-links (vorne)
-        { x: -24, z: 5, rotation: Math.PI * 0.5, type: 'events' }          // Rot: links-mitte
+        { x: -16, z: 20, rotation: Math.PI * -1.2, type: 'publications' },        // Grün: unten-links (vorne)
+        { x: -12, z: -20, rotation: Math.PI * -1.8, type: 'events' }       // Rot: Rechts neben ReceptionWall
     ];
 
     // Institution-Stand aus den Daten finden

@@ -78,14 +78,14 @@
     function handleWallClick() {
         const worldX = platformPosition[0] + position[0];
         const worldZ = platformPosition[2] + position[2];
-        const viewDistance = 12;
+        const viewDistance = 6.8;
         const cameraY = getCameraY(platformPosition[1]);
         const cos = Math.cos(rotation);
         const sin = Math.sin(rotation);
         
         worldStore.setViewTarget(
             { x: worldX + sin * viewDistance, y: cameraY, z: worldZ + cos * viewDistance },
-            { x: worldX, y: cameraY + 1, z: worldZ }
+            { x: worldX, y: cameraY + -0.0, z: worldZ }
         );
     }
 
@@ -139,7 +139,7 @@
             <T.MeshBasicMaterial color={darkColor} />
         </T.Mesh>
 
-        <!-- Chatbot-Avatar via HTML für bessere Darstellung -->
+        <!-- Chatbot-Video + Text -->
         <T.Group 
             position={[0, 0, 0.1]}
             scale={chatScale}
@@ -149,9 +149,18 @@
         >
             <HTML center transform scale={0.4}>
                 <div class="flex flex-col items-center cursor-pointer">
-                    <div class="text-8xl mb-2">🤖</div>
+                    <!-- Video statt Emoji -->
+                    <video 
+                        src="/assets/bot.mp4" 
+                        autoplay 
+                        loop 
+                        muted 
+                        playsinline
+                        class="w-64 h-64 object-contain rounded-lg"
+                        style="background: transparent;"
+                    ></video>
                     <div 
-                        class="text-2xl font-bold whitespace-nowrap px-4 py-2 rounded-lg"
+                        class="text-2xl font-bold whitespace-nowrap px-4 py-2 rounded-lg mt-2"
                         style="color: #22d3d3; text-shadow: 0 0 15px #22d3d3, 0 0 30px #22d3d3;"
                     >
                         💬 Frag mich!
