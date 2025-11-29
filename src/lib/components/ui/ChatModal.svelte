@@ -9,27 +9,18 @@
     import { Send, Bot, User, Loader2 } from "lucide-svelte";
     import GlassDialog from "./GlassDialog.svelte";
 
-    interface Props {
-        isOpen?: boolean;
-        onClose?: () => void;
-        webhookUrl?: string;
-    }
-
-    let { 
-        isOpen = undefined,
-        onClose = undefined,
-        webhookUrl = undefined
-    }: Props = $props();
-
-    // Verwende Props falls vorhanden, sonst Store
-    let isModalOpen = $derived(isOpen !== undefined ? isOpen : worldStore.state.isChatOpen);
+    // Direkt vom Store - reaktiv durch $derived
+    let isModalOpen = $derived(worldStore.state.isChatOpen);
+    
+    // Debug: Beobachte Änderungen
+    $effect(() => {
+        console.log('ChatModal: isModalOpen changed to', isModalOpen);
+    });
 
     function handleClose() {
-        if (onClose) {
-            onClose();
-        } else {
-            worldStore.closeChat();
-        }
+        console.log('ChatModal handleClose called');
+        console.trace('Close called from:');
+        worldStore.closeChat();
     }
 
     interface ChatMessage {
@@ -130,37 +121,56 @@
     width="450px"
     height="600px"
 >
-    <div class="flex flex-col h-full">
+    <div style="display: flex; flex-direction: column; height: 100%;">
         <!-- Messages -->
         <div 
             bind:this={messagesContainer}
-            class="flex-1 overflow-y-auto p-4 space-y-4"
+            style="flex: 1; overflow-y: auto; padding: 1rem;"
         >
             {#each messages as message (message.id)}
                 <div 
-                    class="flex gap-3"
-                    class:flex-row-reverse={message.role === 'user'}
+                    style="
+                        display: flex;
+                        gap: 0.75rem;
+                        margin-bottom: 1rem;
+                        flex-direction: {message.role === 'user' ? 'row-reverse' : 'row'};
+                    "
                 >
                     <!-- Avatar -->
-                    <div 
-                        class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center {message.role === 'assistant' ? 'bg-cyan-600/50' : 'bg-slate-600/50'}"
-                        style="border: 1px solid rgba(255,255,255,0.1);"
-                    >
+                    <div style="
+                        width: 2rem;
+                        height: 2rem;
+                        border-radius: 9999px;
+                        flex-shrink: 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: {message.role === 'assistant' ? 'rgba(8, 145, 178, 0.5)' : 'rgba(71, 85, 105, 0.5)'};
+                        border: 1px solid rgba(255,255,255,0.1);
+                    ">
                         {#if message.role === 'assistant'}
-                            <Bot class="w-5 h-5 text-cyan-300" />
+                            <Bot style="width: 1.25rem; height: 1.25rem; color: #67e8f9;" />
                         {:else}
-                            <User class="w-5 h-5 text-white" />
+                            <User style="width: 1.25rem; height: 1.25rem; color: white;" />
                         {/if}
                     </div>
 
                     <!-- Message Bubble -->
-                    <div 
-                        class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed {message.role === 'assistant' ? 'bg-cyan-900/40 text-white rounded-bl-sm' : 'bg-slate-700/50 text-slate-100 rounded-br-sm'}"
-                        style="border: 1px solid rgba(255,255,255,0.08);"
-                    >
+                    <div style="
+                        max-width: 80%;
+                        border-radius: 1rem;
+                        padding: 0.625rem 1rem;
+                        font-size: 0.875rem;
+                        line-height: 1.625;
+                        background: {message.role === 'assistant' ? 'rgba(22, 78, 99, 0.4)' : 'rgba(51, 65, 85, 0.5)'};
+                        color: {message.role === 'assistant' ? 'white' : '#f1f5f9'};
+                        border: 1px solid rgba(255,255,255,0.08);
+                        border-bottom-left-radius: {message.role === 'assistant' ? '0.125rem' : '1rem'};
+                        border-bottom-right-radius: {message.role === 'user' ? '0.125rem' : '1rem'};
+                    ">
                         <!-- Render Markdown-like formatting -->
                         {@html message.content
-                            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyan-300">$1</strong>')
+                            .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #67e8f9;">$1</strong>')
                             .replace(/\n/g, '<br>')
                         }
                     </div>
@@ -169,38 +179,70 @@
 
             <!-- Loading Indicator -->
             {#if isLoading}
-                <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-cyan-600/50 flex items-center justify-center" style="border: 1px solid rgba(255,255,255,0.1);">
-                        <Bot class="w-5 h-5 text-cyan-300" />
+                <div style="display: flex; gap: 0.75rem;">
+                    <div style="
+                        width: 2rem;
+                        height: 2rem;
+                        border-radius: 9999px;
+                        background: rgba(8, 145, 178, 0.5);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border: 1px solid rgba(255,255,255,0.1);
+                    ">
+                        <Bot style="width: 1.25rem; height: 1.25rem; color: #67e8f9;" />
                     </div>
-                    <div class="bg-cyan-900/40 rounded-2xl rounded-bl-sm px-4 py-3" style="border: 1px solid rgba(255,255,255,0.08);">
-                        <Loader2 class="w-5 h-5 text-cyan-300 animate-spin" />
+                    <div style="
+                        background: rgba(22, 78, 99, 0.4);
+                        border-radius: 1rem;
+                        border-bottom-left-radius: 0.125rem;
+                        padding: 0.75rem 1rem;
+                        border: 1px solid rgba(255,255,255,0.08);
+                    ">
+                        <Loader2 style="width: 1.25rem; height: 1.25rem; color: #67e8f9; animation: spin 1s linear infinite;" />
                     </div>
                 </div>
             {/if}
         </div>
 
         <!-- Input -->
-        <div class="p-4 border-t border-white/10">
-            <div class="flex gap-2">
+        <div style="padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; gap: 0.5rem;">
                 <input
                     type="text"
                     bind:value={inputValue}
                     onkeydown={handleKeydown}
                     placeholder="Ihre Frage..."
-                    class="flex-1 bg-slate-800/50 text-white placeholder-slate-400 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 border border-white/10"
                     disabled={isLoading}
+                    style="
+                        flex: 1;
+                        background: rgba(30, 41, 59, 0.5);
+                        color: white;
+                        border-radius: 0.75rem;
+                        padding: 0.75rem 1rem;
+                        font-size: 0.875rem;
+                        border: 1px solid rgba(255,255,255,0.1);
+                        outline: none;
+                    "
                 />
                 <button
                     onclick={sendMessage}
                     disabled={!inputValue.trim() || isLoading}
-                    class="px-4 py-3 bg-cyan-600/50 hover:bg-cyan-500/50 disabled:bg-slate-600/30 disabled:cursor-not-allowed text-white rounded-xl transition-colors border border-cyan-400/30"
+                    style="
+                        padding: 0.75rem 1rem;
+                        background: {!inputValue.trim() || isLoading ? 'rgba(71, 85, 105, 0.3)' : 'rgba(8, 145, 178, 0.5)'};
+                        color: white;
+                        border-radius: 0.75rem;
+                        border: 1px solid rgba(34, 211, 238, 0.3);
+                        cursor: {!inputValue.trim() || isLoading ? 'not-allowed' : 'pointer'};
+                        transition: background-color 0.15s;
+                    "
                     aria-label="Nachricht senden"
                 >
-                    <Send class="w-5 h-5" />
+                    <Send style="width: 1.25rem; height: 1.25rem;" />
                 </button>
             </div>
-            <p class="text-xs text-slate-500 mt-2 text-center">
+            <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem; text-align: center;">
                 Demo-Modus • Später mit n8n-KI verbunden
             </p>
         </div>

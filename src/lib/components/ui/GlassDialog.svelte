@@ -34,6 +34,11 @@
         children,
         headerSlot
     }: Props = $props();
+    
+    // Debug
+    $effect(() => {
+        console.log('GlassDialog: isOpen =', isOpen, 'hasChildren =', !!children);
+    });
 
     // Drag State
     let dialogX = $state(0);
@@ -99,14 +104,35 @@
         window.removeEventListener('touchend', stopDrag);
     }
 
+    // Track wenn Dialog stabil offen ist (nach kurzer Verzögerung)
+    let isStable = $state(false);
+    
+    $effect(() => {
+        if (isOpen) {
+            // Kurze Verzögerung bevor wir auf Events reagieren
+            isStable = false;
+            const timer = setTimeout(() => {
+                isStable = true;
+            }, 100);
+            return () => clearTimeout(timer);
+        } else {
+            isStable = false;
+        }
+    });
+
     function handleBackdropClick(e: MouseEvent) {
+        if (!isStable) return;
+        console.log('handleBackdropClick', e.target, e.currentTarget, e.target === e.currentTarget);
         if (e.target === e.currentTarget) {
+            console.log('Backdrop click - closing dialog');
             onClose();
         }
     }
 
     function handleKeydown(e: KeyboardEvent) {
+        if (!isStable) return;
         if (e.key === 'Escape') {
+            console.log('Escape pressed - closing dialog');
             onClose();
         }
     }
@@ -115,10 +141,21 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if isOpen}
-    <!-- Backdrop mit leichtem Blur -->
+    <!-- Backdrop Container - mit isolation für neuen Stacking Context -->
     <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
     <div
-        class="fixed inset-0 z-50 flex items-center justify-center"
+        style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            isolation: isolate;
+        "
         onclick={handleBackdropClick}
         onkeydown={handleKeydown}
         role="dialog"
@@ -128,129 +165,116 @@
         transition:fade={{ duration: 150 }}
     >
         <!-- Semi-transparenter Overlay -->
-        <div class="absolute inset-0 bg-black/30 backdrop-blur-[2px]"></div>
+        <div style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        "></div>
         
-        <!-- Dialog Container -->
+        <!-- Dialog Box -->
         <div
             bind:this={dialogRef}
-            class="relative glass-dialog"
             style="
+                position: relative;
                 width: {width};
-                height: {height};
+                min-height: 200px;
                 max-width: calc(100vw - 2rem);
                 max-height: calc(100vh - 2rem);
                 transform: translate({dialogX}px, {dialogY}px);
+                background: rgba(15, 23, 42, 0.85);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-radius: 1rem;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                box-shadow: 
+                    0 25px 50px rgba(0, 0, 0, 0.5), 
+                    0 0 30px rgba(34, 211, 211, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
             "
             transition:scale={{ duration: 200, start: 0.95 }}
         >
-            <!-- Glasrahmen -->
-            <div class="absolute inset-0 rounded-2xl glass-frame"></div>
-            
-            <!-- Innerer Content-Bereich -->
-            <div class="relative rounded-2xl overflow-hidden flex flex-col h-full glass-inner">
-                
-                <!-- Header mit Drag-Handle -->
-                <div 
-                    class="glass-header flex items-center justify-between px-4 py-3 cursor-move select-none"
-                    onmousedown={startDrag}
-                    ontouchstart={startDrag}
-                    role="button"
-                    tabindex="0"
-                >
-                    <div class="flex items-center gap-3">
-                        {#if Icon}
-                            <div class="w-10 h-10 rounded-xl glass-icon flex items-center justify-center">
-                                <Icon class="w-5 h-5 text-cyan-300" />
-                            </div>
-                        {/if}
-                        <div>
-                            {#if title}
-                                <h3 id="dialog-title" class="font-semibold text-white text-lg">{title}</h3>
-                            {/if}
-                            {#if subtitle}
-                                <p class="text-xs text-cyan-200/70">{subtitle}</p>
-                            {/if}
+            <!-- Header -->
+            <div 
+                style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 1rem;
+                    background: linear-gradient(90deg, rgba(34, 211, 211, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    cursor: move;
+                    user-select: none;
+                "
+                onmousedown={startDrag}
+                ontouchstart={startDrag}
+                role="button"
+                tabindex="0"
+            >
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    {#if Icon}
+                        <div style="
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            border-radius: 0.5rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            background: rgba(34, 211, 211, 0.3);
+                        ">
+                            <Icon style="width: 1.25rem; height: 1.25rem; color: #67e8f9;" />
                         </div>
-                        {#if headerSlot}
-                            {@render headerSlot()}
-                        {/if}
-                    </div>
-                    
-                    <div class="flex items-center gap-2">
-                        <!-- Drag Indicator -->
-                        <div class="text-white/30 hidden sm:block">
-                            <GripHorizontal class="w-5 h-5" />
-                        </div>
-                        
-                        <!-- Close Button -->
-                        <button
-                            onclick={onClose}
-                            class="p-2 rounded-lg hover:bg-white/10 transition-colors glass-button"
-                            aria-label="Schließen"
-                        >
-                            <X class="w-5 h-5 text-white/80" />
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Content -->
-                <div class="flex-1 overflow-hidden">
-                    {#if children}
-                        {@render children()}
                     {/if}
+                    <div>
+                        {#if title}
+                            <h3 id="dialog-title" style="margin: 0; font-weight: 600; color: white; font-size: 1.125rem;">{title}</h3>
+                        {/if}
+                        {#if subtitle}
+                            <p style="margin: 0; font-size: 0.75rem; color: rgba(165, 243, 252, 0.7);">{subtitle}</p>
+                        {/if}
+                    </div>
                 </div>
+                
+                <!-- Close Button -->
+                <button
+                    onclick={onClose}
+                    style="
+                        width: 2rem;
+                        height: 2rem;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 0.5rem;
+                        border: none;
+                        background: rgba(255, 255, 255, 0.1);
+                        color: white;
+                        cursor: pointer;
+                    "
+                    aria-label="Schließen"
+                >
+                    <X style="width: 1rem; height: 1rem;" />
+                </button>
+            </div>
+            
+            <!-- Content -->
+            <div style="flex: 1; overflow: auto; min-height: 0;">
+                {#if children}
+                    {@render children()}
+                {:else}
+                    <div style="padding: 2rem; color: white; text-align: center;">
+                        <p>Dialog Inhalt wird geladen...</p>
+                    </div>
+                {/if}
             </div>
         </div>
     </div>
 {/if}
 
-<style>
-    .glass-dialog {
-        /* Outer glow */
-        filter: drop-shadow(0 0 30px rgba(34, 211, 211, 0.15))
-                drop-shadow(0 25px 50px rgba(0, 0, 0, 0.5));
-    }
-    
-    .glass-frame {
-        /* Glasrahmen wie NavigationControls */
-        background: linear-gradient(
-            135deg,
-            rgba(255, 255, 255, 0.1) 0%,
-            rgba(255, 255, 255, 0.05) 50%,
-            rgba(255, 255, 255, 0.02) 100%
-        );
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 
-            inset 0 1px 1px rgba(255, 255, 255, 0.1),
-            inset 0 -1px 1px rgba(0, 0, 0, 0.1),
-            0 0 0 1px rgba(0, 0, 0, 0.3);
-    }
-    
-    .glass-inner {
-        background: linear-gradient(
-            180deg,
-            rgba(15, 23, 42, 0.85) 0%,
-            rgba(15, 23, 42, 0.92) 100%
-        );
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-    }
-    
-    .glass-header {
-        background: linear-gradient(
-            90deg,
-            rgba(34, 211, 211, 0.08) 0%,
-            rgba(59, 130, 246, 0.08) 100%
-        );
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    
-    .glass-icon {
-        background: rgba(34, 211, 211, 0.15);
-        border: 1px solid rgba(34, 211, 211, 0.3);
-    }
-    
-    .glass-button:hover {
-        background: rgba(255, 255, 255, 0.1);
-    }
-</style>
+<!-- Keine scoped styles nötig - alles inline für Portal-Kompatibilität -->

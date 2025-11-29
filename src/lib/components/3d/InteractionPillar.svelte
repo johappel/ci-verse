@@ -20,6 +20,7 @@
         rotation?: number;
         size?: number;
         worldPosition?: [number, number, number];
+        onActivate?: () => void;
     }
 
     let { 
@@ -27,7 +28,8 @@
         position = [0, 0, 0],
         rotation = 0,
         size = 0.8,
-        worldPosition
+        worldPosition,
+        onActivate
     }: Props = $props();
     
     const effectiveWorldPos = $derived(worldPosition || position);
@@ -67,7 +69,15 @@
     });
 
     function handleClick() {
+        console.log('InteractionPillar handleClick!', { isNearby, hasOnActivate: !!onActivate, projectId: project.id });
         if (!isNearby) return;
+        
+        // Custom callback hat Priorität
+        if (onActivate) {
+            console.log('Calling onActivate callback');
+            onActivate();
+            return;
+        }
         
         // Wenn externe URL vorhanden, diese öffnen
         if (project.externalUrl) {

@@ -84,7 +84,10 @@
     const teamX = -(panels.institution.width / 2 + panels.gap + panels.team.width / 2);
 
     function handleChatClick() {
+        console.log('handleChatClick aufgerufen!');
+        console.log('isChatOpen vorher:', worldStore.state.isChatOpen);
         worldStore.openChat();
+        console.log('isChatOpen nachher:', worldStore.state.isChatOpen);
     }
 
     function handleWallClick() {
@@ -251,7 +254,30 @@
         worldPosition={[platformPosition[0] + position[0], platformPosition[1] + position[1], platformPosition[2] + position[2] + 3]}
     />
 
-    
+    <!-- ========== INTERACTION PILLAR für Chatbot ========== -->
+    {@const chatbotProject: ProjectData = {
+        id: 'chatbot',
+        title: 'Frag mich!',
+        slug: 'chatbot',
+        externalUrl: '',
+        departments: ['S2'],
+        perspectives: [],
+        targetGroups: [],
+        type: 'ground',
+        staff: [],
+        shortTeaser: 'KI-Assistent für Fragen',
+        display: {
+            slogan: '💬 Frag mich!',
+            color: '#22d3d3'
+        }
+    }}
+    <InteractionPillar 
+        project={chatbotProject}
+        position={[chatbotX, 0, 3]}
+        size={1.2}
+        worldPosition={[platformPosition[0] + position[0] + chatbotX, platformPosition[1] + position[1], platformPosition[2] + position[2] + 3]}
+        onActivate={handleChatClick}
+    />
 
     <!-- ========== CHATBOT-PANEL (Rechts) ========== -->
     <T.Group position={[chatbotX, wall.height / 2 + 1.5, wall.depth / 2 + 0.1]}>
@@ -268,37 +294,29 @@
             <T.MeshBasicMaterial color={darkColor} />
         </T.Mesh>
 
-        <!-- Chatbot-Video + Text -->
-        <T.Group 
-            position={[0, 0, 0.1]}
-            scale={chatScale}
-            onpointerenter={() => { isChatHovered = true; onPointerEnter(); }}
-            onpointerleave={() => { isChatHovered = false; onPointerLeave(); }}
-        >
-            <HTML center transform scale={0.10}>
-                <button 
-                    class="flex flex-col items-center cursor-pointer bg-transparent border-none"
-                    onclick={handleChatClick}
-                >
-                    <!-- Video mit Robot runter kalliert auf 15% -->
+        <!-- Chatbot-Video -->
+        <T.Group position={[0, 0.5, 0.1]} scale={chatScale}>
+            <HTML center transform scale={0.12}>
+                <div class="flex flex-col items-center">
                     <video 
                         src="/assets/bot.mp4" 
                         autoplay 
                         loop 
                         muted 
                         playsinline
-                        class="w-48 h-48 object-contain rounded-lg"
+                        class="w-48 h-64 object-contain rounded-lg pointer-events-none"
                         style="background: transparent;"
                     ></video>
-                    <div
-                        class="text-xl font-bold whitespace-nowrap px-3 py-1 rounded-lg mt-1 scale-1000"
-                        style="color: #22d3d3; text-shadow: 0 0 15px #22d3d3, 0 0 30px #22d3d3;"
-                    >
-                        {chatGlow > 0.1 ? 'Frag mich!' : '...'}
-                    </div>
-                </button>
+                </div>
             </HTML>
         </T.Group>
+        
+        <!-- Hinweistext -->
+        <HTML center transform scale={0.06} position={[0, -2, 0.1]}>
+            <div class="text-center text-cyan-300 text-xl font-medium">
+                ↓ Tritt näher und klicke auf den Boden ↓
+            </div>
+        </HTML>
 
         {#if isChatHovered}
             <T.Mesh position.z={0.02}>

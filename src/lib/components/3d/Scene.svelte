@@ -315,7 +315,7 @@
 </script>
 
 <!-- Container mit festen viewport-Einheiten -->
-<div class="w-screen h-screen" style="position: fixed; top: 0; left: 0;">
+<div class="w-screen h-screen" style="position: fixed; top: 0; left: 0; z-index: 1;">
 	<Canvas>
 		<!-- Kamera mit CameraControls für smooth Transport -->
 		<!-- WASD-Navigation aktiviert, Boundary begrenzt Bewegungsbereich auf Plattform -->

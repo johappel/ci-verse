@@ -130,11 +130,8 @@
         <!-- <FilterBar /> -->
         <NavigationControls {cameraControls} />
 
-        <!-- Marketplace-Panels -->
-        <ChatModal 
-            isOpen={worldStore.state.isChatOpen} 
-            onClose={() => worldStore.closeChat()} 
-        />
+        <!-- Marketplace-Panels (verwenden Store direkt) - ChatModal wurde nach außen verschoben -->
+        
         <RssFeedPanel 
             isOpen={worldStore.state.isRssPanelOpen} 
             onClose={() => worldStore.closeRssPanel()} 
@@ -155,3 +152,8 @@
         </div> -->
     {/if}
 </main>
+
+<!-- ChatModal außerhalb des main-Containers für korrekten z-index -->
+{#if !isLoading}
+    <ChatModal />
+{/if}
