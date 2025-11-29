@@ -68,8 +68,14 @@
 
     function handleClick() {
         if (!isNearby) return;
-        // Öffne ProjectCard statt externe URL
-        worldStore.selectProject(project.id);
+        
+        // Wenn externe URL vorhanden, diese öffnen
+        if (project.externalUrl) {
+            window.open(project.externalUrl, '_blank');
+        } else {
+            // Sonst ProjectCard öffnen
+            worldStore.selectProject(project.id);
+        }
     }
 
     // Puls-Animation

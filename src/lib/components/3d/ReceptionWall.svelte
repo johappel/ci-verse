@@ -8,9 +8,20 @@
      * - Rechts: Team-Slideshow mit Mitarbeiter:innen-Fotos
      */
     import { T, useTask } from '@threlte/core';
-    import { HTML, useCursor, ImageMaterial } from '@threlte/extras';
+    import { HTML, useCursor, useTexture } from '@threlte/extras';
+    import { SRGBColorSpace } from 'three';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
+    import InteractionPillar from './InteractionPillar.svelte';
+    import type { ProjectData } from '$lib/types/project';
+    
+    // Institutions-Bild laden mit korrektem Farbmanagement
+    const institutionTexture = useTexture('/assets/about-ci.jpg', {
+        transform: (texture) => {
+            texture.colorSpace = SRGBColorSpace;
+            return texture;
+        }
+    });
 
     interface TeamMember {
         name: string;
@@ -68,8 +79,9 @@
     let chatScale = $derived(1 + Math.sin(pulsePhase * 0.5) * 0.02);
     let currentMember = $derived(teamMembers[currentTeamIndex] || null);
 
-    const chatbotX = -(panels.institution.width / 2 + panels.gap + panels.chatbot.width / 2);
-    const teamX = panels.institution.width / 2 + panels.gap + panels.team.width / 2;
+    // GETAUSCHT: Chatbot jetzt rechts, Team jetzt links
+    const chatbotX = panels.institution.width / 2 + panels.gap + panels.chatbot.width / 2;
+    const teamX = -(panels.institution.width / 2 + panels.gap + panels.team.width / 2);
 
     function handleChatClick() {
         worldStore.openChat();
@@ -191,7 +203,7 @@
     </T.Group>
     
 
-    <!-- ========== INSTITUTIONS-PANEL (Mitte) ========== -->
+    <!-- ========== INSTITUTIONS-PANEL (Mitte) mit Bild ========== -->
     <T.Group position={[0, wall.height / 2 + 1.5, wall.depth / 2 + 0.1]} onclick={handleWallClick}>
         
         <!-- Goldener Rahmen -->
@@ -200,28 +212,44 @@
             <T.MeshBasicMaterial color={accentColor} />
         </T.Mesh>
 
-        <!-- Panel-Hintergrund -->
-        <T.Mesh position.z={0.05}>
+        <!-- CI-Blau Hintergrund -->
+        <T.Mesh position.z={0.03}>
             <T.PlaneGeometry args={[panels.institution.width, panels.institution.height]} />
-            <T.MeshBasicMaterial color={primaryColor} />
+            <T.MeshBasicMaterial color="#023b88" toneMapped={false} />
         </T.Mesh>
 
-        <!-- Institution Content via HTML -->
-        <HTML position={[0, 0, 0.1]} center transform scale={0.35}>
-            <div class="text-center text-white" style="width: 600px;">
-                <h1 class="text-5xl font-bold tracking-wider mb-1">COMENIUS</h1>
-                <h2 class="text-5xl font-bold tracking-wider mb-4">INSTITUT</h2>
-                <div class="w-64 h-1 mx-auto mb-4" style="background: #fbbf24;"></div>
-                <p class="text-xl mb-1">Evangelische Arbeitsstätte</p>
-                <p class="text-xl mb-1">für Erziehungswissenschaft</p>
-                <p class="text-xl mb-4">und Religionspädagogik e.V.</p>
-                <p class="text-2xl font-bold mb-4" style="color: #fbbf24;">📍 Münster</p>
-                <div class="px-4 py-2 rounded inline-block" style="background: rgba(30,41,59,0.5);">
-                    <span class="text-sm opacity-80">Eine Einrichtung der EKD</span>
-                </div>
-            </div>
-        </HTML>
+        <!-- Institutions-Bild (about-ci.jpg) mit korrektem Farbmanagement -->
+        {#await institutionTexture then texture}
+            <T.Mesh position.z={0.05}>
+                <T.PlaneGeometry args={[panels.institution.width, panels.institution.height]} />
+                <T.MeshBasicMaterial map={texture} toneMapped={false} />
+            </T.Mesh>
+        {/await}
     </T.Group>
+
+    <!-- ========== INTERACTION PILLAR vor Institution (Link zur Website) ========== -->
+    {@const institutionProject: ProjectData = {
+        id: 'comenius-website',
+        title: 'Comenius-Institut Website',
+        slug: 'comenius-website',
+        externalUrl: 'https://comenius.de',
+        departments: ['S1'],
+        perspectives: [],
+        targetGroups: [],
+        type: 'ground',
+        staff: [],
+        shortTeaser: 'Besuchen Sie unsere Website',
+        display: {
+            slogan: 'comenius.de',
+            color: '#fbbf24'
+        }
+    }}
+    <InteractionPillar 
+        project={institutionProject}
+        position={[0, 0, 3]}
+        size={1.2}
+        worldPosition={[platformPosition[0] + position[0], platformPosition[1] + position[1], platformPosition[2] + position[2] + 3]}
+    />
 
     
 
