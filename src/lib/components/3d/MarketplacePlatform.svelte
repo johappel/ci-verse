@@ -18,7 +18,7 @@
     import type { Platform as PlatformType } from '$lib/logic/platforms';
     import type { MarketplaceContent } from '$lib/types/project';
     import MesseWall from './MesseWall.svelte';
-    import InstitutionBooth from './InstitutionBooth.svelte';
+    import ReceptionWall from './ReceptionWall.svelte';
     import MarketplaceStand from './MarketplaceStand.svelte';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getMarketplaceContent } from '$lib/data/mockProjects';
@@ -100,11 +100,22 @@
     //                      [Start] →  [News]
     //                     (rechts)    (rechts-vorne)
     
-    const institutionPosition = { 
-        x: -18,           // Links versetzt
-        z: -18,           // Hinten-links, vor der Wand
-        rotation: Math.PI * 0.15  // Leicht gedreht zur Mitte
+    // Empfangswand: Links seitlich, schaut zur Plattform-Mitte
+    const receptionWallPosition = { 
+        x: -25,           // Links
+        z: 0,             // Mittig (Z-Achse)
+        rotation: Math.PI * 0.5  // 90° gedreht, schaut nach rechts zur Mitte
     };
+
+    // Team-Mitglieder (von comenius.de)
+    const teamMembers = [
+        { name: 'Dr. Jens Dechow', role: 'Direktor', imageUrl: 'https://comenius.de/wp-content/uploads/Dechow-Portrait-wpv_250x250_center_center.jpg' },
+        { name: 'Dr. Simone Wustrack', role: 'Wissenschaftliche Mitarbeiterin', imageUrl: 'https://comenius.de/wp-content/uploads/Simone.Wustrack-wpv_250x250_center_center.png' },
+        { name: 'Dr. Andreas Sander', role: 'Wissenschaftlicher Mitarbeiter', imageUrl: 'https://comenius.de/wp-content/uploads/Bild_Andreas-Sander-wpv_250x250_center_center.jpg' },
+        { name: 'Dr. Juliane Ta Van', role: 'Wissenschaftliche Mitarbeiterin', imageUrl: 'https://comenius.de/wp-content/uploads/tavan-wpv_250x250_center_center.jpg' },
+        { name: 'Dr. Cornelius Sturm', role: 'Wissenschaftlicher Mitarbeiter', imageUrl: 'https://comenius.de/wp-content/uploads/Profilbild-Cornelius-Sturm-2020-wpv_250x250_center_center.jpg' },
+        { name: 'Dr. Ada Wolf', role: 'Wissenschaftliche Mitarbeiterin', imageUrl: 'https://comenius.de/wp-content/uploads/2018/11/MBO_8255-wpv_250x250_center_center.jpg' },
+    ];
     
     // Terminal-Stände nach Ellipsen-Positionen im Screenshot:
     // Rot (links-mitte) = Events, Grün (unten-links) = Publications
@@ -243,15 +254,13 @@
         imageOnly={true}
     />
 
-    <!-- ========== INSTITUTION BOOTH (Turm mit CI-Logo) ========== -->
-    {#if institutionStand}
-        <InstitutionBooth
-            stand={institutionStand}
-            position={[institutionPosition.x, 1.5, institutionPosition.z]}
-            rotation={institutionPosition.rotation}
-            platformPosition={[platform.x, platform.y, platform.z]}
-        />
-    {/if}
+    <!-- ========== EMPFANGSWAND (Institution + Chatbot + Team) ========== -->
+    <ReceptionWall
+        position={[receptionWallPosition.x, 1.5, receptionWallPosition.z]}
+        rotation={receptionWallPosition.rotation}
+        platformPosition={[platform.x, platform.y, platform.z]}
+        {teamMembers}
+    />
 
     <!-- ========== TERMINAL STÄNDE (News rechts, Events links) ========== -->
     {#each terminalStands as stand, i}
