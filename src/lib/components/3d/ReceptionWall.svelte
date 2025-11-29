@@ -167,7 +167,7 @@
                             class="w-48 h-48 rounded-lg mx-auto mb-3 object-cover"
                             style="border: 2px solid rgba(251,191,36,0.5);"
                         />
-                        <div class="text-xl font-bold text-white">{currentMember.name}</div>
+                        <div class="p-3 text-xl font-bold text-white"  style="color: #ffffff; padding: 10px">{currentMember.name}</div>
                         <div class="text-sm" style="color: #94a3b8;">{currentMember.role}</div>
                     </div>
                 {:else}
@@ -176,7 +176,7 @@
                 {/if}
 
                 {#if teamMembers.length > 1}
-                    <div class="flex justify-center items-center gap-2 mt-4">
+                    <div class="flex justify-center items-center gap-2 mt-4" style="align-items: center; margin-top: 16px;">
                         <button 
                             class="w-8 h-8 rounded-full text-white cursor-pointer"
                             style="background: #334155;"
@@ -254,30 +254,6 @@
         worldPosition={[platformPosition[0] + position[0], platformPosition[1] + position[1], platformPosition[2] + position[2] + 3]}
     />
 
-    <!-- ========== INTERACTION PILLAR für Chatbot ========== -->
-    {@const chatbotProject: ProjectData = {
-        id: 'chatbot',
-        title: 'Frag mich!',
-        slug: 'chatbot',
-        externalUrl: '',
-        departments: ['S2'],
-        perspectives: [],
-        targetGroups: [],
-        type: 'ground',
-        staff: [],
-        shortTeaser: 'KI-Assistent für Fragen',
-        display: {
-            slogan: '💬 Frag mich!',
-            color: '#22d3d3'
-        }
-    }}
-    <InteractionPillar 
-        project={chatbotProject}
-        position={[chatbotX, 0, 3]}
-        size={1.2}
-        worldPosition={[platformPosition[0] + position[0] + chatbotX, platformPosition[1] + position[1], platformPosition[2] + position[2] + 3]}
-        onActivate={handleChatClick}
-    />
 
     <!-- ========== CHATBOT-PANEL (Rechts) ========== -->
     <T.Group position={[chatbotX, wall.height / 2 + 1.5, wall.depth / 2 + 0.1]}>
@@ -311,11 +287,29 @@
             </HTML>
         </T.Group>
         
-        <!-- Hinweistext -->
-        <HTML center transform scale={0.06} position={[0, -2, 0.1]}>
-            <div class="text-center text-cyan-300 text-xl font-medium">
-                ↓ Tritt näher und klicke auf den Boden ↓
-            </div>
+        <!-- "Frag mich!" Button unter dem Video -->
+        <HTML center transform scale={0.3} position={[0, -2, 0.1]}>
+            <button 
+                onclick={handleChatClick}
+                onmouseenter={() => isChatHovered = true}
+                onmouseleave={() => isChatHovered = false}
+                style="
+                    background: linear-gradient(135deg, #0891b2 0%, #22d3d3 100%);
+                    border: 2px solid #22d3d3;
+                    border-radius: 12px;
+                    padding: 12px 32px;
+                    color: white;
+                    font-size: 24px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    box-shadow: 0 0 20px rgba(34, 211, 211, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+                    transition: all 0.2s ease;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                "
+                class="hover:scale-105"
+            >
+                Frag mich!
+            </button>
         </HTML>
 
         {#if isChatHovered}
