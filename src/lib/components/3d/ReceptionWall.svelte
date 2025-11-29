@@ -124,94 +124,7 @@
         <T.MeshStandardMaterial color={accentColor} metalness={0.6} roughness={0.3} />
     </T.Mesh>
 
-    <!-- ========== CHATBOT-PANEL (Links) ========== -->
-    <T.Group position={[chatbotX, wall.height / 2 + 1.5, wall.depth / 2 + 0.1]}>
-        
-        <!-- Rahmen mit Glow -->
-        <T.Mesh position.z={0.01}>
-            <T.PlaneGeometry args={[panels.chatbot.width + 0.3, panels.chatbot.height + 0.3]} />
-            <T.MeshBasicMaterial color={neonCyan} transparent opacity={chatGlow} />
-        </T.Mesh>
-
-        <!-- Panel-Hintergrund -->
-        <T.Mesh position.z={0.05}>
-            <T.PlaneGeometry args={[panels.chatbot.width, panels.chatbot.height]} />
-            <T.MeshBasicMaterial color={darkColor} />
-        </T.Mesh>
-
-        <!-- Chatbot-Video + Text -->
-        <T.Group 
-            position={[0, 0, 0.1]}
-            scale={chatScale}
-            onclick={handleChatClick}
-            onpointerenter={() => { isChatHovered = true; onPointerEnter(); }}
-            onpointerleave={() => { isChatHovered = false; onPointerLeave(); }}
-        >
-            <HTML center transform scale={0.4}>
-                <div class="flex flex-col items-center cursor-pointer">
-                    <!-- Video statt Emoji -->
-                    <video 
-                        src="/assets/bot.mp4" 
-                        autoplay 
-                        loop 
-                        muted 
-                        playsinline
-                        class="w-64 h-64 object-contain rounded-lg"
-                        style="background: transparent;"
-                    ></video>
-                    <div 
-                        class="text-2xl font-bold whitespace-nowrap px-4 py-2 rounded-lg mt-2"
-                        style="color: #22d3d3; text-shadow: 0 0 15px #22d3d3, 0 0 30px #22d3d3;"
-                    >
-                        💬 Frag mich!
-                    </div>
-                </div>
-            </HTML>
-        </T.Group>
-
-        {#if isChatHovered}
-            <T.Mesh position.z={0.02}>
-                <T.PlaneGeometry args={[panels.chatbot.width + 0.5, panels.chatbot.height + 0.5]} />
-                <T.MeshBasicMaterial color={neonCyan} transparent opacity={0.2} />
-            </T.Mesh>
-        {/if}
-
-        <T.PointLight color={neonCyan} intensity={chatGlow * 30} distance={8} decay={2} position={[0, 0, 1]} />
-    </T.Group>
-
-    <!-- ========== INSTITUTIONS-PANEL (Mitte) ========== -->
-    <T.Group position={[0, wall.height / 2 + 1.5, wall.depth / 2 + 0.1]} onclick={handleWallClick}>
-        
-        <!-- Goldener Rahmen -->
-        <T.Mesh position.z={0.01}>
-            <T.PlaneGeometry args={[panels.institution.width + 0.3, panels.institution.height + 0.3]} />
-            <T.MeshBasicMaterial color={accentColor} />
-        </T.Mesh>
-
-        <!-- Panel-Hintergrund -->
-        <T.Mesh position.z={0.05}>
-            <T.PlaneGeometry args={[panels.institution.width, panels.institution.height]} />
-            <T.MeshBasicMaterial color={primaryColor} />
-        </T.Mesh>
-
-        <!-- Institution Content via HTML -->
-        <HTML position={[0, 0, 0.1]} center transform scale={0.35}>
-            <div class="text-center text-white" style="width: 600px;">
-                <h1 class="text-5xl font-bold tracking-wider mb-1">COMENIUS</h1>
-                <h2 class="text-5xl font-bold tracking-wider mb-4">INSTITUT</h2>
-                <div class="w-64 h-1 mx-auto mb-4" style="background: #fbbf24;"></div>
-                <p class="text-xl mb-1">Evangelische Arbeitsstätte</p>
-                <p class="text-xl mb-1">für Erziehungswissenschaft</p>
-                <p class="text-xl mb-4">und Religionspädagogik e.V.</p>
-                <p class="text-2xl font-bold mb-4" style="color: #fbbf24;">📍 Münster</p>
-                <div class="px-4 py-2 rounded inline-block" style="background: rgba(30,41,59,0.5);">
-                    <span class="text-sm opacity-80">Eine Einrichtung der EKD</span>
-                </div>
-            </div>
-        </HTML>
-    </T.Group>
-
-    <!-- ========== TEAM-SLIDESHOW (Rechts) ========== -->
+    <!-- ========== TEAM-SLIDESHOW (Links) ========== -->
     <T.Group position={[teamX, wall.height / 2 + 1.5, wall.depth / 2 + 0.1]}>
         
         <!-- Rahmen -->
@@ -275,6 +188,96 @@
                 {/if}
             </div>
         </HTML>
+    </T.Group>
+    
+
+    <!-- ========== INSTITUTIONS-PANEL (Mitte) ========== -->
+    <T.Group position={[0, wall.height / 2 + 1.5, wall.depth / 2 + 0.1]} onclick={handleWallClick}>
+        
+        <!-- Goldener Rahmen -->
+        <T.Mesh position.z={0.01}>
+            <T.PlaneGeometry args={[panels.institution.width + 0.3, panels.institution.height + 0.3]} />
+            <T.MeshBasicMaterial color={accentColor} />
+        </T.Mesh>
+
+        <!-- Panel-Hintergrund -->
+        <T.Mesh position.z={0.05}>
+            <T.PlaneGeometry args={[panels.institution.width, panels.institution.height]} />
+            <T.MeshBasicMaterial color={primaryColor} />
+        </T.Mesh>
+
+        <!-- Institution Content via HTML -->
+        <HTML position={[0, 0, 0.1]} center transform scale={0.35}>
+            <div class="text-center text-white" style="width: 600px;">
+                <h1 class="text-5xl font-bold tracking-wider mb-1">COMENIUS</h1>
+                <h2 class="text-5xl font-bold tracking-wider mb-4">INSTITUT</h2>
+                <div class="w-64 h-1 mx-auto mb-4" style="background: #fbbf24;"></div>
+                <p class="text-xl mb-1">Evangelische Arbeitsstätte</p>
+                <p class="text-xl mb-1">für Erziehungswissenschaft</p>
+                <p class="text-xl mb-4">und Religionspädagogik e.V.</p>
+                <p class="text-2xl font-bold mb-4" style="color: #fbbf24;">📍 Münster</p>
+                <div class="px-4 py-2 rounded inline-block" style="background: rgba(30,41,59,0.5);">
+                    <span class="text-sm opacity-80">Eine Einrichtung der EKD</span>
+                </div>
+            </div>
+        </HTML>
+    </T.Group>
+
+    
+
+    <!-- ========== CHATBOT-PANEL (Rechts) ========== -->
+    <T.Group position={[chatbotX, wall.height / 2 + 1.5, wall.depth / 2 + 0.1]}>
+        
+        <!-- Rahmen mit Glow -->
+        <T.Mesh position.z={0.01}>
+            <T.PlaneGeometry args={[panels.chatbot.width + 0.3, panels.chatbot.height + 0.3]} />
+            <T.MeshBasicMaterial color={neonCyan} transparent opacity={chatGlow} />
+        </T.Mesh>
+
+        <!-- Panel-Hintergrund -->
+        <T.Mesh position.z={0.05}>
+            <T.PlaneGeometry args={[panels.chatbot.width, panels.chatbot.height]} />
+            <T.MeshBasicMaterial color={darkColor} />
+        </T.Mesh>
+
+        <!-- Chatbot-Video + Text -->
+        <T.Group 
+            position={[0, 0, 0.1]}
+            scale={chatScale}
+            onclick={handleChatClick}
+            onpointerenter={() => { isChatHovered = true; onPointerEnter(); }}
+            onpointerleave={() => { isChatHovered = false; onPointerLeave(); }}
+        >
+            <HTML center transform scale={0.10}>
+                <div class="flex flex-col items-center cursor-pointer">
+                    <!-- Video mit Robot runter kalliert auf 15% -->
+                    <video 
+                        src="/assets/bot.mp4" 
+                        autoplay 
+                        loop 
+                        muted 
+                        playsinline
+                        class="w-48 h-48 object-contain rounded-lg"
+                        style="background: transparent;"
+                    ></video>
+                    <div
+                        class="text-xl font-bold whitespace-nowrap px-3 py-1 rounded-lg mt-1 scale-1000"
+                        style="color: #22d3d3; text-shadow: 0 0 15px #22d3d3, 0 0 30px #22d3d3;"
+                    >
+                        {chatGlow > 0.1 ? 'Frag mich!' : '...'}
+                    </div>
+                </div>
+            </HTML>
+        </T.Group>
+
+        {#if isChatHovered}
+            <T.Mesh position.z={0.02}>
+                <T.PlaneGeometry args={[panels.chatbot.width + 0.5, panels.chatbot.height + 0.5]} />
+                <T.MeshBasicMaterial color={neonCyan} transparent opacity={0.2} />
+            </T.Mesh>
+        {/if}
+
+        <T.PointLight color={neonCyan} intensity={chatGlow * 30} distance={8} decay={2} position={[0, 0, 1]} />
     </T.Group>
 
     <!-- Boden-Markierung -->
