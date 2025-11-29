@@ -6,8 +6,8 @@
      * Später: n8n-Webhook Integration (chatWebhook aus MarketplaceStand)
      */
     import { worldStore } from "$lib/logic/store.svelte";
-    import { fade, fly } from "svelte/transition";
-    import { Send, X, Bot, User, Loader2 } from "lucide-svelte";
+    import { Send, Bot, User, Loader2 } from "lucide-svelte";
+    import GlassDialog from "./GlassDialog.svelte";
 
     interface Props {
         isOpen?: boolean;
@@ -121,41 +121,16 @@
     }
 </script>
 
-{#if isModalOpen}
-    <!-- Backdrop -->
-    <button
-        type="button"
-        class="fixed inset-0 w-full h-full bg-black/50 backdrop-blur-sm z-50 cursor-default"
-        onclick={handleClose}
-        aria-label="Schließen"
-        transition:fade={{ duration: 200 }}
-    ></button>
-
-    <!-- Chat Modal -->
-    <div
-        class="fixed bottom-4 right-4 w-[420px] max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-2rem)] bg-slate-900 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden border border-slate-700"
-        transition:fly={{ y: 100, x: 50, duration: 300 }}
-    >
-        <!-- Header -->
-        <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-900 to-blue-800 border-b border-blue-700">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-                    <Bot class="w-6 h-6 text-white" />
-                </div>
-                <div>
-                    <h3 class="font-semibold text-white">Comenius Assistent</h3>
-                    <p class="text-xs text-blue-200">KI-gestützte Auskunft</p>
-                </div>
-            </div>
-            <button
-                onclick={handleClose}
-                class="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                aria-label="Chat schließen"
-            >
-                <X class="w-5 h-5 text-white" />
-            </button>
-        </div>
-
+<GlassDialog 
+    isOpen={isModalOpen} 
+    onClose={handleClose}
+    title="Comenius Assistent"
+    subtitle="KI-gestützte Auskunft"
+    icon={Bot}
+    width="450px"
+    height="600px"
+>
+    <div class="flex flex-col h-full">
         <!-- Messages -->
         <div 
             bind:this={messagesContainer}
@@ -168,12 +143,11 @@
                 >
                     <!-- Avatar -->
                     <div 
-                        class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center"
-                        class:bg-blue-600={message.role === 'assistant'}
-                        class:bg-slate-600={message.role === 'user'}
+                        class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center {message.role === 'assistant' ? 'bg-cyan-600/50' : 'bg-slate-600/50'}"
+                        style="border: 1px solid rgba(255,255,255,0.1);"
                     >
                         {#if message.role === 'assistant'}
-                            <Bot class="w-5 h-5 text-white" />
+                            <Bot class="w-5 h-5 text-cyan-300" />
                         {:else}
                             <User class="w-5 h-5 text-white" />
                         {/if}
@@ -181,17 +155,12 @@
 
                     <!-- Message Bubble -->
                     <div 
-                        class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed"
-                        class:bg-blue-600={message.role === 'assistant'}
-                        class:text-white={message.role === 'assistant'}
-                        class:bg-slate-700={message.role === 'user'}
-                        class:text-slate-100={message.role === 'user'}
-                        class:rounded-bl-sm={message.role === 'assistant'}
-                        class:rounded-br-sm={message.role === 'user'}
+                        class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed {message.role === 'assistant' ? 'bg-cyan-900/40 text-white rounded-bl-sm' : 'bg-slate-700/50 text-slate-100 rounded-br-sm'}"
+                        style="border: 1px solid rgba(255,255,255,0.08);"
                     >
                         <!-- Render Markdown-like formatting -->
                         {@html message.content
-                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyan-300">$1</strong>')
                             .replace(/\n/g, '<br>')
                         }
                     </div>
@@ -201,31 +170,31 @@
             <!-- Loading Indicator -->
             {#if isLoading}
                 <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-                        <Bot class="w-5 h-5 text-white" />
+                    <div class="w-8 h-8 rounded-full bg-cyan-600/50 flex items-center justify-center" style="border: 1px solid rgba(255,255,255,0.1);">
+                        <Bot class="w-5 h-5 text-cyan-300" />
                     </div>
-                    <div class="bg-blue-600 rounded-2xl rounded-bl-sm px-4 py-3">
-                        <Loader2 class="w-5 h-5 text-white animate-spin" />
+                    <div class="bg-cyan-900/40 rounded-2xl rounded-bl-sm px-4 py-3" style="border: 1px solid rgba(255,255,255,0.08);">
+                        <Loader2 class="w-5 h-5 text-cyan-300 animate-spin" />
                     </div>
                 </div>
             {/if}
         </div>
 
         <!-- Input -->
-        <div class="p-4 border-t border-slate-700 bg-slate-800/50">
+        <div class="p-4 border-t border-white/10">
             <div class="flex gap-2">
                 <input
                     type="text"
                     bind:value={inputValue}
                     onkeydown={handleKeydown}
                     placeholder="Ihre Frage..."
-                    class="flex-1 bg-slate-700 text-white placeholder-slate-400 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="flex-1 bg-slate-800/50 text-white placeholder-slate-400 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 border border-white/10"
                     disabled={isLoading}
                 />
                 <button
                     onclick={sendMessage}
                     disabled={!inputValue.trim() || isLoading}
-                    class="px-4 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
+                    class="px-4 py-3 bg-cyan-600/50 hover:bg-cyan-500/50 disabled:bg-slate-600/30 disabled:cursor-not-allowed text-white rounded-xl transition-colors border border-cyan-400/30"
                     aria-label="Nachricht senden"
                 >
                     <Send class="w-5 h-5" />
@@ -236,4 +205,4 @@
             </p>
         </div>
     </div>
-{/if}
+</GlassDialog>

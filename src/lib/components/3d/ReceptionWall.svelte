@@ -164,7 +164,7 @@
                             class="w-48 h-48 rounded-lg mx-auto mb-3 object-cover"
                             style="border: 2px solid rgba(251,191,36,0.5);"
                         />
-                        <div class="text-xl font-bold">{currentMember.name}</div>
+                        <div class="text-xl font-bold text-white">{currentMember.name}</div>
                         <div class="text-sm" style="color: #94a3b8;">{currentMember.role}</div>
                     </div>
                 {:else}
