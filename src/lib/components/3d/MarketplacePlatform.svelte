@@ -199,9 +199,9 @@
 
     // Stehtisch-Positionen (für Atmosphäre)
     const stehtischPositions = [
-        { x: -8, z: 8, rotation: 0 },      // Links-vorne
-        { x: 8, z: -5, rotation: Math.PI / 4 },   // Rechts-mitte
-        { x: -5, z: -8, rotation: -Math.PI / 6 }, // Links-hinten
+        { x: -20, z: 21, rotation: 0 },      // Links-vorne
+        { x: -21, z: 24, rotation: Math.PI / 4 },   // Rechts-mitte
+        { x: -18, z: 24, rotation: -Math.PI / 6 }, // Links-hinten
     ];
 
     // Spotlight-Positionen
@@ -326,7 +326,7 @@
 
     <!-- ========== STEHTISCHE (Atmosphäre) ========== -->
     {#each stehtischPositions as tisch}
-        <T.Group position={[tisch.x, 1.5, tisch.z]} rotation.y={tisch.rotation}>
+        <T.Group position={[tisch.x, 1.5, tisch.z]} rotation.y={tisch.rotation} scale={1.8}>
             <!-- Tischplatte -->
             <T.Mesh position.y={1} castShadow>
                 <T.CylinderGeometry args={[0.4, 0.35, 0.08, 16]} />
@@ -364,8 +364,8 @@
             <T.MeshStandardMaterial 
                 color={platformGlowColor}
                 emissive={platformGlowColor}
-                emissiveIntensity={1.5 + energyPulse * 2.0}
-                metalness={0.1}
+                emissiveIntensity={1.5 + energyPulse * 1.5}
+                metalness={0.8}
                 roughness={0.2}
                 transparent
                 opacity={0.85}
@@ -373,24 +373,13 @@
         </T.Mesh>
         
         <!-- Mittlerer Glow-Layer -->
-        <T.Mesh 
-            rotation.y={octaederRotation * 0.7}
-            rotation.x={Math.PI / 8}
-            scale={1.1 + energyPulse * 0.1}
-        >
-            <T.OctahedronGeometry args={[1.5, 0]} />
-            <T.MeshBasicMaterial 
-                color={platformGlowColor}
-                transparent
-                opacity={0.3 + energyPulse * 0.3}
-            />
-        </T.Mesh>
         
         <!-- Innerer Kern - pulsiert hell -->
-        <T.Mesh rotation.y={octaederRotation * -1.5} scale={0.8 + energyPulse * 0.4}>
+        <T.Mesh rotation.y={octaederRotation * -1.5} scale={0.8 + energyPulse * 0.3}>
             <T.SphereGeometry args={[0.6, 16, 16]} />
             <T.MeshBasicMaterial 
-                color="#ffffff"
+                color="#ffff44"
+                opacity={ 1.0 }
             />
         </T.Mesh>
         
@@ -400,7 +389,7 @@
             <T.MeshBasicMaterial 
                 color={platformGlowColor}
                 transparent
-                opacity={0.6 + energyPulse * 0.4}
+                opacity={0.8 + energyPulse * 0.4}
             />
         </T.Mesh>
         
