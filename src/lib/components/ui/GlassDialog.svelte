@@ -182,6 +182,7 @@
             style="
                 position: relative;
                 width: {width};
+                height: {height};
                 min-height: 200px;
                 max-width: calc(100vw - 2rem);
                 max-height: calc(100vh - 2rem);

@@ -55,14 +55,14 @@
     title={iframeTitle}
     subtitle={iframeUrl || ''}
     icon={Globe}
-    width="90vw"
+    width="min(90vw, 1400px)"
     height="85vh"
 >
     <div style="
         display: flex;
         flex-direction: column;
-        height: 100%;
-        min-height: 500px;
+        height: calc(85vh - 80px);
+        min-height: 400px;
     ">
         <!-- Toolbar -->
         <div style="
@@ -141,10 +141,11 @@
 
         <!-- Iframe Container -->
         <div style="
-            flex: 1;
+            flex: 1 1 auto;
             position: relative;
             background: #ffffff;
             overflow: hidden;
+            min-height: 0;
         ">
             <!-- Loading Spinner -->
             {#if isLoading}
