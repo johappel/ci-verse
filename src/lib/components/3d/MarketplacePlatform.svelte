@@ -106,9 +106,9 @@
     
     // Empfangswand: Links seitlich, schaut zur Plattform-Mitte
     const receptionWallPosition = { 
-        x: -25,           // Links
-        z: 0,             // Mittig (Z-Achse)
-        rotation: Math.PI * 0.5  // 90° gedreht, schaut nach rechts zur Mitte
+        x: -20,           // Links
+        z: -10,             // Mittig (Z-Achse)
+        rotation: Math.PI * 0.34  // 90° gedreht, schaut nach rechts zur Mitte
     };
 
     // Team-Mitglieder (von comenius.de)
@@ -125,8 +125,8 @@
     // Rot (links-mitte) = Events, Grün (unten-links) = Publications
     // Chat ist am Turm (InstitutionBooth) integriert
     const terminalPositions: Array<{ x: number; z: number; rotation: number; type: string }> = [
-        { x: -16, z: 20, rotation: Math.PI * -1.2, type: 'publications' },        // Grün: unten-links (vorne)
-        { x: -12, z: -20, rotation: Math.PI * -1.8, type: 'events' }       // Rot: Rechts neben ReceptionWall
+        { x: -24, z: 10, rotation: Math.PI * +0.6, type: 'publications' },        // Grün: unten-links (vorne)
+        { x: -7.5, z: -26.5, rotation: Math.PI * -1.85, type: 'events' }       // Rot: Rechts neben ReceptionWall
     ];
 
     // Institution-Stand aus den Daten finden
@@ -259,7 +259,7 @@
     />
 
     <!-- ========== EMPFANGSWAND (Institution + Chatbot + Team) ========== -->
-    <ReceptionWall
+    <ReceptionWall 
         position={[receptionWallPosition.x, 1.5, receptionWallPosition.z]}
         rotation={receptionWallPosition.rotation}
         platformPosition={[platform.x, platform.y, platform.z]}

@@ -130,7 +130,7 @@
     });
 </script>
 
-<T.Group position={position} rotation.y={rotation}>
+<T.Group position={position} rotation.y={rotation} scale={1.5}>
     
     <!-- ========== BASIS / SOCKEL ========== -->
     <T.Mesh 
@@ -216,9 +216,10 @@
 
         <!-- ========== INTERAKTIONS-BUTTON (HTML Overlay) ========== -->
         <HTML
-            position={[0, 1.2, dimensions.depth / 2 + 0.3]}
+            position={[0, -0.27, dimensions.depth / 3 + 0.3]}
+            rotation={[0, +0.0, 0]}
             transform
-            scale={0.08}
+            scale={0.4}
             pointerEvents="auto"
         >
             <button
@@ -270,16 +271,16 @@
     <!-- ========== TERMINAL-BILDSCHIRM (nur bei publications/events) ========== -->
     {#if stand.type === 'publications' || stand.type === 'events'}
         <!-- Angewinkelter Bildschirm vorne -->
-        <T.Group position={[0, dimensions.baseHeight + 1.5, dimensions.depth / 2 - 0.3]}>
+        <T.Group position={[0, dimensions.baseHeight + 1.4, dimensions.depth / 3 - 0.3]}>
             <T.Mesh rotation.x={-0.3} castShadow>
                 <T.BoxGeometry args={[dimensions.width * 0.7, 2.5, 0.15]} />
-                <T.MeshStandardMaterial color="#1f2937" metalness={0.5} roughness={0.3} />
+                <T.MeshStandardMaterial color="#1f2937" metalness={1} roughness={0.3} />
             </T.Mesh>
             
             <!-- Bildschirm-Inhalt (simuliert) -->
             <T.Mesh rotation.x={-0.3} position.z={0.08}>
                 <T.PlaneGeometry args={[dimensions.width * 0.65, 2.3]} />
-                <T.MeshBasicMaterial color={stand.type === 'publications' ? '#065f46' : '#7f1d1d'} />
+                <T.MeshBasicMaterial color={stand.type === 'publications' ? '#1a1a1a' : '#7f1d1d'} />
             </T.Mesh>
             
             <!-- Bildschirm-Text -->
@@ -287,7 +288,7 @@
                 text={stand.type === 'publications' ? '📰 Aktuelle News' : '📅 Nächste Termine'}
                 fontSize={0.2}
                 color="#ffffff"
-                position={[0, 0.5, 0.1]}
+                position={[0, 0.5, -0]}
                 rotation.x={-0.3}
                 anchorX="center"
             />
