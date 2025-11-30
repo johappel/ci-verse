@@ -30,6 +30,10 @@
     // Marketplace-Daten laden
     let marketplace = $derived(getMarketplaceContent());
 
+    // Farben aus Content-Daten (Fallback auf platforms.ts)
+    let platformColor = $derived(marketplace?.color ?? platform.color);
+    let platformGlowColor = $derived(marketplace?.glowColor ?? platform.glowColor);
+
     // Oktaeder-Rotation (animiert)
     let octaederRotation = $state(0);
     useTask((delta) => {
@@ -204,7 +208,7 @@
     >
         <T.CylinderGeometry args={[platform.size, platform.size, 3, 6]} />
         <T.MeshStandardMaterial
-            color={platform.color}
+            color={platformColor}
             metalness={0.3}
             roughness={0.6}
         />
@@ -214,7 +218,7 @@
     <T.Mesh position.y={-2} rotation.x={-Math.PI / 2}>
         <T.RingGeometry args={[platform.size * 0.98, platform.size * 1.02, 6]} />
         <T.MeshBasicMaterial
-            color={platform.glowColor}
+            color={platformGlowColor}
             transparent
             opacity={glowOpacity.current}
             side={2}
@@ -232,7 +236,7 @@
     <MesseWall
         posters={leftWallPosters}
         platformSize={platform.size}
-        platformColor={platform.color}
+        platformColor={platformColor}
         wallHeight={8}
         wallCount={2}
         startEdge={5}
@@ -245,7 +249,7 @@
     <MesseWall
         posters={rightWallPosters}
         platformSize={platform.size}
-        platformColor={platform.color}
+        platformColor={platformColor}
         wallHeight={8}
         wallCount={1}
         startEdge={1}
@@ -304,8 +308,8 @@
         >
             <T.OctahedronGeometry args={[1.5, 0]} />
             <T.MeshPhysicalMaterial 
-                color={platform.glowColor}
-                emissive={platform.glowColor}
+                color={platformGlowColor}
+                emissive={platformGlowColor}
                 emissiveIntensity={isCurrentPlatform ? 0.6 : 0.2}
                 metalness={0.3}
                 roughness={0.1}
@@ -318,12 +322,12 @@
         <!-- Innerer Kern -->
         <T.Mesh rotation.y={octaederRotation * -1.5}>
             <T.SphereGeometry args={[0.6, 16, 16]} />
-            <T.MeshBasicMaterial color={platform.glowColor} />
+            <T.MeshBasicMaterial color={platformGlowColor} />
         </T.Mesh>
         
         <!-- Punktlicht -->
         <T.PointLight
-            color={platform.glowColor}
+            color={platformGlowColor}
             intensity={isCurrentPlatform ? 60 : 20}
             distance={25}
             decay={2}
@@ -345,8 +349,8 @@
         <T.Mesh position.z={-0.05}>
             <T.BoxGeometry args={[6.2, 2, 0.1]} />
             <T.MeshStandardMaterial 
-                color={platform.glowColor}
-                emissive={platform.glowColor}
+                color={platformGlowColor}
+                emissive={platformGlowColor}
                 emissiveIntensity={0.3}
                 transparent
                 opacity={0.7}

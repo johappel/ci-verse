@@ -169,6 +169,11 @@ function civerse_get_marketplace() {
     
     return [
         'id' => 'S',
+        'title' => get_field('marketplace_title', 'civerse_marketplace') ?: 'Marktplatz',
+        'short' => get_field('marketplace_short', 'civerse_marketplace') ?: 'Marktplatz',
+        'description' => get_field('marketplace_description', 'civerse_marketplace') ?: 'Bildungsmarktplatz des Comenius-Instituts.',
+        'color' => get_field('marketplace_color', 'civerse_marketplace') ?: '#64748b',
+        'glowColor' => get_field('marketplace_glow_color', 'civerse_marketplace') ?: '#94a3b8',
         'stands' => array_map(function($stand) {
             $rss_feeds = [];
             if (!empty($stand['rss_feeds'])) {
@@ -226,6 +231,8 @@ function civerse_get_platforms() {
             'title' => get_field('platform_title', $post->ID),
             'short' => get_field('platform_short', $post->ID),
             'description' => get_field('platform_description', $post->ID),
+            'color' => get_field('platform_color', $post->ID) ?: '#64748b',
+            'glowColor' => get_field('platform_glow_color', $post->ID) ?: '#94a3b8',
             'aspects' => array_map(function($aspect, $index) use ($id) {
                 return [
                     'id' => strtolower($id) . '-a' . ($index + 1),

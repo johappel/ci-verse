@@ -354,6 +354,8 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
         title: 'Frühkindliche Bildung',
         short: 'Kita',
         description: 'Religiöse Bildung für Kinder von 0-6 Jahren',
+        color: '#fcd34d',      // Amber
+        glowColor: '#fde68a',
         aspects: [
             { id: 'b1-a1', title: 'Religiöse Bildung', icon: '🙏', description: 'Grundlagen religiöser Erziehung im Kita-Alter', contentUrl: '/content/b1-religioes.html' },
             { id: 'b1-a2', title: 'Spielerisches Lernen', icon: '🎮', description: 'Spielbasierte pädagogische Konzepte', contentUrl: '/content/b1-spielen.html' },
@@ -369,6 +371,8 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
         title: 'Schule & Jugend',
         short: 'Schule',
         description: 'Bildungsangebote für Schule und Jugendarbeit',
+        color: '#fb923c',      // Orange
+        glowColor: '#fdba74',
         aspects: [
             { id: 'b2-a1', title: 'Konfirmandenarbeit', icon: '⛪', description: 'Begleitung junger Menschen im Glauben', contentUrl: '/content/b2-konfi.html' },
             { id: 'b2-a2', title: 'Schulseelsorge', icon: '💚', description: 'Unterstützung in schulischen Krisen', contentUrl: '/content/b2-seelsorge.html' },
@@ -384,6 +388,8 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
         title: 'Erwachsenenbildung',
         short: 'Erwachsene',
         description: 'Fortbildung und Lebenslanges Lernen',
+        color: '#f87171',      // Red
+        glowColor: '#fca5a5',
         aspects: [
             { id: 'b3-a1', title: 'Gemeindebildung', icon: '🏛️', description: 'Bildungsangebote in Kirchengemeinden', contentUrl: '/content/b3-gemeinde.html' },
             { id: 'b3-a2', title: 'Ehrenamtliche', icon: '🤲', description: 'Qualifizierung freiwillig Engagierter', contentUrl: '/content/b3-ehrenamt.html' },
@@ -399,6 +405,8 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
         title: 'Forschung',
         short: 'Forschung',
         description: 'Wissenschaftliche Studien und Publikationen',
+        color: '#a78bfa',      // Violet
+        glowColor: '#c4b5fd',
         aspects: [
             { id: 'q1-a1', title: 'Empirische Forschung', icon: '📊', description: 'Datenbasierte Studien zur Bildung', contentUrl: '/content/q1-empirisch.html' },
             { id: 'q1-a2', title: 'Bildungsmonitoring', icon: '📈', description: 'Kontinuierliche Beobachtung des Bildungssystems', contentUrl: '/content/q1-monitoring.html' },
@@ -414,6 +422,8 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
         title: 'Europa & Internationales',
         short: 'Europa',
         description: 'Internationale Kooperationen und EU-Projekte',
+        color: '#fbbf24',      // Yellow
+        glowColor: '#fcd34d',
         aspects: [
             { id: 'q2-a1', title: 'EU-Projekte', icon: '🇪🇺', description: 'Erasmus+ und andere Förderprogramme', contentUrl: '/content/q2-eu.html' },
             { id: 'q2-a2', title: 'Ökumene', icon: '🌍', description: 'Interkirchliche Zusammenarbeit', contentUrl: '/content/q2-oekumene.html' },
@@ -429,6 +439,8 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
         title: 'Digitalisierung',
         short: 'Digital',
         description: 'Digitale Transformation und E-Learning',
+        color: '#22d3ee',      // Cyan
+        glowColor: '#67e8f9',
         aspects: [
             { id: 'q3-a1', title: 'E-Learning', icon: '💻', description: 'Digitale Lernplattformen', contentUrl: '/content/q3-elearning.html' },
             { id: 'q3-a2', title: 'KI in der Bildung', icon: '🤖', description: 'Künstliche Intelligenz als Werkzeug', contentUrl: '/content/q3-ki.html' },
@@ -450,6 +462,8 @@ export const mockMarketplace: MarketplaceContent = {
     title: 'Marktplatz',
     description: 'Bildungsmarktplatz des Comenius-Instituts.',
     short: 'Marktplatz',
+    color: '#64748b',      // Slate
+    glowColor: '#94a3b8',
     stands: [
         {
             id: 's-institut',

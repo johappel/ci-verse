@@ -67,6 +67,8 @@ export interface PlatformContent {
     title: string;             // Voller Name, z.B. "Schule & Jugend"
     short: string;             // Kurzname für Buttons, z.B. "Schule"
     description: string;       // Kurzbeschreibung der Plattform
+    color: string;             // Primärfarbe (Hex)
+    glowColor: string;         // Leuchtfarbe für Glow-Effekte (Hex)
     aspects: PlatformAspect[]; // Max 5 thematische Aspekte
     wallPosters: string[];     // Projekt-IDs für Messewände (Position = Index)
     boothProjects: string[];   // Projekt-IDs für freie Messestände (Position = Index)
@@ -117,6 +119,8 @@ export interface MarketplaceContent {
     title: string;                           // Voller Name, z.B. "Marktplatz"
     short: string;                           // Kurzname für Buttons
     description: string;                     // Kurzbeschreibung der Plattform
+    color: string;                           // Primärfarbe (Hex)
+    glowColor: string;                       // Leuchtfarbe für Glow-Effekte (Hex)
     stands: MarketplaceStand[];              // Interaktive Stände
     wallPosters: MarketplaceWallPoster[];    // Leitlinien-Poster an den Wänden
 }

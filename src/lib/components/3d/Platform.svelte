@@ -24,6 +24,10 @@
     let boothProjects = $derived(getBoothProjectsForPlatform(platform.id));
     let wallPosters = $derived(getWallPostersForPlatform(platform.id));
 
+    // Farben aus Content-Daten (Fallback auf platforms.ts)
+    let platformColor = $derived(platformContent?.color ?? platform.color);
+    let platformGlowColor = $derived(platformContent?.glowColor ?? platform.glowColor);
+
     // Referenzen für Spotlight-Targets (je Spot ein eigenes Target)
     let spotTargets: (Object3D | undefined)[] = $state(Array(6).fill(undefined));
 
@@ -129,7 +133,7 @@
         <!-- Plattform ist jetzt 3 Einheiten dick (begehbar) -->
         <T.CylinderGeometry args={[platform.size, platform.size, 3, 6]} />
         <T.MeshStandardMaterial
-            color={platform.color}
+            color={platformColor}
             metalness={0.3}
             roughness={0.6}
         />
@@ -139,7 +143,7 @@
     <T.Mesh position.y={-2} rotation.x={-Math.PI / 2}>
         <T.RingGeometry args={[platform.size * 0.98, platform.size * 1.02, 6]} />
         <T.MeshBasicMaterial
-            color={platform.glowColor}
+            color={platformGlowColor}
             transparent
             opacity={glowOpacity.current}
             side={2}
@@ -177,8 +181,8 @@
         >
             <T.OctahedronGeometry args={[1.2, 0]} />
             <T.MeshPhysicalMaterial 
-                color={platform.glowColor}
-                emissive={platform.glowColor}
+                color={platformGlowColor}
+                emissive={platformGlowColor}
                 emissiveIntensity={isCurrentPlatform ? 0.5 : 0.2}
                 metalness={0.3}
                 roughness={0.1}
@@ -199,12 +203,12 @@
         >
             <T.SphereGeometry args={[0.5, 16, 16]} />
             <T.MeshBasicMaterial 
-                color={platform.glowColor}
+                color={platformGlowColor}
             />
         </T.Mesh>
         <!-- Punktlicht vom Kern -->
         <T.PointLight
-            color={platform.glowColor}
+            color={platformGlowColor}
             intensity={isCurrentPlatform ? 50 : 15}
             distance={20}
             decay={2}
@@ -241,8 +245,8 @@
         <T.Mesh position.z={-0.05}>
             <T.BoxGeometry args={[platform.name.length * 0.5 + 1.7, 2, 0.1]} />
             <T.MeshStandardMaterial 
-                color={platform.glowColor}
-                emissive={platform.glowColor}
+                color={platformGlowColor}
+                emissive={platformGlowColor}
                 emissiveIntensity={0.3}
                 transparent
                 opacity={0.7}
@@ -278,7 +282,7 @@
                 position={[0, 1.5, 0]}
                 height={5}
                 radius={3}
-                color={platform.color}
+                color={platformColor}
                 platformPosition={[platform.x, platform.y, platform.z]}
             />
         {/if}
@@ -288,7 +292,7 @@
             <MesseWall
                 posters={wallPosters}
                 platformSize={platform.size}
-                platformColor={platform.color}
+                platformColor={platformColor}
                 wallHeight={10}
                 wallCount={Math.min(wallPosters.length, 3)}
                 startEdge={3}
@@ -337,7 +341,7 @@
             <T.SpotLight
                 position={[spot.x * platform.size, spotlightHeight - 1.5, spot.z * platform.size]}
                 target={spotTargets[i]}
-                color={platform.glowColor}
+                color={platformGlowColor}
                 intensity={250}
                 distance={spotlightHeight * 2.5}
                 angle={0.7}
@@ -358,7 +362,7 @@
             <!-- Leuchtende Linse -->
             <T.Mesh position={[spot.x * platform.size, spotlightHeight - 1.7, spot.z * platform.size]}>
                 <T.SphereGeometry args={[0.25, 8, 8]} />
-                <T.MeshBasicMaterial color={platform.glowColor} />
+                <T.MeshBasicMaterial color={platformGlowColor} />
             </T.Mesh>
         {/each}
         
@@ -373,7 +377,7 @@
     {#if !shouldRenderSpotlights}
         <T.PointLight
             position={[0, 10, 0]}
-            color={platform.glowColor}
+            color={platformGlowColor}
             intensity={5}
             distance={platform.size * 1.5}
         />

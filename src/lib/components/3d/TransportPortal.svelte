@@ -3,7 +3,25 @@
     import { Text, Billboard, useCursor } from '@threlte/extras';
     import { worldStore } from '$lib/logic/store.svelte';
     import { platforms } from '$lib/logic/platforms';
+    import { getPlatformContent, getMarketplaceContent } from '$lib/data/mockProjects';
     import { CylinderGeometry } from 'three';
+
+    // Helper: Farben aus Content-Daten holen (Fallback auf platforms.ts)
+    function getPlatformColors(platformId: string): { color: string; glowColor: string } {
+        if (platformId === 'S') {
+            const marketplace = getMarketplaceContent();
+            return {
+                color: marketplace?.color ?? platforms['S']?.color ?? '#64748b',
+                glowColor: marketplace?.glowColor ?? platforms['S']?.glowColor ?? '#94a3b8'
+            };
+        }
+        const content = getPlatformContent(platformId);
+        const layout = platforms[platformId];
+        return {
+            color: content?.color ?? layout?.color ?? '#64748b',
+            glowColor: content?.glowColor ?? layout?.glowColor ?? '#94a3b8'
+        };
+    }
 
     // Zeit-basierte Animation (unabhängig von Frame-Rate)
     let animationStartTime = $state(0);
@@ -96,7 +114,7 @@
         <T.Mesh position.y={0.05} rotation.x={-Math.PI / 2}>
             <T.RingGeometry args={[7.5, 8, 32]} />
             <T.MeshBasicMaterial 
-                color={shouldAnimate && targetPlatform ? targetPlatform.glowColor : "#60a5fa"} 
+                color={shouldAnimate && targetPlatform ? getPlatformColors(targetPlatform.id).glowColor : "#60a5fa"} 
                 transparent 
                 opacity={shouldAnimate ? 0.5 + pulseIntensity * 0.5 : 0.8} 
             />
@@ -107,7 +125,7 @@
             <T.Mesh position.y={3} rotation.x={Math.PI / 2}>
                 <T.TorusGeometry args={[5, 0.08, 8, 32]} />
                 <T.MeshBasicMaterial 
-                    color={shouldAnimate && targetPlatform ? targetPlatform.glowColor : "#60a5fa"} 
+                    color={shouldAnimate && targetPlatform ? getPlatformColors(targetPlatform.id).glowColor : "#60a5fa"} 
                     transparent 
                     opacity={shouldAnimate ? 0.8 : 0.6} 
                 />
@@ -120,7 +138,7 @@
                 <T.Mesh position.y={3.5} rotation.x={Math.PI / 2}>
                     <T.TorusGeometry args={[4, 0.06, 8, 32]} />
                     <T.MeshBasicMaterial 
-                        color={targetPlatform?.glowColor || "#60a5fa"} 
+                        color={targetPlatform ? getPlatformColors(targetPlatform.id).glowColor : "#60a5fa"} 
                         transparent 
                         opacity={0.4 + pulseIntensity * 0.4} 
                     />
@@ -131,7 +149,7 @@
                 <T.Mesh position.y={2.5} rotation.x={Math.PI / 2}>
                     <T.TorusGeometry args={[6, 0.05, 8, 32]} />
                     <T.MeshBasicMaterial 
-                        color={targetPlatform?.glowColor || "#60a5fa"} 
+                        color={targetPlatform ? getPlatformColors(targetPlatform.id).glowColor : "#60a5fa"} 
                         transparent 
                         opacity={0.3 + pulseIntensity * 0.3} 
                     />
@@ -142,11 +160,11 @@
         <!-- Zentraler Leuchtpunkt - größer und heller beim Aufladen/Transport -->
         <T.Mesh position.y={3} scale={shouldAnimate ? 1 + pulseIntensity * 0.5 : 1}>
             <T.SphereGeometry args={[0.4, 16, 16]} />
-            <T.MeshBasicMaterial color={shouldAnimate && targetPlatform ? targetPlatform.glowColor : "#ffffff"} />
+            <T.MeshBasicMaterial color={shouldAnimate && targetPlatform ? getPlatformColors(targetPlatform.id).glowColor : "#ffffff"} />
         </T.Mesh>
         <T.PointLight 
             position={[0, 3, 0]} 
-            color={shouldAnimate && targetPlatform ? targetPlatform.glowColor : "#60a5fa"} 
+            color={shouldAnimate && targetPlatform ? getPlatformColors(targetPlatform.id).glowColor : "#60a5fa"} 
             intensity={shouldAnimate ? 40 + pulseIntensity * 40 : 20} 
             distance={shouldAnimate ? 50 : 30} 
         />
@@ -157,6 +175,7 @@
                 {@const angle = ((i - 1) / 3) * Math.PI * 0.6 + Math.PI * 0.7}
                 {@const radius = 4.5}
                 {@const isHovered = worldStore.state.hoveredDestination === platform.id}
+                {@const colors = getPlatformColors(platform.id)}
                 <T.Group position={[Math.cos(angle) * radius, 0, Math.sin(angle) * radius]}>
                     <!-- Hexagonaler Button -->
                     <T.Mesh 
@@ -168,8 +187,8 @@
                         onpointerleave={onButtonLeave}
                     >
                         <T.MeshStandardMaterial 
-                            color={platform.color}
-                            emissive={platform.color}
+                            color={colors.color}
+                            emissive={colors.color}
                             emissiveIntensity={isHovered ? 0.8 : 0.3}
                             metalness={0.6}
                             roughness={0.2}
@@ -197,6 +216,7 @@
                 {@const angle = ((i - 1) / 3) * Math.PI * 0.6 - Math.PI * 0.3}
                 {@const radius = 5}
                 {@const isHovered = worldStore.state.hoveredDestination === platform.id}
+                {@const colors = getPlatformColors(platform.id)}
                 <T.Group position={[Math.cos(angle) * radius, 0, Math.sin(angle) * radius]}>
                     <!-- Hexagonaler Button -->
                     <T.Mesh 
@@ -208,8 +228,8 @@
                         onpointerleave={onButtonLeave}
                     >
                         <T.MeshStandardMaterial 
-                            color={platform.color}
-                            emissive={platform.color}
+                            color={colors.color}
+                            emissive={colors.color}
                             emissiveIntensity={isHovered ? 0.8 : 0.3}
                             metalness={0.6}
                             roughness={0.2}
@@ -236,7 +256,7 @@
             {#if isTransporting && targetPlatform}
                 <Text
                     text={`→ ${targetPlatform.name}`}
-                    color={targetPlatform.glowColor}
+                    color={getPlatformColors(targetPlatform.id).glowColor}
                     fontSize={0.9}
                     anchorX="center"
                     anchorY="middle"
