@@ -130,9 +130,14 @@
     const maxPosterWidth = imageOnly ? imageOnlyWidth : (textAreaWidth + maxImageWidth + 0.8); // +0.8 für Rahmen/Gap
     
     // Spacing basiert auf maximaler Breite, damit keine Überlappung entsteht
-    const posterSpacing = maxPosterWidth + 4; // +4 Abstand zwischen Postern
-    const maxPostersPerWall = Math.max(1, Math.floor(hexEdgeLength / posterSpacing));
-    const postersPerWall = Math.min(maxPostersPerWall, 2); // Max 2 pro Wand (Landscape braucht Platz)
+    // Bei kleineren Plattformen wird der Spacing reduziert, um 2 Poster zu ermöglichen
+    const idealSpacing = maxPosterWidth + 4; // Idealer Abstand
+    const minSpacingFor2 = hexEdgeLength / 2.2; // Minimaler Spacing um 2 Poster zu ermöglichen
+    const posterSpacing = Math.max(maxPosterWidth + 1, Math.min(idealSpacing, minSpacingFor2));
+    
+    // Immer mindestens 2 Poster pro Wand (wenn genug Platz)
+    const maxPostersPerWall = Math.max(2, Math.floor(hexEdgeLength / posterSpacing));
+    const postersPerWall = Math.min(maxPostersPerWall, 2); // Max 2 pro Wand
     
     const posterPositions = $derived(posters.map((poster, i) => {
         const wallIndex = Math.floor(i / postersPerWall) % wallCount;
