@@ -251,14 +251,14 @@
     <!-- Hexagon-Edge-Winkel = edgeIndex * 60 Grad + 30 Grad (Plattform-Rotation) -->
     <EnergyFloor 
         radius={platform.size * 0.85}
-        intensity={0.5}
+        intensity={0.2}
         posterAngles={[
-            Math.PI * 0.167,  // Edge 0: rechts-vorne (30 Grad)
-            Math.PI * 0.5,    // Edge 1: rechts (90 Grad) - POSTER hier!
-            Math.PI * 0.833,  // Edge 2: rechts-hinten (150 Grad) - POSTER hier!
-            Math.PI * 1.167,  // Edge 3: links-hinten (210 Grad) - frei (Turm)
-            Math.PI * 1.5,    // Edge 4: links (270 Grad) - POSTER hier!
-            Math.PI * 1.833   // Edge 5: links-vorne (330 Grad) - POSTER hier!
+            Math.PI * 0.187,  // Edge 0: rechts-vorne (30 Grad)
+            Math.PI * 0.4,    // Edge 1: rechts (90 Grad) - POSTER hier!
+            Math.PI * 0.633,  // Edge 2: rechts-hinten (150 Grad) - POSTER hier!
+            Math.PI * 1.367,  // Edge 3: links-hinten (210 Grad) - frei (Turm)
+            Math.PI * 1.88,    // Edge 4: links (270 Grad) - POSTER hier!
+            Math.PI * 1.733   // Edge 5: links-vorne (330 Grad) - POSTER hier!
         ]}
         posterColors={[
             '#facc15',  // Edge 0: Gold
