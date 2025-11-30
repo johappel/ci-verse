@@ -16,15 +16,8 @@
     // Display-Daten
     let displayData = $derived(project?.display);
     let screenshotUrl = $derived(displayData?.screenshotUrl);
-    let posterImage = $derived(displayData?.posterImage);
-    let logoUrl = $derived(displayData?.logoUrl);
     let projectColor = $derived(displayData?.color || project?.color || '#3b82f6');
     let slogan = $derived(displayData?.slogan);
-
-    // Berechne ähnliche Projekte für den Footer
-    let relatedProjects = $derived(
-        project ? worldStore.getRelated(project.id).slice(0, 3) : [],
-    );
 
     // Finde Staff-Details
     let staffDetails = $derived(
@@ -37,10 +30,6 @@
 
     function close() {
         worldStore.selectProject(null);
-    }
-
-    function openRelated(id: string) {
-        worldStore.selectProject(id);
     }
 
     function openExternalUrl() {
@@ -173,7 +162,7 @@
 
         <!-- Ansprechpartner -->
         {#if staffDetails.length > 0}
-            <div style="padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <div style="padding-top: 16px;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
                     <Users size={14} style="color: #64748b;" />
                     <h4 style="font-size: 10px; color: #64748b; text-transform: uppercase; margin: 0; letter-spacing: 0.5px;">Ansprechpartner</h4>
@@ -188,38 +177,6 @@
                             />
                             <span style="font-size: 12px; color: #cbd5e1;">{person.name}</span>
                         </div>
-                    {/each}
-                </div>
-            </div>
-        {/if}
-
-        <!-- Verwandte Projekte -->
-        {#if relatedProjects.length > 0}
-            <div style="padding-top: 16px;">
-                <h4 style="font-size: 10px; color: #64748b; text-transform: uppercase; margin: 0 0 10px 0; letter-spacing: 0.5px;">Verwandte Projekte</h4>
-                <div style="display: flex; gap: 8px;">
-                    {#each relatedProjects as rel}
-                        {@const relColor = rel.display?.color || rel.color || '#3b82f6'}
-                        <button
-                            onclick={() => openRelated(rel.id)}
-                            style="
-                                flex: 1;
-                                padding: 10px;
-                                background: rgba(30,41,59,0.3);
-                                border-radius: 8px;
-                                border: 1px solid rgba(255,255,255,0.05);
-                                cursor: pointer;
-                                text-align: left;
-                                transition: background 0.15s, border-color 0.15s;
-                            "
-                            onmouseenter={(e) => { e.currentTarget.style.background = 'rgba(51,65,85,0.4)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
-                            onmouseleave={(e) => { e.currentTarget.style.background = 'rgba(30,41,59,0.3)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; }}
-                        >
-                            <div style="font-size: 14px; font-weight: 700; margin-bottom: 4px; color: {relColor};">
-                                {rel.title.slice(0, 2)}
-                            </div>
-                            <div style="font-size: 11px; color: #94a3b8; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{rel.title}</div>
-                        </button>
                     {/each}
                 </div>
             </div>

@@ -114,6 +114,9 @@ export interface MarketplaceWallPoster {
 /** Inhalt der S-Plattform (Marktplatz) */
 export interface MarketplaceContent {
     id: 'S';
+    title: string;                           // Voller Name, z.B. "Marktplatz"
+    short: string;                           // Kurzname für Buttons
+    description: string;                     // Kurzbeschreibung der Plattform
     stands: MarketplaceStand[];              // Interaktive Stände
     wallPosters: MarketplaceWallPoster[];    // Leitlinien-Poster an den Wänden
 }

@@ -51,7 +51,7 @@
         }
     });
 
-    const displayColor = stand.display.color || '#3b82f6';
+    const displayColor = stand.display.color || '#b82f6';
     
     // Klick auf Stand: Kamera positioniert sich davor
     function handleStandClick() {

@@ -447,6 +447,9 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
 
 export const mockMarketplace: MarketplaceContent = {
     id: 'S',
+    title: 'Marktplatz',
+    description: 'Bildungsmarktplatz des Comenius-Instituts.',
+    short: 'Marktplatz',
     stands: [
         {
             id: 's-institut',

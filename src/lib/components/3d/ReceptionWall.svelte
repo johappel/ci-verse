@@ -249,8 +249,8 @@
     }}
     <InteractionPillar 
         project={institutionProject}
-        position={[0, 0, 3]}
-        size={1.2}
+        position={[0, 0, 1.7]}
+        size={1.0}
         worldPosition={[platformPosition[0] + position[0], platformPosition[1] + position[1], platformPosition[2] + position[2] + 3]}
     />
 
@@ -323,9 +323,9 @@
     </T.Group>
 
     <!-- Boden-Markierung -->
-    <T.Mesh position.y={0.02} rotation.x={-Math.PI / 2} receiveShadow>
-        <T.PlaneGeometry args={[wall.width + 2, 4]} />
-        <T.MeshStandardMaterial color={primaryColor} transparent opacity={0.2} />
+    <T.Mesh position.y={0.01} rotation.x={-Math.PI / 2} receiveShadow>
+        <T.PlaneGeometry args={[wall.width + 1, 2]} />
+        <T.MeshStandardMaterial color={primaryColor} transparent opacity={0.3} />
     </T.Mesh>
 
 </T.Group>
