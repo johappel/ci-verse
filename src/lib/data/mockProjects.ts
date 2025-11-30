@@ -462,8 +462,8 @@ export const mockMarketplace: MarketplaceContent = {
     title: 'Marktplatz',
     description: 'Bildungsmarktplatz des Comenius-Instituts.',
     short: 'Marktplatz',
-    color: '#64748b',      // Slate
-    glowColor: '#94a3b8',
+    color: '#1e293b',      // Dunkleres Slate für bessere Energie-Sichtbarkeit
+    glowColor: '#475569',
     stands: [
         {
             id: 's-institut',

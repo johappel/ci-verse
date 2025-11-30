@@ -20,6 +20,7 @@
     import MesseWall from './MesseWall.svelte';
     import ReceptionWall from './ReceptionWall.svelte';
     import MarketplaceStand from './MarketplaceStand.svelte';
+    import EnergyFloor from './EnergyFloor.svelte';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getMarketplaceContent } from '$lib/data/mockProjects';
     import { mockProjects } from '$lib/data/mockProjects';
@@ -224,6 +225,31 @@
             side={2}
         />
     </T.Mesh>
+
+    <!-- ========== ENERGIE-BODEN (Leitlinien fließen zur Mitte) ========== -->
+    <!-- ========== ENERGIE-BODEN (Leitlinien fliessen zur Mitte) ========== -->
+    <!-- 6 Stroeme fuer alle 6 Poster-Positionen an den Hexagon-Waenden -->
+    <!-- Hexagon-Edge-Winkel = edgeIndex * 60 Grad + 30 Grad (Plattform-Rotation) -->
+    <EnergyFloor 
+        radius={platform.size * 0.85}
+        intensity={0.5}
+        posterAngles={[
+            Math.PI * 0.167,  // Edge 0: rechts-vorne (30 Grad)
+            Math.PI * 0.5,    // Edge 1: rechts (90 Grad) - POSTER hier!
+            Math.PI * 0.833,  // Edge 2: rechts-hinten (150 Grad) - POSTER hier!
+            Math.PI * 1.167,  // Edge 3: links-hinten (210 Grad) - frei (Turm)
+            Math.PI * 1.5,    // Edge 4: links (270 Grad) - POSTER hier!
+            Math.PI * 1.833   // Edge 5: links-vorne (330 Grad) - POSTER hier!
+        ]}
+        posterColors={[
+            '#facc15',  // Edge 0: Gold
+            '#facc15',  // Edge 1: Gold (justice)
+            '#4ade80',  // Edge 2: Gruen (sustainability)
+            '#1e293b',  // Edge 3: Dunkel (kein Poster - Turm)
+            '#22d3ee',  // Edge 4: Cyan (digitality)
+            '#a78bfa'   // Edge 5: Violett (structure)
+        ]}
+    />
 
     <!-- ========== WANDSEGMENTE FÜR LEITLINIEN ========== -->
     <!-- Zwei MesseWall-Gruppen: Links und Rechts vom Turm, Wand dahinter frei -->
