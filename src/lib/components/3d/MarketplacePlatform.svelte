@@ -21,6 +21,7 @@
     import ReceptionWall from './ReceptionWall.svelte';
     import MarketplaceStand from './MarketplaceStand.svelte';
     import EnergyFloor from './EnergyFloor.svelte';
+    import EnergyBeam from './EnergyBeam.svelte';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getMarketplaceContent } from '$lib/data/mockProjects';
     import { mockProjects } from '$lib/data/mockProjects';
@@ -35,13 +36,31 @@
     let platformColor = $derived(marketplace?.color ?? platform.color);
     let platformGlowColor = $derived(marketplace?.glowColor ?? platform.glowColor);
 
-    // Oktaeder-Rotation (animiert)
+    // Zeit-basierte Animation
+    let animTime = $state(0);
+    
+    // Oktaeder-Rotation (animiert) + Energie-Puls
     let octaederRotation = $state(0);
+    let energyPulse = $state(0);
+    let isTransporting = $derived(worldStore.state.isTransporting);
+    
     useTask((delta) => {
+        animTime += delta;
         if (isCurrentPlatform) {
             octaederRotation += delta * 0.5;
+            // Energie-Puls basierend auf Zeit
+            const speed = isTransporting ? 8.0 : 2.0;
+            energyPulse = Math.sin(animTime * speed) * 0.5 + 0.5;
         }
     });
+
+    // Oktaeder-Glow basierend auf Energie
+    let oktaederEmissive = $derived(
+        isTransporting ? 1.2 + energyPulse * 0.8 : 0.3 + energyPulse * 0.4
+    );
+    let oktaederScale = $derived(
+        isTransporting ? 1.0 + energyPulse * 0.15 : 1.0 + energyPulse * 0.05
+    );
 
     // Cursor und Hover
     const { hovering, onPointerEnter, onPointerLeave } = useCursor();
@@ -326,8 +345,16 @@
         </T.Group>
     {/each}
 
-    <!-- ========== OKTAEDER (Navigation Hub) ========== -->
-    <T.Group position.y={15}>
+    <!-- ========== ENERGIE-SÄULE (vom Boden zum Oktaeder) ========== -->
+    <EnergyBeam 
+        height={13}
+        baseY={2}
+        radius={0.6}
+        colors={['#facc15', '#4ade80', '#22d3ee', '#a78bfa']}
+    />
+
+    <!-- ========== OKTAEDER (Navigation Hub) - jetzt mit Energie-Puls ========== -->
+    <T.Group position.y={15} scale={oktaederScale}>
         <T.Mesh 
             rotation.y={octaederRotation}
             rotation.x={Math.PI / 8}
@@ -336,28 +363,41 @@
             <T.MeshPhysicalMaterial 
                 color={platformGlowColor}
                 emissive={platformGlowColor}
-                emissiveIntensity={isCurrentPlatform ? 0.6 : 0.2}
+                emissiveIntensity={oktaederEmissive}
                 metalness={0.3}
                 roughness={0.1}
                 transparent
-                opacity={0.7}
+                opacity={0.7 + energyPulse * 0.2}
                 transmission={0.3}
             />
         </T.Mesh>
         
-        <!-- Innerer Kern -->
-        <T.Mesh rotation.y={octaederRotation * -1.5}>
+        <!-- Innerer Kern - pulsiert mit Energie -->
+        <T.Mesh rotation.y={octaederRotation * -1.5} scale={1 + energyPulse * 0.3}>
             <T.SphereGeometry args={[0.6, 16, 16]} />
             <T.MeshBasicMaterial color={platformGlowColor} />
         </T.Mesh>
         
-        <!-- Punktlicht -->
+        <!-- Punktlicht - Intensität variiert mit Energie -->
         <T.PointLight
             color={platformGlowColor}
-            intensity={isCurrentPlatform ? 60 : 20}
-            distance={25}
+            intensity={isCurrentPlatform ? 60 + energyPulse * 40 : 20}
+            distance={25 + energyPulse * 10}
             decay={2}
         />
+        
+        <!-- Energie-Glow-Ring um Oktaeder -->
+        {#if isCurrentPlatform}
+            <T.Mesh rotation.x={Math.PI / 2}>
+                <T.RingGeometry args={[1.8, 2.2, 32]} />
+                <T.MeshBasicMaterial 
+                    color={platformGlowColor}
+                    transparent
+                    opacity={0.2 + energyPulse * 0.3}
+                    side={2}
+                />
+            </T.Mesh>
+        {/if}
     </T.Group>
 
     <!-- ========== NAMENSSCHILD ========== -->
