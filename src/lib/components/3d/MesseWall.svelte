@@ -130,7 +130,7 @@
     const maxPosterWidth = imageOnly ? imageOnlyWidth : (textAreaWidth + maxImageWidth + 0.8); // +0.8 für Rahmen/Gap
     
     // Spacing basiert auf maximaler Breite, damit keine Überlappung entsteht
-    const posterSpacing = maxPosterWidth + 1.5; // +1.5 Abstand zwischen Postern
+    const posterSpacing = maxPosterWidth + 4; // +4 Abstand zwischen Postern
     const maxPostersPerWall = Math.max(1, Math.floor(hexEdgeLength / posterSpacing));
     const postersPerWall = Math.min(maxPostersPerWall, 2); // Max 2 pro Wand (Landscape braucht Platz)
     
@@ -179,10 +179,9 @@
         const cosR = Math.cos(wallRotY);
         const sinR = Math.sin(wallRotY);
         
-        // Offset von der Wand-Mitte zum Poster (in Weltkoordinaten)
-        // imageOnly: Bild ist zentriert, kein Extra-Offset nötig
-        // Normal: Extra Offset nach rechts (+3), um Text-Poster + Bild besser zu sehen
-        const viewOffsetX = imageOnly ? offsetX : (offsetX + 3);
+        // offsetX ist die Position des Posters auf der Wand (Mitte der Gruppe)
+        // Das Poster wird intern zentriert gerendert, also brauchen wir keinen extra Offset
+        const viewOffsetX = offsetX;
         const offsetWorldX = viewOffsetX * cosR;
         const offsetWorldZ = -viewOffsetX * sinR;  // Negativ wegen Three.js Koordinatensystem
         
