@@ -118,12 +118,12 @@
 
     // Poster auf die Wände verteilen (mehrere pro Wand möglich)
     // imageOnly: Nur großes Bild (für Leitlinien) - Landscape 1649x906
-    // Normal: Text-Poster + Bild nebeneinander
-    const posterSize = 4; // Quadratische Text-Poster
+    // Normal: Text-Poster + Bild nebeneinander - GROß wie Leitlinien!
+    const posterHeight = wallHeight * 0.85; // Höhe nutzt 85% der Wandhöhe
     const imageOnlyWidth = 12; // Breite für imageOnly-Modus (Landscape)
     const imageOnlyHeight = 6.6; // Höhe für imageOnly (1649x906 Verhältnis)
-    const maxImageWidth = posterSize * 2.2; // Landscape ist breiter (8.8)
-    const combinedPosterWidth = imageOnly ? imageOnlyWidth : (posterSize + maxImageWidth + 0.5); // Max-Breite
+    const maxImageWidth = posterHeight * 1.2; // Landscape-Bild max
+    const combinedPosterWidth = imageOnly ? imageOnlyWidth : (posterHeight * 0.6 + maxImageWidth + 0.4); // Text + Bild
     
     // Bei wenigen Postern: 1 Poster pro Wand, mittig platziert
     // Bei 3+ Postern: maximal 2 pro Wand (hexEdgeLength ≈ 35-45)
@@ -143,15 +143,20 @@
         const actualPostersOnWall = Math.min(postersOnThisWall, postersPerWall);
         
         // Berechne die tatsächliche Bildbreite für dieses Poster
-        const isLandscape = poster.project.display?.posterImageFormat === 'landscape';
+        const format = poster.project.display?.posterImageFormat || 'portrait';
         const hasImage = !!poster.project.display?.posterImage;
-        const imageWidth = hasImage ? (isLandscape ? posterSize * 2.2 : posterSize * 0.9) : 0;
-        const imageGap = hasImage ? 0.25 : 0;
+        // Bildbreite je nach Format (proportional zur posterHeight)
+        const imgWidth = hasImage ? (
+            format === 'landscape' ? posterHeight * 1.2 :
+            format === 'square' ? posterHeight * 0.85 :
+            posterHeight * 0.55
+        ) : 0;
+        const imageGap = hasImage ? 0.4 : 0;
         
         // Das Bild geht nach rechts vom Text-Poster
         // Um das Paar zu zentrieren, muss das Text-Poster nach links verschoben werden
-        // Zentrumverschiebung = (imageWidth + gap) / 2
-        const centerCorrection = hasImage ? (imageWidth + imageGap) / 2 : 0;
+        // Zentrumverschiebung = (imgWidth + gap) / 2
+        const centerCorrection = hasImage ? (imgWidth + imageGap) / 2 : 0;
         
         // Zentriere die Poster auf der Wand
         // Bei 1 Poster: mittig (offsetX = 0 - centerCorrection)
@@ -275,14 +280,40 @@
     {#each posterPositions as { project, x, z, rotY, offsetX }}
         {@const isButtonHovered = hoveredButtonId === project.id}
         {@const displayColor = project.display?.color || project.color || '#3b82f6'}
-        {@const titleFontSize = project.title.length > 20 ? 0.24 : project.title.length > 12 ? 0.28 : 0.32}
         {@const hasImage = !!project.display?.posterImage}
-        {@const isLandscape = project.display?.posterImageFormat === 'landscape'}
-        {@const imageWidth = hasImage ? (isLandscape ? posterSize * 1.8 : posterSize * 0.85) : 0}
-        {@const imageHeight = hasImage ? (isLandscape ? posterSize * 1.2 : posterSize * 1.28) : 0}
-        {@const textWidth = posterSize * 0.95}
-        {@const totalWidth = hasImage ? (textWidth + imageWidth + 0.3) : textWidth}
-        {@const totalHeight = Math.max(posterSize, imageHeight)}
+        {@const imageFormat = project.display?.posterImageFormat || 'portrait'}
+        {@const frameWidth = 0.08} <!-- Dünner Rahmen wie ExhibitBooth -->
+        {@const innerPadding = 0.15} <!-- Abstand Inhalt zum Rahmen -->
+        {@const gap = 0.35} <!-- Abstand zwischen Text und Bild -->
+        
+        <!-- Bildgrößen je nach Format (Bild ist dominant!) -->
+        {@const imageWidth = hasImage ? (
+            imageFormat === 'landscape' ? posterHeight * 1.2 :
+            imageFormat === 'square' ? posterHeight * 0.85 :
+            posterHeight * 0.55
+        ) : 0}
+        {@const imageHeight = hasImage ? (
+            imageFormat === 'landscape' ? posterHeight * 0.8 :
+            imageFormat === 'square' ? posterHeight * 0.85 :
+            posterHeight * 0.92
+        ) : 0}
+        
+        <!-- Text-Bereich: schmaler als Bild -->
+        {@const textWidth = hasImage ? Math.min(posterHeight * 0.5, imageWidth * 0.6) : posterHeight * 0.8}
+        
+        <!-- Gesamtgröße: Inhalt + Rahmen -->
+        {@const contentWidth = hasImage ? (textWidth + gap + imageWidth) : textWidth}
+        {@const contentHeight = posterHeight * 0.92}
+        {@const totalWidth = contentWidth + frameWidth * 2 + innerPadding * 2}
+        {@const totalHeight = posterHeight}
+        
+        <!-- Schriftgrößen: Titel MUSS in textWidth passen! -->
+        <!-- Lange Wörter wie "Religionspädagogik" brauchen kleine Schrift -->
+        <!-- Faustregel: ~12-14 Zeichen pro textWidth bei dieser Schriftgröße -->
+        {@const titleFontSize = Math.min(textWidth * 0.085, 0.26)}
+        {@const sloganFontSize = titleFontSize * 0.65}
+        {@const descFontSize = titleFontSize * 0.52}
+        {@const buttonSize = Math.min(textWidth * 0.18, 0.45)}
         
         <T.Group position={[x, wallHeight / 2 + 1.5, z]} rotation.y={rotY}>
             <!-- Offset für Position auf der Wand -->
@@ -318,90 +349,106 @@
                         </T.Group>
                     {/if}
                 {:else}
-                    <!-- === NORMAL MODUS (Einheitlicher Rahmen wie ExhibitBooth) === -->
+                    <!-- === NORMAL MODUS (Dünner Rahmen wie ExhibitBooth) === -->
                     
-                    <!-- Äußerer farbiger Rahmen um das gesamte Poster -->
-                    <T.Mesh position.z={0.15}>
-                        <T.BoxGeometry args={[totalWidth + 0.2, totalHeight + 0.2, 0.08]} />
-                        <T.MeshBasicMaterial color={displayColor} />
-                    </T.Mesh>
-                    
-                    <!-- Innerer dunkler Hintergrund -->
+                    <!-- Dunkler Hintergrund -->
                     <T.Mesh 
-                        position.z={0.2}
+                        position.z={0.18}
                         onclick={() => handlePosterClick(x, z, rotY, offsetX)}
                     >
                         <T.PlaneGeometry args={[totalWidth, totalHeight]} />
                         <T.MeshBasicMaterial color="#0f172a" />
                     </T.Mesh>
                     
+                    <!-- Dünner farbiger Rahmen (4 Linien wie ExhibitBooth) -->
+                    <!-- Oben -->
+                    <T.Mesh position={[0, totalHeight / 2 - frameWidth / 2, 0.19]}>
+                        <T.PlaneGeometry args={[totalWidth, frameWidth]} />
+                        <T.MeshBasicMaterial color={displayColor} />
+                    </T.Mesh>
+                    <!-- Unten -->
+                    <T.Mesh position={[0, -totalHeight / 2 + frameWidth / 2, 0.19]}>
+                        <T.PlaneGeometry args={[totalWidth, frameWidth]} />
+                        <T.MeshBasicMaterial color={displayColor} />
+                    </T.Mesh>
+                    <!-- Links -->
+                    <T.Mesh position={[-totalWidth / 2 + frameWidth / 2, 0, 0.19]}>
+                        <T.PlaneGeometry args={[frameWidth, totalHeight]} />
+                        <T.MeshBasicMaterial color={displayColor} />
+                    </T.Mesh>
+                    <!-- Rechts -->
+                    <T.Mesh position={[totalWidth / 2 - frameWidth / 2, 0, 0.19]}>
+                        <T.PlaneGeometry args={[frameWidth, totalHeight]} />
+                        <T.MeshBasicMaterial color={displayColor} />
+                    </T.Mesh>
+                    
                     <!-- === TEXT-POSTER (links) === -->
-                    {@const textOffsetX = hasImage ? -(totalWidth / 2 - textWidth / 2) : 0}
+                    {@const textOffsetX = hasImage ? -(contentWidth / 2 - textWidth / 2) : 0}
                     <T.Group position.x={textOffsetX}>
                         <!-- Text-Bereich Hintergrund (dezent farbig) -->
-                        <T.Mesh position.z={0.21}>
-                            <T.PlaneGeometry args={[textWidth, totalHeight * 0.95]} />
+                        <T.Mesh position.z={0.20}>
+                            <T.PlaneGeometry args={[textWidth, contentHeight]} />
                             <T.MeshBasicMaterial color={displayColor} transparent opacity={0.1} />
                         </T.Mesh>
                         
-                        <!-- Projekt-Titel (oben) -->
+                        <!-- Projekt-Titel (ganz oben, knapp unter Rahmen) -->
                         <Text
                             text={project.title}
                             fontSize={titleFontSize}
                             anchorX="center"
                             anchorY="top"
-                            position={[0, totalHeight * 0.42, 0.25]}
+                            position={[0, contentHeight * 0.44, 0.25]}
                             color="#ffffff"
                             fontWeight="bold"
-                            maxWidth={textWidth * 0.9}
+                            maxWidth={textWidth * 0.90}
                             textAlign="center"
                         />
 
-                        <!-- Trennlinie unter dem Titel -->
-                        <T.Mesh position={[0, totalHeight * 0.28, 0.24]}>
-                            <T.PlaneGeometry args={[textWidth * 0.6, 0.02]} />
+                        <!-- Trennlinie unter dem Titel (fester Abstand) -->
+                        <T.Mesh position={[0, contentHeight * 0.28, 0.24]}>
+                            <T.PlaneGeometry args={[textWidth * 0.5, 0.025]} />
                             <T.MeshBasicMaterial color={displayColor} />
                         </T.Mesh>
 
-                        <!-- Slogan (falls vorhanden) -->
+                        <!-- Slogan (falls vorhanden) - direkt unter Trennlinie -->
                         {#if project.display?.slogan}
                             <Text
                                 text={project.display.slogan}
-                                fontSize={0.2}
+                                fontSize={sloganFontSize}
                                 anchorX="center"
                                 anchorY="top"
-                                position={[0, totalHeight * 0.22, 0.25]}
+                                position={[0, contentHeight * 0.22, 0.25]}
                                 color={displayColor}
-                                maxWidth={textWidth * 0.85}
+                                maxWidth={textWidth * 0.88}
                                 textAlign="center"
                                 fontStyle="italic"
                             />
                         {/if}
 
-                        <!-- Beschreibung (shortTeaser) -->
+                        <!-- Beschreibung (shortTeaser) - direkt unter Slogan oder Trennlinie -->
                         {#if project.shortTeaser}
-                            {@const descY = project.display?.slogan ? totalHeight * 0.02 : totalHeight * 0.14}
+                            {@const descY = project.display?.slogan ? contentHeight * 0.08 : contentHeight * 0.18}
                             <Text
                                 text={project.shortTeaser}
-                                fontSize={0.16}
+                                fontSize={descFontSize}
                                 anchorX="center"
                                 anchorY="top"
                                 position={[0, descY, 0.25]}
                                 color="#94a3b8"
-                                maxWidth={textWidth * 0.85}
+                                maxWidth={textWidth * 0.88}
                                 textAlign="center"
-                                lineHeight={1.4}
+                                lineHeight={1.3}
                             />
                         {/if}
 
                         <!-- Klickbares Hexagon-Button unten (wie ExhibitBooth) -->
                         <T.Mesh 
-                            position={[0, -totalHeight * 0.38, 0.22]}
+                            position={[0, -contentHeight * 0.38, 0.22]}
                             onclick={() => { if (isNearWall) worldStore.selectProject(project.id); }}
                             onpointerenter={() => { hoveredButtonId = project.id; if (isNearWall) onPointerEnter(); }}
                             onpointerleave={() => { hoveredButtonId = null; onPointerLeave(); }}
                         >
-                            <T.RingGeometry args={[0.22, 0.38, 6]} />
+                            <T.RingGeometry args={[buttonSize * 0.6, buttonSize, 6]} />
                             <T.MeshBasicMaterial 
                                 color={isNearWall && isButtonHovered ? '#ffffff' : displayColor} 
                                 transparent 
@@ -410,12 +457,12 @@
                         </T.Mesh>
                         <!-- Innerer Kreis des Hexagon-Buttons (auch klickbar) -->
                         <T.Mesh 
-                            position={[0, -totalHeight * 0.38, 0.23]}
+                            position={[0, -contentHeight * 0.38, 0.23]}
                             onclick={() => { if (isNearWall) worldStore.selectProject(project.id); }}
                             onpointerenter={() => { hoveredButtonId = project.id; if (isNearWall) onPointerEnter(); }}
                             onpointerleave={() => { hoveredButtonId = null; onPointerLeave(); }}
                         >
-                            <T.CircleGeometry args={[0.22, 6]} />
+                            <T.CircleGeometry args={[buttonSize * 0.6, 6]} />
                             <T.MeshBasicMaterial 
                                 color={isNearWall && isButtonHovered ? displayColor : '#0f172a'} 
                                 transparent 
@@ -425,31 +472,31 @@
                         <!-- Info-Icon im Hexagon (keine Pointer-Events) -->
                         <Text
                             text={isNearWall ? "ℹ️" : "👁️"}
-                            fontSize={0.18}
+                            fontSize={buttonSize * 0.5}
                             anchorX="center"
                             anchorY="middle"
-                            position={[0, -totalHeight * 0.38, 0.24]}
+                            position={[0, -contentHeight * 0.38, 0.24]}
                             pointerEvents="none"
                         />
                     </T.Group>
                     
                     <!-- Vertikale Trennlinie zwischen Text und Bild -->
                     {#if hasImage}
-                        {@const dividerX = textOffsetX + textWidth / 2 + 0.1}
+                        {@const dividerX = textOffsetX + textWidth / 2 + gap / 2}
                         <T.Mesh position={[dividerX, 0, 0.22]}>
-                            <T.PlaneGeometry args={[0.03, totalHeight * 0.9]} />
+                            <T.PlaneGeometry args={[0.04, contentHeight * 0.9]} />
                             <T.MeshBasicMaterial color={displayColor} transparent opacity={0.5} />
                         </T.Mesh>
                     {/if}
 
                     <!-- === POSTER-BILD (rechts) === -->
                     {#if hasImage}
-                        {@const imageOffsetX = totalWidth / 2 - imageWidth / 2}
+                        {@const imageOffsetX = textOffsetX + textWidth / 2 + gap + imageWidth / 2}
                         <T.Mesh 
                             position={[imageOffsetX, 0, 0.22]}
                             onclick={() => handlePosterClick(x, z, rotY, offsetX)}
                         >
-                            <T.PlaneGeometry args={[imageWidth * 0.95, imageHeight * 0.95]} />
+                            <T.PlaneGeometry args={[imageWidth, imageHeight]} />
                             <ImageMaterial 
                                 url={project.display?.posterImage || ''}
                                 transparent

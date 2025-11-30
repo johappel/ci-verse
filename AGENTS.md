@@ -211,7 +211,7 @@ src/lib/
 interface ProjectDisplay {
     slogan: string;               // Slogan für das Poster
     posterImage?: string;         // URL zum Poster-Bild
-    posterImageFormat?: 'portrait' | 'landscape'; // Bildformat (default: portrait)
+    posterImageFormat?: 'portrait' | 'landscape' | 'square'; // Bildformat (default: portrait)
     logoUrl?: string;             // Projekt-Logo
     color: string;                // Primärfarbe (Hex)
     screenshotUrl?: string;       // Website-Screenshot
@@ -221,12 +221,13 @@ interface ProjectDisplay {
 
 ### Poster-Bildformate
 
-| Format | Empfohlene Größe | Position auf MesseWall |
-|--------|------------------|------------------------|
-| **portrait** (Standard) | 800×1200 px | Rechts neben dem Text-Poster (schmal, hoch) |
-| **landscape** | 1200×800 px | Rechts neben dem Text-Poster (breit, flach) |
+| Format | Empfohlene Größe | Darstellung |
+|--------|------------------|-------------|
+| **portrait** (Standard) | 800×1200 px | Schmal und hoch, rechts neben Text |
+| **landscape** | 1200×800 px | Breit und flach, rechts neben Text |
+| **square** | 1000×1000 px | Quadratisch, rechts neben Text |
 
-**Wichtig:** Poster und Bild sind **immer nebeneinander** (nicht untereinander)!
+**Wichtig:** Poster und Bild sind **immer nebeneinander** mit einheitlichem Abstand!
 
 **Beispiel (mockProjects.ts):**
 ```typescript
@@ -236,7 +237,7 @@ interface ProjectDisplay {
     display: {
         slogan: 'Wissen schafft Bildung',
         posterImage: 'https://picsum.photos/seed/research/1200/800',
-        posterImageFormat: 'landscape',  // ← Bild erscheint UNTER dem Text
+        posterImageFormat: 'landscape',  // ← Breitbild rechts neben Text
         color: '#8b5cf6'
     }
 }

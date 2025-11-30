@@ -66,10 +66,11 @@
     });
 
     // Größen-Varianten für Rollup (ausgewogene Proportionen)
+    // gap = einheitlicher Abstand zwischen Text und Bild
     const sizes = {
-        small:  { width: 6.5,  height: 5.5, footWidth: 7,    footDepth: 0.8, textWidth: 2.2, imageWidth: 3.8 },
-        medium: { width: 8.5,  height: 6.5, footWidth: 9,    footDepth: 1.0, textWidth: 2.6, imageWidth: 5.2 },
-        large:  { width: 10.5, height: 8,   footWidth: 11,   footDepth: 1.2, textWidth: 3.0, imageWidth: 6.5 }
+        small:  { width: 6.5,  height: 5.5, footWidth: 7,    footDepth: 0.8, textWidth: 2.2, gap: 0.2 },
+        medium: { width: 8.5,  height: 6.5, footWidth: 9,    footDepth: 1.0, textWidth: 2.6, gap: 0.25 },
+        large:  { width: 10.5, height: 8,   footWidth: 11,   footDepth: 1.2, textWidth: 3.0, gap: 0.3 }
     };
     
     const s = sizes[size];
@@ -77,6 +78,18 @@
     const posterImage = project.display?.posterImage;
     const shortTeaser = project.shortTeaser;
     const slogan = project.display?.slogan;
+    const imageFormat = project.display?.posterImageFormat || 'portrait';
+    
+    // Bildbreite berechnen (verfügbarer Platz = Gesamtbreite - Textbreite - Rahmen - Gap)
+    const availableImageWidth = s.width - s.textWidth - 0.4 - s.gap; // 0.4 = Rahmen links+rechts
+    const imageHeight = s.height * 0.92; // Höhe wie Text-Bereich
+    
+    // Bildbreite je nach Format
+    const imageWidth = $derived(
+        imageFormat === 'landscape' ? availableImageWidth :
+        imageFormat === 'square' ? Math.min(availableImageWidth, imageHeight) :
+        Math.min(availableImageWidth * 0.7, imageHeight * 0.67) // portrait: schmaler
+    );
     
     // Titel-Schriftgröße
     const titleFontSize = $derived(
@@ -238,7 +251,7 @@
             </T.Mesh>
 
             <!-- === TEXT-POSTER (links) === -->
-            {@const textOffsetX = posterImage ? -(s.width / 2 - s.textWidth / 2 - 0.2) : 0}
+            {@const textOffsetX = posterImage ? -(s.width / 2 - s.textWidth / 2 - 0.15) : 0}
             <T.Group position.x={textOffsetX}>
                 <!-- Text-Poster Hintergrund -->
                 <T.Mesh position.z={0.01}>
@@ -337,7 +350,7 @@
 
             <!-- Vertikale Trennlinie zwischen Text und Bild -->
             {#if posterImage}
-                {@const dividerX = textOffsetX + s.textWidth / 2 + 0.15}
+                {@const dividerX = textOffsetX + s.textWidth / 2 + s.gap / 2}
                 <T.Mesh position={[dividerX, 0, 0.015]}>
                     <T.PlaneGeometry args={[0.02, s.height * 0.85]} />
                     <T.MeshBasicMaterial color={displayColor} transparent opacity={0.4} />
@@ -346,14 +359,14 @@
 
             <!-- === POSTER-BILD (rechts, großflächig, klickbar) === -->
             {#if posterImage}
-                {@const imageOffsetX = s.width / 2 - s.imageWidth / 2 - 0.2}
+                {@const imageOffsetX = textOffsetX + s.textWidth / 2 + s.gap + imageWidth / 2}
                 <T.Mesh 
                     position={[imageOffsetX, 0, 0.02]}
                     onpointerenter={handlePointerEnter}
                     onpointerleave={handlePointerLeave}
                     onclick={handleBannerClick}
                 >
-                    <T.PlaneGeometry args={[s.imageWidth, s.height * 0.92]} />
+                    <T.PlaneGeometry args={[imageWidth, imageHeight]} />
                     <ImageMaterial 
                         url={posterImage}
                         transparent
@@ -394,7 +407,7 @@
             </T.Mesh>
 
             <!-- === TEXT-POSTER (links auf Rückseite = rechts gespiegelt) === -->
-            {@const textOffsetX = posterImage ? -(s.width / 2 - s.textWidth / 2 - 0.2) : 0}
+            {@const textOffsetX = posterImage ? -(s.width / 2 - s.textWidth / 2 - 0.15) : 0}
             <T.Group position.x={textOffsetX}>
                 <!-- Text-Poster Hintergrund -->
                 <T.Mesh position.z={0.01}>
@@ -493,7 +506,7 @@
 
             <!-- Vertikale Trennlinie zwischen Text und Bild -->
             {#if posterImage}
-                {@const dividerX = textOffsetX + s.textWidth / 2 + 0.15}
+                {@const dividerX = textOffsetX + s.textWidth / 2 + s.gap / 2}
                 <T.Mesh position={[dividerX, 0, 0.015]}>
                     <T.PlaneGeometry args={[0.02, s.height * 0.85]} />
                     <T.MeshBasicMaterial color={displayColor} transparent opacity={0.4} />
@@ -502,14 +515,14 @@
 
             <!-- === POSTER-BILD (rechts auf Rückseite, großflächig, klickbar) === -->
             {#if posterImage}
-                {@const imageOffsetX = s.width / 2 - s.imageWidth / 2 - 0.2}
+                {@const imageOffsetX = textOffsetX + s.textWidth / 2 + s.gap + imageWidth / 2}
                 <T.Mesh 
                     position={[imageOffsetX, 0, 0.02]}
                     onpointerenter={handlePointerEnter}
                     onpointerleave={handlePointerLeave}
                     onclick={handleBannerClick}
                 >
-                    <T.PlaneGeometry args={[s.imageWidth, s.height * 0.92]} />
+                    <T.PlaneGeometry args={[imageWidth, imageHeight]} />
                     <ImageMaterial 
                         url={posterImage}
                         transparent
