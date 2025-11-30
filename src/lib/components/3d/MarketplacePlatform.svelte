@@ -355,45 +355,90 @@
 
     <!-- ========== OKTAEDER (Navigation Hub) - jetzt mit Energie-Puls ========== -->
     <T.Group position.y={15} scale={oktaederScale}>
+        <!-- Äußerer Oktaeder - leuchtend -->
         <T.Mesh 
             rotation.y={octaederRotation}
             rotation.x={Math.PI / 8}
         >
             <T.OctahedronGeometry args={[1.5, 0]} />
-            <T.MeshPhysicalMaterial 
+            <T.MeshStandardMaterial 
                 color={platformGlowColor}
                 emissive={platformGlowColor}
-                emissiveIntensity={oktaederEmissive}
-                metalness={0.3}
-                roughness={0.1}
+                emissiveIntensity={1.5 + energyPulse * 2.0}
+                metalness={0.1}
+                roughness={0.2}
                 transparent
-                opacity={0.7 + energyPulse * 0.2}
-                transmission={0.3}
+                opacity={0.85}
             />
         </T.Mesh>
         
-        <!-- Innerer Kern - pulsiert mit Energie -->
-        <T.Mesh rotation.y={octaederRotation * -1.5} scale={1 + energyPulse * 0.3}>
-            <T.SphereGeometry args={[0.6, 16, 16]} />
-            <T.MeshBasicMaterial color={platformGlowColor} />
+        <!-- Mittlerer Glow-Layer -->
+        <T.Mesh 
+            rotation.y={octaederRotation * 0.7}
+            rotation.x={Math.PI / 8}
+            scale={1.1 + energyPulse * 0.1}
+        >
+            <T.OctahedronGeometry args={[1.5, 0]} />
+            <T.MeshBasicMaterial 
+                color={platformGlowColor}
+                transparent
+                opacity={0.3 + energyPulse * 0.3}
+            />
         </T.Mesh>
         
-        <!-- Punktlicht - Intensität variiert mit Energie -->
+        <!-- Innerer Kern - pulsiert hell -->
+        <T.Mesh rotation.y={octaederRotation * -1.5} scale={0.8 + energyPulse * 0.4}>
+            <T.SphereGeometry args={[0.6, 16, 16]} />
+            <T.MeshBasicMaterial 
+                color="#ffffff"
+            />
+        </T.Mesh>
+        
+        <!-- Energie-Kern (farbig, pulsierend) -->
+        <T.Mesh rotation.y={octaederRotation * 2} scale={0.5 + energyPulse * 0.3}>
+            <T.IcosahedronGeometry args={[0.8, 0]} />
+            <T.MeshBasicMaterial 
+                color={platformGlowColor}
+                transparent
+                opacity={0.6 + energyPulse * 0.4}
+            />
+        </T.Mesh>
+        
+        <!-- Punktlicht - Intensität variiert stark mit Energie -->
         <T.PointLight
             color={platformGlowColor}
-            intensity={isCurrentPlatform ? 60 + energyPulse * 40 : 20}
-            distance={25 + energyPulse * 10}
+            intensity={80 + energyPulse * 120}
+            distance={35}
+            decay={2}
+        />
+        
+        <!-- Zusätzliches weißes Licht für Helligkeit -->
+        <T.PointLight
+            color="#ffffff"
+            intensity={30 + energyPulse * 50}
+            distance={20}
             decay={2}
         />
         
         <!-- Energie-Glow-Ring um Oktaeder -->
         {#if isCurrentPlatform}
             <T.Mesh rotation.x={Math.PI / 2}>
-                <T.RingGeometry args={[1.8, 2.2, 32]} />
+                <T.RingGeometry args={[1.8, 2.5, 32]} />
                 <T.MeshBasicMaterial 
                     color={platformGlowColor}
                     transparent
-                    opacity={0.2 + energyPulse * 0.3}
+                    opacity={0.3 + energyPulse * 0.4}
+                    side={2}
+                />
+            </T.Mesh>
+            
+            <!-- Zweiter Ring (größer, subtiler) -->
+            <T.Mesh rotation.x={Math.PI / 2} scale={1.3 + energyPulse * 0.2}>
+                <T.RingGeometry args={[2.2, 2.6, 32]} />
+                <T.MeshBasicMaterial 
+                    color="#ffffff"
+                    transparent
+                    opacity={0.15 + energyPulse * 0.2}
                     side={2}
                 />
             </T.Mesh>
