@@ -4,6 +4,10 @@ import type { AppState, ProjectData, Perspective, Department, PlatformAspect } f
 interface ExtendedAppState extends AppState {
     isRssPanelOpen: boolean;
     isEventsPanelOpen: boolean;
+    // Iframe Dialog
+    isIframeOpen: boolean;
+    iframeUrl: string | null;
+    iframeTitle: string | null;
 }
 
 export class WorldStore {
@@ -28,7 +32,11 @@ export class WorldStore {
         selectedAspect: null,
         // NEU: Marketplace-Panels
         isRssPanelOpen: false,
-        isEventsPanelOpen: false
+        isEventsPanelOpen: false,
+        // NEU: Iframe Dialog
+        isIframeOpen: false,
+        iframeUrl: null,
+        iframeTitle: null
     });
 
     // Derived: Theme-Farbe basierend auf aktiver Perspektive
@@ -170,6 +178,35 @@ export class WorldStore {
 
     closeEventsPanel() {
         this.state.isEventsPanelOpen = false;
+    }
+
+    // NEU: Iframe Dialog für externe Websites
+    openIframe(url: string, title?: string) {
+        this.state.iframeUrl = url;
+        this.state.iframeTitle = title || this.extractDomain(url);
+        this.state.isIframeOpen = true;
+        // Schließe andere Modals
+        this.state.selectedId = null;
+        this.state.isChatOpen = false;
+        this.state.isRssPanelOpen = false;
+        this.state.isEventsPanelOpen = false;
+        this.state.selectedAspect = null;
+    }
+
+    closeIframe() {
+        this.state.isIframeOpen = false;
+        this.state.iframeUrl = null;
+        this.state.iframeTitle = null;
+    }
+
+    // Hilfsfunktion: Domain aus URL extrahieren
+    private extractDomain(url: string): string {
+        try {
+            const urlObj = new URL(url);
+            return urlObj.hostname.replace('www.', '');
+        } catch {
+            return 'Website';
+        }
     }
 
     // NEU: Hover über Transport-Button

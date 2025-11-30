@@ -8,6 +8,7 @@
     import ChatModal from "$lib/components/ui/ChatModal.svelte";
     import RssFeedPanel from "$lib/components/ui/RssFeedPanel.svelte";
     import EventsPanel from "$lib/components/ui/EventsPanel.svelte";
+    import IframeDialog from "$lib/components/ui/IframeDialog.svelte";
     import { initWorldStore, worldStore } from "$lib/logic/store.svelte";
     import { mockProjects } from "$lib/data/mockProjects";
     import { onMount } from "svelte";
@@ -156,4 +157,5 @@
 <!-- ChatModal außerhalb des main-Containers für korrekten z-index -->
 {#if !isLoading}
     <ChatModal />
+    <IframeDialog />
 {/if}

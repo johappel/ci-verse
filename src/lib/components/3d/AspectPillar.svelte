@@ -65,8 +65,14 @@
 
     function handleClick() {
         if (!isNearby) return;
-        // Öffne ContentCard mit Aspect-Daten
-        worldStore.selectAspect(aspect);
+        
+        // Wenn contentUrl vorhanden, im Iframe-Dialog öffnen
+        if (aspect.contentUrl) {
+            worldStore.openIframe(aspect.contentUrl, aspect.title);
+        } else {
+            // Sonst ContentCard mit Aspect-Daten öffnen
+            worldStore.selectAspect(aspect);
+        }
     }
 
     // Puls-Animation

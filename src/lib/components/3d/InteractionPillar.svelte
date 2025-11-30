@@ -79,9 +79,9 @@
             return;
         }
         
-        // Wenn externe URL vorhanden, diese öffnen
+        // Wenn externe URL vorhanden, im Iframe-Dialog öffnen
         if (project.externalUrl) {
-            window.open(project.externalUrl, '_blank');
+            worldStore.openIframe(project.externalUrl, project.title);
         } else {
             // Sonst ProjectCard öffnen
             worldStore.selectProject(project.id);
