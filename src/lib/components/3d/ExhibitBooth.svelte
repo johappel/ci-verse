@@ -5,13 +5,13 @@
      * Struktur:
      * - Breite Bodenplatte (Rollup-Fuß)
      * - Großes vertikales Banner mit Text-Poster + posterImage
-     * - InteractionPillar davor für ProjectCard-Aktivierung
+     * - Klickbares Hexagon-Button im Poster für ProjectCard-Aktivierung
      * 
      * Interaktion:
      * - Klick auf Banner → Kamera fährt davor
-     * - Klick auf Pillar-Knopf (bei Nähe) → Öffnet ProjectCard
+     * - Klick auf Hexagon-Button (bei Nähe) → Öffnet ProjectCard
      */
-    import { T } from '@threlte/core';
+    import { T, useThrelte, useTask } from '@threlte/core';
     import { Text, useCursor, HTML, ImageMaterial } from '@threlte/extras';
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
@@ -33,10 +33,37 @@
         platformPosition = [0, 0, 0]
     }: Props = $props();
 
+    const { camera } = useThrelte();
     const { hovering, onPointerEnter, onPointerLeave } = useCursor('pointer');
     
     let isHovered = $state(false);
     let isButtonHovered = $state(false);
+    
+    // Entfernungs-basierte Aktivierung
+    const ACTIVATION_DISTANCE = 12;
+    let isNearby = $state(false);
+    let frameCounter = 0;
+    
+    // Berechne Welt-Position des Booths
+    const worldPosition = $derived([
+        platformPosition[0] + position[0],
+        platformPosition[1] + position[1],
+        platformPosition[2] + position[2]
+    ] as [number, number, number]);
+    
+    // Entfernungs-Check (alle 6 Frames für Performance)
+    useTask(() => {
+        frameCounter++;
+        if (frameCounter % 6 !== 0) return;
+        
+        const camPos = $camera.position;
+        const dx = camPos.x - worldPosition[0];
+        const dy = camPos.y - worldPosition[1];
+        const dz = camPos.z - worldPosition[2];
+        const distSq = dx * dx + dy * dy + dz * dz;
+        
+        isNearby = distSq <= ACTIVATION_DISTANCE * ACTIVATION_DISTANCE;
+    });
 
     // Größen-Varianten für Rollup (ausgewogene Proportionen)
     const sizes = {
@@ -97,10 +124,24 @@
         onPointerLeave();
     }
 
-    // Klick auf Button: ProjectCard öffnen
+    // Klick auf Button: ProjectCard öffnen (nur wenn nah genug)
     function handleButtonClick(e: Event) {
         e.stopPropagation();
+        if (!isNearby) return;
         worldStore.selectProject(project.id);
+    }
+    
+    // Button Hover Handler (nur wenn nah genug)
+    function handleButtonEnter() {
+        if (isNearby) {
+            isButtonHovered = true;
+            onPointerEnter();
+        }
+    }
+    
+    function handleButtonLeave() {
+        isButtonHovered = false;
+        onPointerLeave();
     }
 </script>
 
@@ -259,33 +300,33 @@
                 <T.Mesh 
                     position={[0, -s.height * 0.38, 0.02]}
                     onclick={handleButtonClick}
-                    onpointerenter={() => { isButtonHovered = true; onPointerEnter(); }}
-                    onpointerleave={() => { isButtonHovered = false; onPointerLeave(); }}
+                    onpointerenter={handleButtonEnter}
+                    onpointerleave={handleButtonLeave}
                 >
                     <T.RingGeometry args={[0.18, 0.32, 6]} />
                     <T.MeshBasicMaterial 
-                        color={isButtonHovered ? '#ffffff' : displayColor} 
+                        color={isNearby && isButtonHovered ? '#ffffff' : displayColor} 
                         transparent 
-                        opacity={isButtonHovered ? 1 : 0.6} 
+                        opacity={isNearby ? (isButtonHovered ? 1 : 0.6) : 0.25} 
                     />
                 </T.Mesh>
                 <!-- Innerer Kreis des Hexagon-Buttons (auch klickbar) -->
                 <T.Mesh 
                     position={[0, -s.height * 0.38, 0.025]}
                     onclick={handleButtonClick}
-                    onpointerenter={() => { isButtonHovered = true; onPointerEnter(); }}
-                    onpointerleave={() => { isButtonHovered = false; onPointerLeave(); }}
+                    onpointerenter={handleButtonEnter}
+                    onpointerleave={handleButtonLeave}
                 >
                     <T.CircleGeometry args={[0.18, 6]} />
                     <T.MeshBasicMaterial 
-                        color={isButtonHovered ? displayColor : '#0f172a'} 
+                        color={isNearby && isButtonHovered ? displayColor : '#0f172a'} 
                         transparent 
-                        opacity={0.9} 
+                        opacity={isNearby ? 0.9 : 0.5} 
                     />
                 </T.Mesh>
                 <!-- Info-Icon im Hexagon (keine Pointer-Events) -->
                 <Text
-                    text="ℹ️"
+                    text={isNearby ? "ℹ️" : "👁️"}
                     fontSize={0.15}
                     anchorX="center"
                     anchorY="middle"
@@ -415,33 +456,33 @@
                 <T.Mesh 
                     position={[0, -s.height * 0.38, 0.02]}
                     onclick={handleButtonClick}
-                    onpointerenter={() => { isButtonHovered = true; onPointerEnter(); }}
-                    onpointerleave={() => { isButtonHovered = false; onPointerLeave(); }}
+                    onpointerenter={handleButtonEnter}
+                    onpointerleave={handleButtonLeave}
                 >
                     <T.RingGeometry args={[0.18, 0.32, 6]} />
                     <T.MeshBasicMaterial 
-                        color={isButtonHovered ? '#ffffff' : displayColor} 
+                        color={isNearby && isButtonHovered ? '#ffffff' : displayColor} 
                         transparent 
-                        opacity={isButtonHovered ? 1 : 0.6} 
+                        opacity={isNearby ? (isButtonHovered ? 1 : 0.6) : 0.25} 
                     />
                 </T.Mesh>
                 <!-- Innerer Kreis des Hexagon-Buttons (auch klickbar) -->
                 <T.Mesh 
                     position={[0, -s.height * 0.38, 0.025]}
                     onclick={handleButtonClick}
-                    onpointerenter={() => { isButtonHovered = true; onPointerEnter(); }}
-                    onpointerleave={() => { isButtonHovered = false; onPointerLeave(); }}
+                    onpointerenter={handleButtonEnter}
+                    onpointerleave={handleButtonLeave}
                 >
                     <T.CircleGeometry args={[0.18, 6]} />
                     <T.MeshBasicMaterial 
-                        color={isButtonHovered ? displayColor : '#0f172a'} 
+                        color={isNearby && isButtonHovered ? displayColor : '#0f172a'} 
                         transparent 
-                        opacity={0.9} 
+                        opacity={isNearby ? 0.9 : 0.5} 
                     />
                 </T.Mesh>
                 <!-- Info-Icon im Hexagon (keine Pointer-Events) -->
                 <Text
-                    text="ℹ️"
+                    text={isNearby ? "ℹ️" : "👁️"}
                     fontSize={0.15}
                     anchorX="center"
                     anchorY="middle"
