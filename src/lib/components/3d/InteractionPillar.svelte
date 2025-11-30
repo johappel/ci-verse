@@ -79,11 +79,15 @@
             return;
         }
         
-        // Wenn externe URL vorhanden, im Iframe-Dialog öffnen
-        if (project.externalUrl) {
+        // Projekte mit type='ground' oder 'orbit' öffnen die ProjectCard
+        // Nur spezielle Links (z.B. Institution ohne richtiges Projekt) nutzen IframeDialog
+        const isRealProject = project.type === 'ground' || project.type === 'orbit';
+        
+        if (project.externalUrl && !isRealProject) {
+            // Spezielle Links (nicht echte Projekte) im Iframe-Dialog öffnen
             worldStore.openIframe(project.externalUrl, project.title);
         } else {
-            // Sonst ProjectCard öffnen
+            // Normale Projekte: ProjectCard öffnen
             worldStore.selectProject(project.id);
         }
     }

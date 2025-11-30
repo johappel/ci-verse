@@ -16,7 +16,6 @@
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
-    import InteractionPillar from './InteractionPillar.svelte';
 
     interface Props {
         project: ProjectData;
@@ -37,6 +36,7 @@
     const { hovering, onPointerEnter, onPointerLeave } = useCursor('pointer');
     
     let isHovered = $state(false);
+    let isButtonHovered = $state(false);
 
     // Größen-Varianten für Rollup (ausgewogene Proportionen)
     const sizes = {
@@ -96,24 +96,15 @@
         isHovered = false;
         onPointerLeave();
     }
+
+    // Klick auf Button: ProjectCard öffnen
+    function handleButtonClick(e: Event) {
+        e.stopPropagation();
+        worldStore.selectProject(project.id);
+    }
 </script>
 
 <T.Group position={position} rotation.y={rotation}>
-    
-    <!-- InteractionPillar vor dem Rollup -->
-    {@const cos = Math.cos(rotation)}
-    {@const sin = Math.sin(rotation)}
-    {@const pillarLocalZ = s.footDepth + 1.2}
-    <InteractionPillar 
-        {project}
-        position={[0, 0, pillarLocalZ]}
-        size={1.2}
-        worldPosition={[
-            platformPosition[0] + position[0] + pillarLocalZ * sin,
-            platformPosition[1] + position[1],
-            platformPosition[2] + position[2] + pillarLocalZ * cos
-        ]}
-    />
     
     <!-- ========== STELLWAND-FUSS (leicht, Stützen nach beiden Seiten) ========== -->
     <T.Group>
@@ -264,11 +255,43 @@
                     />
                 {/if}
 
-                <!-- Dezenter Akzent unten (kleiner, subtiler) -->
-                <T.Mesh position={[0, -s.height * 0.38, 0.02]}>
-                    <T.RingGeometry args={[0.15, 0.22, 6]} />
-                    <T.MeshBasicMaterial color={displayColor} transparent opacity={0.35} />
+                <!-- Klickbares Hexagon-Button unten -->
+                <T.Mesh 
+                    position={[0, -s.height * 0.38, 0.02]}
+                    onclick={handleButtonClick}
+                    onpointerenter={() => { isButtonHovered = true; onPointerEnter(); }}
+                    onpointerleave={() => { isButtonHovered = false; onPointerLeave(); }}
+                >
+                    <T.RingGeometry args={[0.18, 0.32, 6]} />
+                    <T.MeshBasicMaterial 
+                        color={isButtonHovered ? '#ffffff' : displayColor} 
+                        transparent 
+                        opacity={isButtonHovered ? 1 : 0.6} 
+                    />
                 </T.Mesh>
+                <!-- Innerer Kreis des Hexagon-Buttons (auch klickbar) -->
+                <T.Mesh 
+                    position={[0, -s.height * 0.38, 0.025]}
+                    onclick={handleButtonClick}
+                    onpointerenter={() => { isButtonHovered = true; onPointerEnter(); }}
+                    onpointerleave={() => { isButtonHovered = false; onPointerLeave(); }}
+                >
+                    <T.CircleGeometry args={[0.18, 6]} />
+                    <T.MeshBasicMaterial 
+                        color={isButtonHovered ? displayColor : '#0f172a'} 
+                        transparent 
+                        opacity={0.9} 
+                    />
+                </T.Mesh>
+                <!-- Info-Icon im Hexagon (keine Pointer-Events) -->
+                <Text
+                    text="ℹ️"
+                    fontSize={0.15}
+                    anchorX="center"
+                    anchorY="middle"
+                    position={[0, -s.height * 0.38, 0.03]}
+                    pointerEvents="none"
+                />
             </T.Group>
 
             <!-- Vertikale Trennlinie zwischen Text und Bild -->
@@ -388,11 +411,43 @@
                     />
                 {/if}
 
-                <!-- Dezenter Akzent unten (kleiner, subtiler) -->
-                <T.Mesh position={[0, -s.height * 0.38, 0.02]}>
-                    <T.RingGeometry args={[0.15, 0.22, 6]} />
-                    <T.MeshBasicMaterial color={displayColor} transparent opacity={0.35} />
+                <!-- Klickbares Hexagon-Button unten (Rückseite) -->
+                <T.Mesh 
+                    position={[0, -s.height * 0.38, 0.02]}
+                    onclick={handleButtonClick}
+                    onpointerenter={() => { isButtonHovered = true; onPointerEnter(); }}
+                    onpointerleave={() => { isButtonHovered = false; onPointerLeave(); }}
+                >
+                    <T.RingGeometry args={[0.18, 0.32, 6]} />
+                    <T.MeshBasicMaterial 
+                        color={isButtonHovered ? '#ffffff' : displayColor} 
+                        transparent 
+                        opacity={isButtonHovered ? 1 : 0.6} 
+                    />
                 </T.Mesh>
+                <!-- Innerer Kreis des Hexagon-Buttons (auch klickbar) -->
+                <T.Mesh 
+                    position={[0, -s.height * 0.38, 0.025]}
+                    onclick={handleButtonClick}
+                    onpointerenter={() => { isButtonHovered = true; onPointerEnter(); }}
+                    onpointerleave={() => { isButtonHovered = false; onPointerLeave(); }}
+                >
+                    <T.CircleGeometry args={[0.18, 6]} />
+                    <T.MeshBasicMaterial 
+                        color={isButtonHovered ? displayColor : '#0f172a'} 
+                        transparent 
+                        opacity={0.9} 
+                    />
+                </T.Mesh>
+                <!-- Info-Icon im Hexagon (keine Pointer-Events) -->
+                <Text
+                    text="ℹ️"
+                    fontSize={0.15}
+                    anchorX="center"
+                    anchorY="middle"
+                    position={[0, -s.height * 0.38, 0.03]}
+                    pointerEvents="none"
+                />
             </T.Group>
 
             <!-- Vertikale Trennlinie zwischen Text und Bild -->
