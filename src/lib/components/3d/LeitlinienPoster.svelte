@@ -145,7 +145,6 @@
         text={poster.title}
         fontSize={0.35}
         color="#ffffff"
-        font="/fonts/Inter-Bold.woff"
         position={[0, s.height * 0.2, 0.1]}
         anchorX="center"
         anchorY="middle"
@@ -158,7 +157,6 @@
         text="LEITLINIE"
         fontSize={0.12}
         color={colors.glow}
-        font="/fonts/Inter-Regular.woff"
         position={[0, s.height - 0.3, 0.1]}
         anchorX="center"
         letterSpacing={0.15}

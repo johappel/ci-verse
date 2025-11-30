@@ -354,12 +354,13 @@
         </T.Mesh>
         <Text
             text={platform.name}
-            color={isCurrentPlatform ? '#1e293b' : '#e2e8f0'}
-            fontSize={0.6}
-            font="/fonts/Inter-Bold.woff"
+            color={isCurrentPlatform ? '#1e293b' : '#ffffff'}
+            fontSize={0.7}
             position={[0, 0, 0.2]}
             anchorX="center"
             anchorY="middle"
+            outlineWidth={isCurrentPlatform ? 0 : 0.02}
+            outlineColor="#000000"
         />
     </Billboard>
 

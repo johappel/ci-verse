@@ -185,7 +185,6 @@
             text="Comenius"
             color={lightColor}
             fontSize={0.6}
-            font="/fonts/Inter-Bold.woff"
             position={[0, 1.5, tower.depth / 2 + 0.02]}
             anchorX="center"
             anchorY="middle"
@@ -194,7 +193,6 @@
             text="Institut"
             color={lightColor}
             fontSize={0.6}
-            font="/fonts/Inter-Bold.woff"
             position={[0, 0.7, tower.depth / 2 + 0.02]}
             anchorX="center"
             anchorY="middle"
@@ -205,7 +203,6 @@
             text="Comenius"
             color={lightColor}
             fontSize={0.6}
-            font="/fonts/Inter-Bold.woff"
             position={[0, 1.5, -tower.depth / 2 - 0.02]}
             rotation.y={Math.PI}
             anchorX="center"
@@ -215,7 +212,6 @@
             text="Institut"
             color={lightColor}
             fontSize={0.6}
-            font="/fonts/Inter-Bold.woff"
             position={[0, 0.7, -tower.depth / 2 - 0.02]}
             rotation.y={Math.PI}
             anchorX="center"
@@ -275,7 +271,6 @@
             text="CI"
             color={neonBlue}
             fontSize={1.8}
-            font="/fonts/Inter-Bold.woff"
             position={[0, 0.2, 0]}
             rotation.x={-Math.PI / 2}
             anchorX="center"
@@ -287,7 +282,6 @@
             text="CI"
             color={neonBlue}
             fontSize={1.8}
-            font="/fonts/Inter-Bold.woff"
             position={[0, -0.2, 0]}
             rotation.x={Math.PI / 2}
             anchorX="center"
@@ -337,7 +331,6 @@
                 text={panel.text}
                 color={darkColor}
                 fontSize={0.35}
-                font="/fonts/Inter-Regular.woff"
                 position={[0, 0, 0.15]}
                 anchorX="center"
                 anchorY="middle"
@@ -382,7 +375,6 @@
             text="💬 Fragen?"
             color="#ffffff"
             fontSize={0.35}
-            font="/fonts/Inter-Bold.woff"
             position={[0, 0, 0.15]}
             anchorX="center"
             anchorY="middle"

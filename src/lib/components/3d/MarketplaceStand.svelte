@@ -195,7 +195,6 @@
             text={stand.title}
             fontSize={stand.type === 'institution' ? 0.35 : 0.28}
             color="#1f2937"
-            font="/fonts/Inter-Bold.woff"
             position={[0, dimensions.height - 1.2, -dimensions.depth / 2 + 0.12]}
             anchorX="center"
             anchorY="top"
@@ -207,7 +206,6 @@
             text={stand.description}
             fontSize={0.18}
             color="#4b5563"
-            font="/fonts/Inter-Regular.woff"
             position={[0, dimensions.height - 2, -dimensions.depth / 2 + 0.12]}
             anchorX="center"
             anchorY="top"
