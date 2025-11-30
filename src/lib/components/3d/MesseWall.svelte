@@ -118,18 +118,21 @@
 
     // Poster auf die Wände verteilen (mehrere pro Wand möglich)
     // imageOnly: Nur großes Bild (für Leitlinien) - Landscape 1649x906
-    // Normal: Text-Poster + Bild nebeneinander - GROß wie Leitlinien!
+    // Normal: Text-Poster + Bild nebeneinander
     const posterHeight = wallHeight * 0.85; // Höhe nutzt 85% der Wandhöhe
     const imageOnlyWidth = 12; // Breite für imageOnly-Modus (Landscape)
     const imageOnlyHeight = 6.6; // Höhe für imageOnly (1649x906 Verhältnis)
-    const maxImageWidth = posterHeight * 1.2; // Landscape-Bild max
-    const combinedPosterWidth = imageOnly ? imageOnlyWidth : (posterHeight * 0.6 + maxImageWidth + 0.4); // Text + Bild
     
-    // Bei wenigen Postern: 1 Poster pro Wand, mittig platziert
-    // Bei 3+ Postern: maximal 2 pro Wand (hexEdgeLength ≈ 35-45)
-    const maxPostersPerWall = Math.floor(hexEdgeLength / (combinedPosterWidth + 3)); // +3 für Abstand
-    const postersPerWall = Math.max(1, Math.min(maxPostersPerWall, 2)); // Max 2 pro Wand
-    const posterSpacing = combinedPosterWidth + 4; // Abstand zwischen Postern
+    // Maximale Poster-Breite für Spacing (Landscape ist der breiteste Fall)
+    // Portrait: 0.55, Square: 0.85, Landscape: 1.2
+    const maxImageWidth = posterHeight * 1.2; // Landscape-Breite als Maximum
+    const textAreaWidth = posterHeight * 0.5; // Text-Bereich
+    const maxPosterWidth = imageOnly ? imageOnlyWidth : (textAreaWidth + maxImageWidth + 0.8); // +0.8 für Rahmen/Gap
+    
+    // Spacing basiert auf maximaler Breite, damit keine Überlappung entsteht
+    const posterSpacing = maxPosterWidth + 1.5; // +1.5 Abstand zwischen Postern
+    const maxPostersPerWall = Math.max(1, Math.floor(hexEdgeLength / posterSpacing));
+    const postersPerWall = Math.min(maxPostersPerWall, 2); // Max 2 pro Wand (Landscape braucht Platz)
     
     const posterPositions = $derived(posters.map((poster, i) => {
         const wallIndex = Math.floor(i / postersPerWall) % wallCount;
@@ -142,32 +145,18 @@
         ).length;
         const actualPostersOnWall = Math.min(postersOnThisWall, postersPerWall);
         
-        // Berechne die tatsächliche Bildbreite für dieses Poster
-        const format = poster.project.display?.posterImageFormat || 'portrait';
-        const hasImage = !!poster.project.display?.posterImage;
-        // Bildbreite je nach Format (proportional zur posterHeight)
-        const imgWidth = hasImage ? (
-            format === 'landscape' ? posterHeight * 1.2 :
-            format === 'square' ? posterHeight * 0.85 :
-            posterHeight * 0.55
-        ) : 0;
-        const imageGap = hasImage ? 0.4 : 0;
-        
-        // Das Bild geht nach rechts vom Text-Poster
-        // Um das Paar zu zentrieren, muss das Text-Poster nach links verschoben werden
-        // Zentrumverschiebung = (imgWidth + gap) / 2
-        const centerCorrection = hasImage ? (imgWidth + imageGap) / 2 : 0;
-        
-        // Zentriere die Poster auf der Wand
-        // Bei 1 Poster: mittig (offsetX = 0 - centerCorrection)
-        // Bei 2 Postern: links und rechts von der Mitte
+        // Zentriere die GRUPPE von Postern auf der Wand
+        // Bei 1 Poster: mittig (offsetX = 0)
+        // Bei 2 Postern: links und rechts von der Mitte, symmetrisch
+        // Bei 3 Postern: links, mitte, rechts
         let offsetX: number;
         if (actualPostersOnWall === 1) {
-            offsetX = -centerCorrection; // Einzelnes Poster-Paar mittig
+            offsetX = 0; // Einzelnes Poster genau in der Mitte
         } else {
-            // Mehrere Poster: gleichmäßig verteilen
-            const startOffset = -((actualPostersOnWall - 1) * posterSpacing) / 2;
-            offsetX = startOffset + positionOnWall * posterSpacing - centerCorrection;
+            // Mehrere Poster: gleichmäßig und symmetrisch verteilen
+            const totalWidth = (actualPostersOnWall - 1) * posterSpacing;
+            const startOffset = -totalWidth / 2;
+            offsetX = startOffset + positionOnWall * posterSpacing;
         }
         
         return {
