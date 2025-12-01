@@ -20,12 +20,16 @@
         schedule: ScheduleEntry[];
         position?: [number, number, number];
         rotation?: number;
+        rotationX?: number;  // Kippung zum Betrachter
+        rotationZ?: number;  // Seitliche Kippung
     }
 
     let { 
         schedule, 
         position = [0, 4, 0],
-        rotation = 0
+        rotation = 0,
+        rotationX = 0,
+        rotationZ = 0
     }: Props = $props();
 
     // Status-Text und Farbe
@@ -48,7 +52,7 @@
     }
 </script>
 
-<T.Group position={position} rotation.y={rotation}>
+<T.Group position={position} rotation.y={rotation} rotation.x={rotationX} rotation.z={rotationZ}>
     <!-- Tafel-Rahmen (3D) - weiter nach hinten -->
     <T.Mesh position={[0, 0, -0.15]}>
         <T.BoxGeometry args={[8, 5, 0.2]} />
@@ -64,7 +68,7 @@
 
     <!-- Leuchtender Rand - weiter nach hinten -->
     <T.Mesh position={[0, 0, -0.12]}>
-        <T.BoxGeometry args={[8.2, 5.2, 0.1]} />
+        <T.BoxGeometry args={[8.1, 6.3, 0.1]} />
         <T.MeshStandardMaterial
             color="#3b82f6"
             emissive="#3b82f6"
@@ -202,7 +206,7 @@
                 border-top: 1px solid #334155;
             ">
                 <span style="font-size: 12px; color: #64748b;">
-                    "Bildung verbindet Welten"
+                    "Bildung verbindet uns"
                 </span>
                 <span style="font-size: 12px; color: #60a5fa;">
                     ↗ Klick = Website

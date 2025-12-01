@@ -130,7 +130,7 @@
     });
 </script>
 
-<T.Group position={position} rotation.y={rotation} scale={1.5}>
+<T.Group position={position} rotation.y={rotation} scale={1.0}>
     
     <!-- ========== BASIS / SOCKEL ========== -->
     <T.Mesh 
