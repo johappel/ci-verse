@@ -80,12 +80,15 @@
 		
 		worldStore.startTransport('S');
 		
-		// Progress animieren während Rückflug
-		for (let i = 25; i <= 50; i++) {
-			tourProgress = i / 50;
-			updateLoading(70 + ((i - 25) * 1.2), 'fliege zum Start...');
-			await new Promise(resolve => setTimeout(resolve, 60));
-		}
+		// Warte auf Transport-Animation (inkl. Landung)
+		await new Promise(resolve => {
+			const checkTransport = setInterval(() => {
+				if (!worldStore.state.isTransporting) {
+					clearInterval(checkTransport);
+					resolve(undefined);
+				}
+			}, 100);
+		});
 		
 		// === FERTIG ===
 		updateLoading(100, 'Bereit!', true);
@@ -144,31 +147,61 @@
 				
 				// 3-Stufen-Animation: Aufsteigen → Gleiten → Landen
 				async function flyAlongLightBridge() {
-					// Stufe 1: Sanft auf Flughöhe steigen (0.8s)
-					cameraControls!.smoothTime = 0.6;
-					await cameraControls!.setLookAt(
+					// Stufe 1: Sanft auf Flughöhe steigen
+					cameraControls!.smoothTime = 0.8;
+					cameraControls!.setLookAt(
 						startX, flightAltitude, startZ,  // Aufsteigen
 						midX, flightAltitude - 5, midZ,  // Vorausschauen Richtung Ziel
 						true
 					);
+					// Warte bis Aufstieg abgeschlossen (smoothTime * 2 für Sicherheit)
+					await new Promise(r => setTimeout(r, 1600));
 					
-					// Stufe 2: Auf Flughöhe zum Ziel gleiten (1.5s)
-					cameraControls!.smoothTime = 0.8;
-					await cameraControls!.setLookAt(
+					// Stufe 2: Auf Flughöhe zum Ziel gleiten
+					cameraControls!.smoothTime = 1.2;
+					cameraControls!.setLookAt(
 						finalCamX, flightAltitude, finalCamZ,  // Über dem Ziel
 						target.x, target.y + 5, target.z,      // Schaut zur Plattform runter
 						true
 					);
+					// Warte bis Gleiten abgeschlossen
+					await new Promise(r => setTimeout(r, 2400));
 					
-					// Stufe 3: Sanft zur Landeposition absenken (0.8s)
-					cameraControls!.smoothTime = 0.6;
-					await cameraControls!.setLookAt(
+					// Stufe 3: Sanft zur Landeposition absenken
+					cameraControls!.smoothTime = 1.0;
+					cameraControls!.setLookAt(
 						finalCamX, finalCamY, finalCamZ,        // Finale Position
 						target.x, target.y + 5, target.z,      // Look-At zur Mitte
 						true
 					);
 
-					cameraControls!.smoothTime = 0.2; //zurücksetzen
+					// Warte bis Kamera TATSÄCHLICH an Zielposition angekommen ist
+					const POSITION_THRESHOLD = 0.5; // 50cm Toleranz
+					await new Promise<void>(resolve => {
+						const checkPosition = setInterval(() => {
+							const cam = cameraControls!.camera.position;
+							const dx = Math.abs(cam.x - finalCamX);
+							const dy = Math.abs(cam.y - finalCamY);
+							const dz = Math.abs(cam.z - finalCamZ);
+							
+							// Alle drei Achsen müssen innerhalb der Toleranz sein
+							if (dx < POSITION_THRESHOLD && dy < POSITION_THRESHOLD && dz < POSITION_THRESHOLD) {
+								clearInterval(checkPosition);
+								resolve();
+							}
+						}, 100); // Prüfe alle 100ms
+						
+						// Fallback nach 8 Sekunden
+						setTimeout(() => {
+							clearInterval(checkPosition);
+							resolve();
+						}, 8000);
+					});
+					
+					cameraControls!.smoothTime = 0.9; // zurücksetzen
+					
+					// Transport abschließen
+					worldStore.finishTransport();
 				}
 				
 				flyAlongLightBridge();

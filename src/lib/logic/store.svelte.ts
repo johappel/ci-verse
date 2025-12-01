@@ -132,12 +132,23 @@ export class WorldStore {
         this.state.isTransporting = true;
         this.state.transportTarget = targetId;
         
-        // Nach Animation (2.5s) abschließen
+        // Fallback-Timeout falls finishTransport nicht aufgerufen wird
         setTimeout(() => {
-            this.state.currentPlatform = targetId;
-            this.state.isTransporting = false;
-            this.state.transportTarget = null;
-        }, 2500);
+            if (this.state.isTransporting && this.state.transportTarget === targetId) {
+                this.finishTransport();
+            }
+        }, 5000);
+    }
+    
+    // Transport abschließen (wird von Scene nach Animation aufgerufen)
+    finishTransport() {
+        if (!this.state.isTransporting) return;
+        
+        if (this.state.transportTarget) {
+            this.state.currentPlatform = this.state.transportTarget;
+        }
+        this.state.isTransporting = false;
+        this.state.transportTarget = null;
     }
 
     setCurrentPlatform(platformId: string) {
