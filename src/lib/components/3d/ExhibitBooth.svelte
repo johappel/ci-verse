@@ -15,7 +15,6 @@
     import { Text, useCursor, HTML, ImageMaterial } from '@threlte/extras';
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
-    import { getCameraY } from '$lib/logic/platforms';
 
     interface Props {
         project: ProjectData;
@@ -103,13 +102,16 @@
         const worldBoothY = platformPosition[1] + position[1];
         const worldBoothZ = platformPosition[2] + position[2];
         
-        const viewDistance = 8; // Näher für bessere Lesbarkeit
-        const cameraY = getCameraY(platformPosition[1]);
+        const viewDistance = 5; // Näher für bessere Lesbarkeit
         
         const cos = Math.cos(rotation);
         const sin = Math.sin(rotation);
         const worldOffsetX = viewDistance * sin;
         const worldOffsetZ = viewDistance * cos;
+        
+        // Kamera auf Augenhöhe relativ zur Banner-Mitte
+        const bannerCenterY = worldBoothY + s.height / 2 + 0.3;
+        const cameraY = bannerCenterY; // Kamera auf gleicher Höhe wie Banner-Mitte
         
         const cameraPos = {
             x: worldBoothX + worldOffsetX,
@@ -117,10 +119,10 @@
             z: worldBoothZ + worldOffsetZ
         };
         
-        const bannerCenterY = worldBoothY + s.height / 2 + 0.3;
+        // LookAt zeigt direkt auf die Banner-Mitte
         const lookAtPos = {
             x: worldBoothX,
-            y: Math.min(bannerCenterY, cameraY + 1),
+            y: bannerCenterY,
             z: worldBoothZ
         };
         
