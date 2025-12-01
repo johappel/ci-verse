@@ -150,6 +150,57 @@ function startTransport(targetId: string) {
 
 ---
 
+## Energie-Visualisierung (v2.0)
+
+Die 4 Leitlinien werden als fließende Energie visualisiert:
+
+### Konzept
+```
+[Poster] → EnergyFloor (6 Ströme) → Oktaeder → EnergyBeam ↑
+                                       ↑
+                              (Pulsiert + Glüht)
+```
+
+### EnergyFloor (GLSL Shader)
+```typescript
+// Shader-Konfiguration
+const floorConfig = {
+  size: 8,                    // Fläche unter dem Oktaeder
+  streamCount: 6,             // 6 Ströme (2 pro Wand = 6 Poster)
+  flowSpeed: 0.5,             // Geschwindigkeit
+  blending: AdditiveBlending, // Glow-Effekt
+};
+
+// Ström-Farben (nach Poster-Position)
+const streamColors = [
+  '#fbbf24', '#22c55e',  // Links: Justice, Sustainability
+  '#06b6d4', '#a855f7',  // Rechts: Digitality, Structure  
+  '#fbbf24', '#22c55e',  // Hinten: Justice, Sustainability
+];
+```
+
+### EnergyBeam
+```typescript
+const beamConfig = {
+  height: 5,                  // Höhe über Boden
+  colorRotation: true,        // Rotiert durch alle 4 Farben
+  particleSpeed: 3.0,         // Aufsteigende Partikel
+};
+```
+
+### Oktaeder-Glow
+```typescript
+// Multi-Layer Glow-Effekt
+const oktaederLayers = [
+  { type: 'outer',  geometry: 'Icosahedron', opacity: 0.15, scale: 1.8 },
+  { type: 'middle', geometry: 'Sphere',      opacity: 0.2,  scale: 1.4 },
+  { type: 'core',   geometry: 'Octahedron',  opacity: 1.0,  scale: 1.0 },
+  { type: 'ring',   geometry: 'Torus',       opacity: 0.3,  scale: 1.2 },
+];
+```
+
+---
+
 ## Folder Structure
 
 ```text
@@ -160,9 +211,12 @@ src/
         Scene.svelte         # Canvas-Container, Kamera, Nebel
         WorldLayout.svelte   # Rendert alle Plattformen + Linien
         Platform.svelte      # Hexagonale Plattform-Basis
+        MarketplacePlatform.svelte # S-Plattform mit Energie-System
         ExhibitStand.svelte  # Projekt-Messestand
         LightBridge.svelte   # Einzelne Transport-Linie
         TransportNetwork.svelte # Alle Verbindungen
+        EnergyFloor.svelte   # Boden-Energie-Shader ⚡
+        EnergyBeam.svelte    # Vertikale Energie-Säule ⚡
       ui/                    # HTML Overlays
         FilterBar.svelte     # Perspektiven-Filter
         ProjectCard.svelte   # Projekt-Detail-Modal

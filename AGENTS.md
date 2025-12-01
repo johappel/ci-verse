@@ -1,8 +1,8 @@
 # Anweisungen für AI Coding Agents (Cursor/Copilot)
 
 ## Projekt Status
-**🔄 Architektur-Redesign** (2025-11-25)  
-Umstellung auf **Schwebende Plattformen mit Lichtlinien-Transport**.
+**🚀 Feature Complete v2.0** (2025-11-30)  
+Energie-Visualisierung implementiert: EnergyFloor, EnergyBeam, pulsierender Oktaeder.
 
 ---
 
@@ -11,7 +11,7 @@ Umstellung auf **Schwebende Plattformen mit Lichtlinien-Transport**.
 ### Was bauen wir?
 Eine **interaktive 3D-Bildungslandschaft** für das Comenius-Institut. Keine klassische Website, sondern ein **explorativer 3D-Raum** im Browser, der als Gateway zu den vielen externen Projekten dient.
 
-### Die Schwebende-Plattformen-Architektur (NEU!)
+### Die Schwebende-Plattformen-Architektur
 
 ```
 Seitenansicht (Y-Achse):
@@ -44,6 +44,30 @@ Draufsicht (X-Z-Ebene):
                 [B2 Schule]
                 Y=8, z=15
 ```
+
+### Energie-Visualisierung (NEU in v2.0!)
+
+```
+    [Poster]     [Poster]     [Poster]     [Poster]
+       │            │            │            │
+       └────────────┼────────────┼────────────┘
+                    │ EnergyFloor (6 Ströme)
+                    ▼
+              ╔═══════════╗
+              ║  Oktaeder ║ ← Pulsiert + Glüht
+              ╚═════╦═════╝
+                    ║ EnergyBeam (vertikal)
+                    ║
+              ══════╩══════
+                   [S]
+              Marktplatz
+```
+
+Die 4 Leitlinien fließen als **sichtbare Energie** zum Oktaeder:
+- **Gold** (Gerechtigkeit)
+- **Grün** (Nachhaltigkeit)
+- **Cyan** (Digitalität)
+- **Violett** (Strukturen)
 
 ### Plattform-Definitionen
 

@@ -473,3 +473,103 @@ ProjectChart KI-Chat für S2_1.
   </div>
 {/if}
 ```
+
+---
+
+## Energie-Komponenten (NEU in v2.0)
+
+Diese Komponenten visualisieren die Leitlinien als fließende Energie.
+
+---
+
+### EnergyFloor.svelte
+Animierter Boden-Shader mit 6 Energieströmen von den Leitlinien-Postern zur Mitte.
+
+**Props:**
+| Prop | Typ | Default | Beschreibung |
+|------|-----|---------|--------------|
+| `size` | number | 8 | Größe des Boden-Bereichs |
+| `activePerspective` | string | 'neutral' | Aktive Leitperspektive |
+| `isOnS` | boolean | false | Ob auf S-Plattform |
+| `isTransporting` | boolean | false | Ob Transport aktiv |
+
+**Shader-Features:**
+- GLSL Fragment Shader mit `AdditiveBlending`
+- 6 farbige Ströme (2 pro Leitlinie da 6 Poster-Positionen)
+- Inward-Flow Animation mit Partikeln
+- Puls-Effekte die zur Mitte laufen
+- Perspektiven-Highlight wenn aktiviert
+
+**Farben nach Leitlinie:**
+```typescript
+const streamColors = {
+  justice: '#fbbf24',      // Gold
+  sustainability: '#22c55e', // Grün
+  digitality: '#06b6d4',   // Cyan
+  structure: '#a855f7',    // Violett
+};
+```
+
+---
+
+### EnergyBeam.svelte
+Vertikale Energie-Säule vom Boden zum Oktaeder.
+
+**Props:**
+| Prop | Typ | Default | Beschreibung |
+|------|-----|---------|--------------|
+| `height` | number | 5 | Höhe der Säule |
+| `isOnS` | boolean | false | Sichtbar nur auf S |
+| `isTransporting` | boolean | false | Transport aktiv |
+
+**Features:**
+- Aufsteigende Partikel-Animation
+- Farbrotation durch alle 4 Leitlinien-Farben
+- AdditiveBlending für Glow-Effekt
+- Intensität erhöht während Transport
+
+**Shader-Auszug:**
+```glsl
+// Aufsteigende Partikel
+float particles = smoothstep(0.0, 0.02, 
+  sin(vUv.y * 30.0 - time * 3.0) * 
+  sin(vUv.x * 20.0)
+);
+
+// Farbrotation
+float colorPhase = time * 0.3;
+vec3 color = mix(justice, sustainability, step(0.25, fract(colorPhase)));
+// ... weitere Farb-Übergänge
+```
+
+---
+
+### Pulsierender Oktaeder (in MarketplacePlatform.svelte)
+Der zentrale Oktaeder empfängt die Energie und visualisiert sie.
+
+**Animationen:**
+```typescript
+// In MarketplacePlatform.svelte
+let animTime = $state(0);
+let energyPulse = $derived(Math.sin(animTime * 2) * 0.5 + 0.5);
+let oktaederScale = $derived(1.0 + energyPulse * 0.1);
+let oktaederEmissive = $derived(1.5 + energyPulse * 2.0);
+```
+
+**Effekt-Layer:**
+1. **Outer Glow** - Pulsierender Halo (Icosahedron)
+2. **Middle Glow** - Mittlerer Glow (Sphere)
+3. **Inner Core** - Heller Kern (Oktaeder)
+4. **Ring Effect** - Horizontaler Ring (Torus)
+
+**Material:**
+```svelte
+<T.MeshStandardMaterial
+  color="#ffffff"
+  emissive="#fbbf24"
+  emissiveIntensity={oktaederEmissive}
+  metalness={0.5}
+  roughness={0.2}
+/>
+```
+
