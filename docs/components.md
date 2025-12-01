@@ -220,6 +220,130 @@ Einzelner Projekt-Messestand auf einer Plattform.
 
 ---
 
+### ExhibitBooth.svelte
+Freistehender Messestand für Projekte mit `displayType: 'booth'` oder `'both'`.
+
+```svelte
+<script>
+  import { T } from '@threlte/core';
+  import { Text, Billboard } from '@threlte/extras';
+  
+  let { 
+    project,           // ProjectData
+    position,          // [x, y, z] relativ zur Plattform
+    rotation = 0,      // Ausrichtung (Radians)
+    size = 'medium',   // 'small' | 'medium' | 'large'
+    platformPosition   // [x, y, z] für absolute Positionierung
+  } = $props();
+</script>
+```
+
+**Positionierung:** Booths werden im Halbkreis **vorne** auf der Plattform angeordnet (gegenüber der MesseWall).
+
+---
+
+### MesseWall.svelte
+Poster-Wand für Projekte mit `displayType: 'wall'` oder `'both'`.
+
+```svelte
+<script>
+  import { T } from '@threlte/core';
+  import { Text, useTexture } from '@threlte/extras';
+  
+  let { 
+    posters,           // Array<{ project, position }>
+    platformSize,      // Für Wand-Positionierung
+    platformColor,     // Wand-Akzentfarbe
+    wallHeight = 10,
+    wallCount = 3,     // Anzahl Wände (1-3)
+    startEdge = 3,     // Startkante (Hexagon-Seite)
+    platformPosition,
+    platformId
+  } = $props();
+</script>
+```
+
+**Positionierung:** Wände werden an **Kanten 3-5** des Hexagons platziert (hinten).
+
+---
+
+### Signpost.svelte
+Wegweiser für verwandte Projekte (zeigt auf andere Plattformen).
+
+```svelte
+<script>
+  import { T } from '@threlte/core';
+  import { Text, Billboard } from '@threlte/extras';
+  
+  let { 
+    relatedProjects,   // ProjectData[] - Projekte mit relatedDepartments
+    position,          // [x, y, z]
+    platformId,        // Aktuelle Plattform-ID
+    compact = false    // true = horizontal, false = vertikale Tafel
+  } = $props();
+</script>
+```
+
+**Zwei Darstellungsmodi:**
+
+#### Compact Mode (`compact={true}`)
+Horizontale Anordnung unter dem Plattform-Namensschild:
+
+```
+    [Plattformschild: "Erwachsene"]
+              ↓
+    🔗 Siehe auch:
+    ┌──────────┐ ┌──────────┐
+    │Konfi-App │ │Projekt 2 │
+    │→ Schule  │ │→ Digital │
+    └──────────┘ └──────────┘
+```
+
+- Position: Y=9.5 (direkt unter Schild bei Y=12)
+- Buttons mit farbigem Rand (Projekt-Farbe)
+- Hover: Button leuchtet auf
+- Klick: Navigation zur Heimat-Plattform
+
+#### Standard Mode (`compact={false}`)
+Freistehende Holztafel mit Pfosten:
+
+```
+    ┌─────────────────────┐
+    │ 🔗 Siehe auch...    │
+    ├─────────────────────┤
+    │ ● Konfi-App         │
+    │   → Schule & Digital│
+    └─────────────────────┘
+           ║
+           ║ Holzpfosten
+           ║
+    ═══════╩═══════
+```
+
+**Verwendung in Platform.svelte:**
+```svelte
+{#if relatedProjects.length > 0 && platform.id !== 'S'}
+    <Signpost
+        {relatedProjects}
+        position={[0, 9.5, 0]}
+        platformId={platform.id}
+        compact={true}
+    />
+{/if}
+```
+
+**Datenquelle:**
+```typescript
+// Helper-Funktion in mockProjects.ts
+export function getRelatedProjectsForPlatform(platformId: string): ProjectData[] {
+    return mockProjects.filter(p => 
+        p.relatedDepartments?.includes(platformId as Department)
+    );
+}
+```
+
+---
+
 ### Scene.svelte
 Canvas-Container mit Kamera, Licht und Nebel.
 

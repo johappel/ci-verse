@@ -1,8 +1,8 @@
 # Anweisungen für AI Coding Agents (Cursor/Copilot)
 
 ## Projekt Status
-**🚀 Feature Complete v2.0** (2025-11-30)  
-Energie-Visualisierung implementiert: EnergyFloor, EnergyBeam, pulsierender Oktaeder.
+**🚀 Feature Complete v2.1** (2025-12-01)  
+Neu: Signpost-Wegweiser für verwandte Projekte, displayType-System für Booth/Wall-Zuordnung.
 
 ---
 
@@ -208,6 +208,9 @@ src/lib/
 │   │   ├── WorldLayout.svelte     # Rendert Plattformen + Lichtlinien
 │   │   ├── Platform.svelte        # Generische Plattform (Waben-Basis)
 │   │   ├── ExhibitStand.svelte    # Projekt-Messestand auf Plattform
+│   │   ├── ExhibitBooth.svelte    # Freistehender Messestand (displayType: booth)
+│   │   ├── MesseWall.svelte       # Poster-Wand (displayType: wall)
+│   │   ├── Signpost.svelte        # Wegweiser für verwandte Projekte
 │   │   ├── LightBridge.svelte     # Einzelne Lichtlinie (klickbar)
 │   │   ├── TransportNetwork.svelte # Verwaltet alle Verbindungen
 │   │   └── [DEPRECATED] Terra.svelte
@@ -230,6 +233,19 @@ src/lib/
 
 ## 4. Datenmodell
 
+### ProjectData Interface (Auszug)
+```typescript
+interface ProjectData {
+    id: string;
+    title: string;
+    departments: Department[];           // Heimat-Plattformen (B1, B2, B3, Q1, Q2, Q3)
+    relatedDepartments?: Department[];   // Wegweiser auf diesen Plattformen zeigen
+    displayType: 'booth' | 'wall' | 'both';  // Wie wird das Projekt angezeigt?
+    display?: ProjectDisplay;
+    // ... weitere Felder
+}
+```
+
 ### ProjectDisplay Interface
 ```typescript
 interface ProjectDisplay {
@@ -242,6 +258,37 @@ interface ProjectDisplay {
     icon?: string;                // Emoji oder Icon-Name
 }
 ```
+
+### displayType - Projekt-Anzeige
+
+| displayType | Komponente | Beschreibung |
+|-------------|------------|---------------|
+| **booth** | ExhibitBooth | Freistehender Messestand (vorne auf Plattform) |
+| **wall** | MesseWall | Poster an der Wand (hinten auf Plattform) |
+| **both** | Beide | Sowohl Booth als auch Poster |
+
+### relatedDepartments - Wegweiser-System
+
+Projekte können auf anderen Plattformen als "Wegweiser" erscheinen:
+
+```typescript
+// Beispiel: Konfi-App ist auf B2 + Q3, zeigt Wegweiser auf B3
+{
+    id: 'p5',
+    title: 'Konfi-App',
+    departments: ['B2', 'Q3'],        // Heimat-Plattformen
+    relatedDepartments: ['B3'],       // Wegweiser auf B3 zeigen
+    displayType: 'both'
+}
+```
+
+**Aktuelle Wegweiser-Konfiguration:**
+
+| Plattform | Zeigt Wegweiser zu |
+|-----------|--------------------|
+| B3 | Konfi-App (→ Schule & Digital) |
+| Q1 | Godly Play (→ Kita & Schule) |
+| B2 | Senioren digital (→ Erwachsene & Digital) |
 
 ### Poster-Bildformate
 
@@ -297,6 +344,41 @@ Generische schwebende Plattform mit hexagonaler Basis.
   {/each}
 </T.Group>
 ```
+
+### Signpost.svelte
+Wegweiser für verwandte Projekte (unter dem Plattformschild).
+
+```svelte
+<script>
+  let { 
+    relatedProjects,   // ProjectData[] mit relatedDepartments
+    position,          // [x, y, z]
+    platformId,        // Aktuelle Plattform-ID
+    compact = false    // true = horizontal unter Schild
+  } = $props();
+</script>
+```
+
+**Zwei Modi:**
+
+| Modus | Position | Layout |
+|-------|----------|--------|
+| **compact** (Standard) | Y=9.5, unter Plattformschild | Horizontal, kleine Buttons |
+| **standard** | Frei auf Plattform | Vertikale Holztafel mit Pfosten |
+
+**Kompakt-Modus (unter Schild):**
+```
+    Y=12  ┌─────────────────┐
+          │  Erwachsene     │  ← Plattformschild
+          └─────────────────┘
+    Y=9.5 🔗 Siehe auch:
+          ┌──────────┐
+          │Konfi-App │  ← Klickbarer Button
+          │→ Schule  │
+          └──────────┘
+```
+
+---
 
 ### LightBridge.svelte
 Klickbare Lichtlinie zwischen zwei Plattformen.

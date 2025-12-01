@@ -8,12 +8,14 @@
     import InfoHexagon from './InfoHexagon.svelte';
     import MesseWall from './MesseWall.svelte';
     import ExhibitBooth from './ExhibitBooth.svelte';
+    import Signpost from './Signpost.svelte';
     import { getHexagonalLayout } from '$lib/logic/layout';
     import { worldStore } from '$lib/logic/store.svelte';
     import { 
         getPlatformContent, 
         getBoothProjectsForPlatform, 
-        getWallPostersForPlatform 
+        getWallPostersForPlatform,
+        getRelatedProjectsForPlatform 
     } from '$lib/data/mockProjects';
     import type { Object3D, Intersection } from 'three';
 
@@ -23,6 +25,7 @@
     let platformContent = $derived(getPlatformContent(platform.id));
     let boothProjects = $derived(getBoothProjectsForPlatform(platform.id));
     let wallPosters = $derived(getWallPostersForPlatform(platform.id));
+    let relatedProjects = $derived(getRelatedProjectsForPlatform(platform.id));
 
     // Farben aus Content-Daten (Fallback auf platforms.ts)
     let platformColor = $derived(platformContent?.color ?? platform.color);
@@ -265,6 +268,16 @@
             outlineColor="#000000"
         />
     </Billboard>
+
+    <!-- Wegweiser unter dem Plattformschild (nur wenn relatedProjects vorhanden) -->
+    {#if relatedProjects.length > 0 && platform.id !== 'S'}
+        <Signpost
+            {relatedProjects}
+            position={[0, 9.5, 0]}
+            platformId={platform.id}
+            compact={true}
+        />
+    {/if}
 
     <!-- ============================================ -->
     <!-- PLATTFORM-INHALTE (nur für aktuelle/Ziel-Plattform!) -->
