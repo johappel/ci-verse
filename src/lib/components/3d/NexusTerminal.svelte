@@ -183,24 +183,13 @@
 
         <!-- Schwellen (quer zu den Gleisen, also entlang Z) -->
         {#each Array(20) as _, i}
-            <T.Mesh position={[i * 3 - 48, -0.05, 0]}>
+            <T.Mesh position={[i * 6 - 54, -0.05, 0]}>
                 <T.BoxGeometry args={[0.3, 0.1, 3]} />
                 <T.MeshStandardMaterial 
                     color="#3f3f46"
                     roughness={0.9}
                 />
             </T.Mesh>
-        {/each}
-
-        <!-- Gleis-Beleuchtung entlang der Schienen -->
-        {#each Array(10) as _, i}
-            <T.PointLight
-                position={[i * 6 - 27, 0.3, 0]}
-                color="#3b82f6"
-                intensity={2}
-                distance={5}
-                decay={2}
-            />
         {/each}
     </T.Group>
 
