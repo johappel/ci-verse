@@ -213,7 +213,7 @@
 <div 
 	bind:this={panelRef}
 	class="fixed z-30 select-none"
-	style="left: calc(50% + {panelX}px); bottom: calc(24px + {panelY}px); transform: translateX(-50%); top: auto !important;"
+	style="left: calc(80% + {panelX}px); bottom: calc(24px + {panelY}px); transform: translateX(-50%); top: auto !important;"
 	class:opacity-50={isInputFocused}
 	class:pointer-events-none={isInputFocused}
 	class:cursor-grabbing={isDragging}
@@ -232,7 +232,7 @@
 			aria-valuenow={panelX}
 			tabindex="0"
 		>
-			<span class="select-none">{currentPlatformName}</span>
+			<span class="select-none" style="color: white;">{currentPlatformName}</span>
 		</div>
 		<!-- Obere Reihe: H - W - C -->
 		<div style="display: flex; gap: 12px;">

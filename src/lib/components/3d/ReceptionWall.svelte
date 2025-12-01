@@ -93,7 +93,7 @@
     function handleWallClick() {
         const worldX = platformPosition[0] + position[0];
         const worldZ = platformPosition[2] + position[2];
-        const viewDistance = 6.8;
+        const viewDistance = 9;
         const cameraY = getCameraY(platformPosition[1]);
         const cos = Math.cos(rotation);
         const sin = Math.sin(rotation);
