@@ -239,7 +239,7 @@
         departments: ['S1'],
         perspectives: [],
         targetGroups: [],
-        type: 'ground',
+        displayType: 'booth',
         staff: [],
         shortTeaser: 'Besuchen Sie unsere Website',
         display: {

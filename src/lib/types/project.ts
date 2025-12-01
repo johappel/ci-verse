@@ -35,10 +35,11 @@ export interface ProjectData {
     title: string;
     slug: string;
     externalUrl: string;
-    departments: Department[];
+    departments: Department[];           // Wo das Projekt angezeigt wird
+    relatedDepartments?: Department[];   // Wo ein Wegweiser erscheint
     perspectives: Perspective[];
     targetGroups: TargetGroup[];
-    type: 'ground' | 'orbit';
+    displayType: 'booth' | 'wall' | 'both';  // Wie wird das Projekt angezeigt?
     staff: string[]; // IDs
     shortTeaser?: string;
     display?: ProjectDisplay;
@@ -70,8 +71,7 @@ export interface PlatformContent {
     color: string;             // Primärfarbe (Hex)
     glowColor: string;         // Leuchtfarbe für Glow-Effekte (Hex)
     aspects: PlatformAspect[]; // Max 5 thematische Aspekte
-    wallPosters: string[];     // Projekt-IDs für Messewände (Position = Index)
-    boothProjects: string[];   // Projekt-IDs für freie Messestände (Position = Index)
+    // Projekte + Wegweiser werden über ProjectData.departments + relatedDepartments zugeordnet
 }
 
 // ============================================

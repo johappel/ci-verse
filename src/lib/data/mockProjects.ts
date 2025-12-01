@@ -13,7 +13,7 @@ export const mockProjects: ProjectData[] = [
         departments: ['B1'],
         perspectives: ['justice', 'sustainability'],
         targetGroups: ['0-3', '4-6'],
-        type: 'ground',
+        displayType: 'booth',
         staff: ['m1', 'm2'],
         shortTeaser: 'Religiöse Bildung für die Kleinsten - spielerisch, respektvoll, entwicklungsgerecht.',
         display: {
@@ -32,7 +32,7 @@ export const mockProjects: ProjectData[] = [
         departments: ['B3', 'Q3'],
         perspectives: ['digitality', 'structure'],
         targetGroups: ['adults', 'employees'],
-        type: 'ground',
+        displayType: 'both',
         staff: ['m3'],
         shortTeaser: 'Moderne Tools für die Gemeindearbeit - effizient, transparent und zukunftsorientiert.',
         display: {
@@ -51,7 +51,7 @@ export const mockProjects: ProjectData[] = [
         departments: ['Q1'],
         perspectives: ['justice'],
         targetGroups: [],
-        type: 'orbit',
+        displayType: 'wall',
         staff: ['m1'],
         shortTeaser: 'Evidenzbasierte Forschung zur evangelischen Bildungslandschaft in Deutschland.',
         display: {
@@ -71,7 +71,7 @@ export const mockProjects: ProjectData[] = [
         departments: ['B1'],
         perspectives: ['structure', 'justice'],
         targetGroups: ['employees'],
-        type: 'ground',
+        displayType: 'booth',
         staff: ['m2', 'm4'],
         shortTeaser: 'Systematische Qualitätsentwicklung für evangelische Kindertageseinrichtungen.',
         display: {
@@ -88,9 +88,10 @@ export const mockProjects: ProjectData[] = [
         slug: 'konfi-app',
         externalUrl: 'https://konfi-app.de',
         departments: ['B2', 'Q3'],
+        relatedDepartments: ['B3'],
         perspectives: ['digitality'],
         targetGroups: ['11-14', '15-18'],
-        type: 'ground',
+        displayType: 'both',
         staff: ['m3', 'm5'],
         shortTeaser: 'Die digitale Begleitung für die Konfirmandenzeit - interaktiv und jugendgerecht.',
         display: {
@@ -109,7 +110,7 @@ export const mockProjects: ProjectData[] = [
         departments: ['B3'],
         perspectives: ['structure', 'sustainability'],
         targetGroups: ['adults', 'volunteers'],
-        type: 'ground',
+        displayType: 'booth',
         staff: ['m4'],
         shortTeaser: 'Qualifizierung und Wertschätzung für ehrenamtlich Engagierte.',
         display: {
@@ -126,9 +127,10 @@ export const mockProjects: ProjectData[] = [
         slug: 'godly-play',
         externalUrl: 'https://godlyplay.de',
         departments: ['B1', 'B2'],
+        relatedDepartments: ['Q1'],
         perspectives: ['justice', 'sustainability'],
         targetGroups: ['4-6', '7-10'],
-        type: 'ground',
+        displayType: 'wall',
         staff: ['m1', 'm6'],
         shortTeaser: 'Biblische Geschichten spielerisch entdecken - ein Konzept aus den USA.',
         display: {
@@ -147,7 +149,7 @@ export const mockProjects: ProjectData[] = [
         departments: ['B2'],
         perspectives: ['justice'],
         targetGroups: ['7-10', '11-14', '15-18', 'employees'],
-        type: 'ground',
+        displayType: 'both',
         staff: ['m5', 'm6'],
         shortTeaser: 'Unterstützung und Begleitung in schulischen Krisensituationen.',
         display: {
@@ -164,9 +166,10 @@ export const mockProjects: ProjectData[] = [
         slug: 'senioren-digital',
         externalUrl: 'https://senioren-digital.de',
         departments: ['B3', 'Q3'],
+        relatedDepartments: ['B2'],
         perspectives: ['digitality', 'justice'],
         targetGroups: ['seniors'],
-        type: 'ground',
+        displayType: 'booth',
         staff: ['m4', 'm3'],
         shortTeaser: 'Digitale Teilhabe für die ältere Generation ermöglichen.',
         display: {
@@ -185,7 +188,7 @@ export const mockProjects: ProjectData[] = [
         departments: ['Q1'],
         perspectives: ['structure'],
         targetGroups: ['employees'],
-        type: 'orbit',
+        displayType: 'wall',
         staff: ['m1'],
         shortTeaser: 'Interaktive Karte aller evangelischen Bildungseinrichtungen.',
         display: {
@@ -205,7 +208,7 @@ export const mockProjects: ProjectData[] = [
         departments: ['B2'],
         perspectives: ['digitality', 'sustainability'],
         targetGroups: ['employees'],
-        type: 'ground',
+        displayType: 'booth',
         staff: ['m5'],
         shortTeaser: 'Umfangreiche Materialsammlung für den Religionsunterricht.',
         display: {
@@ -224,7 +227,7 @@ export const mockProjects: ProjectData[] = [
         departments: ['Q2'],
         perspectives: ['sustainability'],
         targetGroups: ['young-adults', 'employees'],
-        type: 'orbit',
+        displayType: 'wall',
         staff: ['m6', 'm1'],
         shortTeaser: 'Europäische Zusammenarbeit in der religiösen Bildung.',
         display: {
@@ -244,14 +247,15 @@ export const mockProjects: ProjectData[] = [
         departments: ['Q2'],
         perspectives: ['justice', 'sustainability'],
         targetGroups: ['adults', 'employees'],
-        type: 'ground',
+        displayType: 'booth',
         staff: ['m6'],
         shortTeaser: 'Interreligiöser und interkonfessioneller Dialog in der Bildung.',
         display: {
             slogan: 'Vielfalt verbindet',
-            posterImage: 'https://picsum.photos/seed/oekumene-poster/800/1200',
+            posterImage: 'https://picsum.photos/seed/oekumene-poster/800/800',
             logoUrl: '/logos/oekumene.svg',
             color: '#ca8a04',
+            posterImageFormat: 'square',
             screenshotUrl: 'https://picsum.photos/seed/oekumene/800/600'
         }
     },
@@ -263,7 +267,7 @@ export const mockProjects: ProjectData[] = [
         departments: ['Q3'],
         perspectives: ['digitality'],
         targetGroups: ['employees'],
-        type: 'ground',
+        displayType: 'booth',
         staff: ['m3'],
         shortTeaser: 'Praktische Anwendung von KI-Tools in der Bildungsarbeit.',
         display: {
@@ -282,7 +286,7 @@ export const mockProjects: ProjectData[] = [
         departments: ['Q3'],
         perspectives: ['structure', 'digitality'],
         targetGroups: ['employees'],
-        type: 'ground',
+        displayType: 'both',
         staff: ['m3', 'm4'],
         shortTeaser: 'Beratung und Unterstützung bei Datenschutzfragen.',
         display: {
@@ -362,9 +366,7 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
             { id: 'b1-a3', title: 'Elternarbeit', icon: '👨‍👩‍👧', description: 'Zusammenarbeit mit Familien', contentUrl: '/content/b1-eltern.html' },
             { id: 'b1-a4', title: 'Inklusion', icon: '🤝', description: 'Vielfalt als Bereicherung', contentUrl: '/content/b1-inklusion.html' },
             { id: 'b1-a5', title: 'Fachkräfte', icon: '👩‍🏫', description: 'Fortbildung und Qualifizierung', contentUrl: '/content/b1-fachkraefte.html' }
-        ],
-        wallPosters: ['p1', 'p4', 'p7'],
-        boothProjects: ['p1', 'p4']
+        ]
     },
     B2: {
         id: 'B2',
@@ -379,9 +381,7 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
             { id: 'b2-a3', title: 'Jugendarbeit', icon: '🎸', description: 'Freizeitangebote und Gemeinschaft', contentUrl: '/content/b2-jugend.html' },
             { id: 'b2-a4', title: 'Religionsunterricht', icon: '📖', description: 'Didaktik und Methodik', contentUrl: '/content/b2-ru.html' },
             { id: 'b2-a5', title: 'Medienkompetenz', icon: '📱', description: 'Digitale Bildung für Jugendliche', contentUrl: '/content/b2-medien.html' }
-        ],
-        wallPosters: ['p5', 'p8'],
-        boothProjects: ['p5', 'p8', 'p11']
+        ]
     },
     B3: {
         id: 'B3',
@@ -396,9 +396,7 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
             { id: 'b3-a3', title: 'Seniorenarbeit', icon: '👴', description: 'Bildung im dritten Lebensabschnitt', contentUrl: '/content/b3-senioren.html' },
             { id: 'b3-a4', title: 'Familienbildung', icon: '👪', description: 'Angebote für die ganze Familie', contentUrl: '/content/b3-familie.html' },
             { id: 'b3-a5', title: 'Berufliche Bildung', icon: '💼', description: 'Fortbildung für Hauptamtliche', contentUrl: '/content/b3-beruf.html' }
-        ],
-        wallPosters: ['p2', 'p6', 'p9'],
-        boothProjects: ['p2', 'p6', 'p9']
+        ]
     },
     Q1: {
         id: 'Q1',
@@ -413,9 +411,7 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
             { id: 'q1-a3', title: 'Publikationen', icon: '📚', description: 'Wissenschaftliche Veröffentlichungen', contentUrl: '/content/q1-publikationen.html' },
             { id: 'q1-a4', title: 'Kooperationen', icon: '🤝', description: 'Zusammenarbeit mit Hochschulen', contentUrl: '/content/q1-kooperation.html' },
             { id: 'q1-a5', title: 'Transfer', icon: '🔄', description: 'Wissenstransfer in die Praxis', contentUrl: '/content/q1-transfer.html' }
-        ],
-        wallPosters: ['p3', 'p10'],
-        boothProjects: ['p3', 'p10']
+        ]
     },
     Q2: {
         id: 'Q2',
@@ -430,9 +426,7 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
             { id: 'q2-a3', title: 'Partnerschaften', icon: '🤝', description: 'Internationale Bildungspartnerschaften', contentUrl: '/content/q2-partner.html' },
             { id: 'q2-a4', title: 'Austausch', icon: '✈️', description: 'Begegnungsprogramme', contentUrl: '/content/q2-austausch.html' },
             { id: 'q2-a5', title: 'Mehrsprachigkeit', icon: '🗣️', description: 'Sprachförderung und Interkulturalität', contentUrl: '/content/q2-sprache.html' }
-        ],
-        wallPosters: ['p12', 'p13'],
-        boothProjects: ['p12', 'p13']
+        ]
     },
     Q3: {
         id: 'Q3',
@@ -447,9 +441,7 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
             { id: 'q3-a3', title: 'Datenschutz', icon: '🔒', description: 'Sicherer Umgang mit Daten', contentUrl: '/content/q3-datenschutz.html' },
             { id: 'q3-a4', title: 'Tools & Apps', icon: '📲', description: 'Digitale Werkzeuge für die Praxis', contentUrl: '/content/q3-tools.html' },
             { id: 'q3-a5', title: 'Medienpädagogik', icon: '🎬', description: 'Kritischer Umgang mit Medien', contentUrl: '/content/q3-medienpaed.html' }
-        ],
-        wallPosters: ['p2', 'p14', 'p15'],
-        boothProjects: ['p2', 'p14', 'p15']
+        ]
     }
 };
 
@@ -592,25 +584,38 @@ export function getPlatformContent(platformId: string): PlatformContent | undefi
     return mockPlatformContents[platformId];
 }
 
-/** Booth-Projekte einer Plattform mit vollständigen Daten */
+/** 
+ * Booth-Projekte einer Plattform (displayType: 'booth' oder 'both')
+ * Reihenfolge = Array-Position in mockProjects
+ */
 export function getBoothProjectsForPlatform(platformId: string): ProjectData[] {
-    const content = mockPlatformContents[platformId];
-    if (!content) return [];
-    return content.boothProjects
-        .map(id => getProjectById(id))
-        .filter((p): p is ProjectData => p !== undefined);
+    return mockProjects.filter(p => 
+        p.departments.includes(platformId as Department) &&
+        (p.displayType === 'booth' || p.displayType === 'both')
+    );
 }
 
-/** Wall-Poster einer Plattform mit vollständigen Projektdaten (Position = Array-Index) */
+/** 
+ * Wall-Poster einer Plattform (displayType: 'wall' oder 'both')
+ * Position = Index in gefiltertem Array
+ */
 export function getWallPostersForPlatform(platformId: string): Array<{ project: ProjectData; position: number }> {
-    const content = mockPlatformContents[platformId];
-    if (!content) return [];
-    return content.wallPosters
-        .map((projectId, index) => {
-            const project = getProjectById(projectId);
-            return project ? { project, position: index } : null;
-        })
-        .filter((item): item is { project: ProjectData; position: number } => item !== null);
+    return mockProjects
+        .filter(p => 
+            p.departments.includes(platformId as Department) &&
+            (p.displayType === 'wall' || p.displayType === 'both')
+        )
+        .map((project, index) => ({ project, position: index }));
+}
+
+/**
+ * Wegweiser-Projekte einer Plattform
+ * Findet Projekte, die diese Plattform in relatedDepartments haben
+ */
+export function getRelatedProjectsForPlatform(platformId: string): ProjectData[] {
+    return mockProjects.filter(p => 
+        p.relatedDepartments?.includes(platformId as Department)
+    );
 }
 
 // ============================================================================

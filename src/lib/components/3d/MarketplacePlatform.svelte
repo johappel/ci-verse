@@ -169,7 +169,7 @@
                 departments: ['S1' as Department],
                 perspectives: [poster.perspective] as Perspective[],
                 targetGroups: [] as TargetGroup[],
-                type: 'ground',
+                displayType: 'wall',
                 staff: [],
                 shortTeaser: `Leitlinie: ${poster.title}`,
                 display: {
