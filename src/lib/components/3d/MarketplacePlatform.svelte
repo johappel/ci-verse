@@ -126,9 +126,9 @@
     
     // Empfangswand: Links seitlich, schaut zur Plattform-Mitte
     const receptionWallPosition = { 
-        x: -20,           // Links
-        z: -10,             // Mittig (Z-Achse)
-        rotation: Math.PI * 0.34  // 90° gedreht, schaut nach rechts zur Mitte
+        x: -25,           // Links
+        z: -15,             // Mittig (Z-Achse)
+        rotation: Math.PI * 0.335  // schaut zur Mitte
     };
 
     // Team-Mitglieder (von comenius.de)
@@ -145,8 +145,8 @@
     // Rot (links-mitte) = Events, Grün (unten-links) = Publications
     // Chat ist am Turm (InstitutionBooth) integriert
     const terminalPositions: Array<{ x: number; z: number; rotation: number; type: string }> = [
-        { x: -24, z: 10, rotation: Math.PI * +0.6, type: 'publications' },        // Grün: unten-links (vorne)
-        { x: -7.5, z: -26.5, rotation: Math.PI * -1.85, type: 'events' }       // Rot: Rechts neben ReceptionWall
+        { x: -26, z: 12, rotation: Math.PI * +0.6, type: 'publications' },        // Grün: unten-links (vorne)
+        { x: -20, z: 23, rotation: Math.PI * +0.7, type: 'events' }       // Rot: Rechts neben ReceptionWall
     ];
 
     // Institution-Stand aus den Daten finden
@@ -199,9 +199,9 @@
 
     // Stehtisch-Positionen (für Atmosphäre)
     const stehtischPositions = [
-        { x: -20, z: 21, rotation: 0 },      // Links-vorne
-        { x: -21, z: 24, rotation: Math.PI / 4 },   // Rechts-mitte
-        { x: -18, z: 24, rotation: -Math.PI / 6 }, // Links-hinten
+        { x: -15, z: 13, rotation: 0 },      // Links-vorne
+        { x: -16, z: 16, rotation: Math.PI / 4 },   // Rechts-mitte
+        { x: -18, z: 13, rotation: -Math.PI / 6 }, // Links-hinten
     ];
 
     // Spotlight-Positionen
@@ -245,7 +245,6 @@
         />
     </T.Mesh>
 
-    <!-- ========== ENERGIE-BODEN (Leitlinien fließen zur Mitte) ========== -->
     <!-- ========== ENERGIE-BODEN (Leitlinien fliessen zur Mitte) ========== -->
     <!-- 6 Stroeme fuer alle 6 Poster-Positionen an den Hexagon-Waenden -->
     <!-- Hexagon-Edge-Winkel = edgeIndex * 60 Grad + 30 Grad (Plattform-Rotation) -->
@@ -255,13 +254,13 @@
         posterAngles={[
             Math.PI * 0.187,  // Edge 0: rechts-vorne (30 Grad)
             Math.PI * 0.4,    // Edge 1: rechts (90 Grad) - POSTER hier!
-            Math.PI * 0.633,  // Edge 2: rechts-hinten (150 Grad) - POSTER hier!
+            Math.PI * 0.59,  // Edge 2: rechts-hinten (150 Grad) - POSTER hier!
             Math.PI * 1.367,  // Edge 3: links-hinten (210 Grad) - frei (Turm)
-            Math.PI * 1.88,    // Edge 4: links (270 Grad) - POSTER hier!
-            Math.PI * 1.733   // Edge 5: links-vorne (330 Grad) - POSTER hier!
+            Math.PI * 1.80,   // Edge 4: links (270 Grad) - POSTER hier!
+            Math.PI * 1.96   // Edge 5: links-vorne (330 Grad) - POSTER hier!
         ]}
         posterColors={[
-            '#facc15',  // Edge 0: Gold
+            '#facc00',  // Edge 0: Gold
             '#facc15',  // Edge 1: Gold (justice)
             '#4ade80',  // Edge 2: Gruen (sustainability)
             '#1e293b',  // Edge 3: Dunkel (kein Poster - Turm)
