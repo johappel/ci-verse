@@ -31,7 +31,7 @@
 
     // ========== ZUG-ANIMATION ==========
     // Zyklus: 20 Sekunden
-    const CYCLE_DURATION = 20;
+    const CYCLE_DURATION = 30;
     const PHASE_TIMINGS = {
         arriving: { start: 0, end: 3 },      // 0-3s
         stopped: { start: 3, end: 10 },      // 3-10s
@@ -118,7 +118,7 @@
     const trackLength = 120;
     const trackWidth = 0.15;
     const trackSpacing = 2;  // Abstand zwischen den Schienen
-    const trackY = 0;        // Höhe der Gleise
+    const trackY = 0.1;        // Höhe der Gleise
     const trackZ = 4;        // Z-Position der Gleismitte (vor dem Bahnsteig)
 </script>
 
@@ -181,8 +181,8 @@
         </T.Mesh>
 
         <!-- Schwellen (quer zu den Gleisen, also entlang Z) -->
-        {#each Array(20) as _, i}
-            <T.Mesh position={[i * 3 - 28, -0.05, 0]}>
+        {#each Array(40) as _, i}
+            <T.Mesh position={[i * 3 - 48, -0.05, 0]}>
                 <T.BoxGeometry args={[0.3, 0.1, 3]} />
                 <T.MeshStandardMaterial 
                     color="#3f3f46"
@@ -217,14 +217,14 @@
     <!-- ========== ABFAHRTSTAFEL ========== -->
     <DepartureBoard 
         {schedule}
-        position={[-6, 6, -2]}
+        position={[-7, 6, -2]}
         rotation={Math.PI * 0.1}
     />
 
     <!-- ========== TERMINAL-SCHILD ========== -->
-    <T.Group position={[2, 5, -2.5]}>
+    <T.Group position={[3.5, 4.5, -2.0]}>
         <T.Mesh>
-            <T.BoxGeometry args={[8, 1.2, 0.2]} />
+            <T.BoxGeometry args={[10, 1.4, 0.2]} />
             <T.MeshStandardMaterial 
                 color="#0f172a"
                 metalness={0.5}

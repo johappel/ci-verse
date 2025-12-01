@@ -49,18 +49,21 @@
 </script>
 
 <T.Group position={position} rotation.y={rotation}>
-    <!-- Tafel-Rahmen (3D) -->
-    <T.Mesh position={[0, 0, -0.1]}>
+    <!-- Tafel-Rahmen (3D) - weiter nach hinten -->
+    <T.Mesh position={[0, 0, -0.15]}>
         <T.BoxGeometry args={[8, 5, 0.2]} />
         <T.MeshStandardMaterial
             color="#1e293b"
             metalness={0.5}
             roughness={0.3}
+            polygonOffset
+            polygonOffsetFactor={1}
+            polygonOffsetUnits={1}
         />
     </T.Mesh>
 
-    <!-- Leuchtender Rand -->
-    <T.Mesh position={[0, 0, -0.05]}>
+    <!-- Leuchtender Rand - weiter nach hinten -->
+    <T.Mesh position={[0, 0, -0.12]}>
         <T.BoxGeometry args={[8.2, 5.2, 0.1]} />
         <T.MeshStandardMaterial
             color="#3b82f6"
@@ -68,80 +71,121 @@
             emissiveIntensity={0.3}
             metalness={0.7}
             roughness={0.2}
+            polygonOffset
+            polygonOffsetFactor={2}
+            polygonOffsetUnits={2}
         />
     </T.Mesh>
 
-    <!-- HTML-Overlay für Tafel-Inhalt -->
-    <HTML position={[0, 0, 0.05]} transform center>
-        <div 
-            class="w-[320px] bg-slate-900/95 rounded-lg border border-blue-500/50 shadow-2xl overflow-hidden select-none"
-            style="font-family: 'Courier New', monospace;"
-        >
+    <!-- HTML-Overlay für Tafel-Inhalt - weiter nach vorne -->
+    <HTML position={[0, 0, 0.1]} transform center>
+        <div style="
+            width: 320px;
+            background: #0f172a;
+            border-radius: 8px;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            user-select: none;
+            font-family: 'Courier New', monospace;
+        ">
             <!-- Header -->
-            <div class="bg-blue-600 px-3 py-2 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-lg">🚉</span>
-                    <span class="text-white font-bold text-sm">NEXUS TERMINAL</span>
+            <div style="
+                background: #2563eb;
+                padding: 8px 12px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            ">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">🚉</span>
+                    <span style="color: white; font-weight: bold; font-size: 14px;">NEXUS TERMINAL</span>
                 </div>
-                <span class="text-blue-200 text-xs">Verbindungen</span>
+                <span style="color: white; font-size: 12px;">Verbindungen</span>
             </div>
 
             <!-- Spalten-Header -->
-            <div class="grid grid-cols-[60px_1fr_50px_70px] gap-1 px-2 py-1 bg-slate-800 text-xs text-slate-400 border-b border-slate-700">
+            <div style="
+                display: grid;
+                grid-template-columns: 60px 1fr 50px 70px;
+                gap: 4px;
+                padding: 4px 8px;
+                background: #1e293b;
+                font-size: 12px;
+                color: white;
+                border-bottom: 1px solid #334155;
+            ">
                 <span>Zeit</span>
                 <span>Ziel</span>
-                <span class="text-center">Gleis</span>
-                <span class="text-right">Status</span>
+                <span style="text-align: center;">Gleis</span>
+                <span style="text-align: right;">Status</span>
             </div>
 
             <!-- Fahrplan-Einträge -->
-            <div class="divide-y divide-slate-700/50">
+            <div>
                 {#each schedule.slice(0, 5) as entry, i}
                     {@const statusDisplay = getStatusDisplay(entry.status)}
+                    {@const isFirst = i === 0}
                     <button
-                        class="grid grid-cols-[60px_1fr_50px_70px] gap-1 px-2 py-1.5 w-full text-left hover:bg-slate-800/50 transition-colors"
-                        class:bg-slate-800={i === 0}
+                        style="
+                            display: grid;
+                            grid-template-columns: 60px 1fr 50px 70px;
+                            gap: 4px;
+                            padding: 6px 8px;
+                            width: 100%;
+                            text-align: left;
+                            background: {isFirst ? '#1e293b' : 'transparent'};
+                            border: none;
+                            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+                            cursor: pointer;
+                        "
                         onclick={() => handlePartnerClick(entry.destination)}
                     >
                         <!-- Zeit -->
-                        <span 
-                            class="text-sm font-mono"
-                            class:text-yellow-400={i === 0}
-                            class:text-slate-300={i !== 0}
-                        >
+                        <span style="
+                            font-size: 14px;
+                            font-family: monospace;
+                            color: {isFirst ? '#facc15' : '#cbd5e1'};
+                        ">
                             {entry.time}
                         </span>
 
                         <!-- Ziel mit Farb-Indikator -->
-                        <div class="flex items-center gap-1 overflow-hidden">
-                            <span 
-                                class="w-2 h-2 rounded-full flex-shrink-0"
-                                style="background-color: {entry.destination.color};"
-                            ></span>
-                            <span 
-                                class="text-sm truncate"
-                                class:text-white={i === 0}
-                                class:text-slate-300={i !== 0}
-                            >
+                        <div style="display: flex; align-items: center; gap: 4px; overflow: hidden;">
+                            <span style="
+                                width: 8px;
+                                height: 8px;
+                                border-radius: 50%;
+                                flex-shrink: 0;
+                                background-color: {entry.destination.color};
+                            "></span>
+                            <span style="
+                                font-size: 14px;
+                                color: {isFirst ? 'white' : '#cbd5e1'};
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            ">
                                 {entry.destination.shortName}
                             </span>
                         </div>
 
                         <!-- Gleis -->
-                        <span 
-                            class="text-sm text-center"
-                            class:text-blue-400={i === 0}
-                            class:text-slate-400={i !== 0}
-                        >
+                        <span style="
+                            font-size: 14px;
+                            text-align: center;
+                            color: {isFirst ? '#60a5fa' : '#94a3b8'};
+                        ">
                             {entry.platform}
                         </span>
 
                         <!-- Status -->
-                        <span 
-                            class="text-xs text-right font-semibold"
-                            class:animate-pulse={statusDisplay.blink && i === 0}
-                            style="color: {statusDisplay.color};"
-                        >
+                        <span style="
+                            font-size: 12px;
+                            text-align: right;
+                            font-weight: 600;
+                            color: {statusDisplay.color};
+                        ">
                             {statusDisplay.text}
                         </span>
                     </button>
@@ -149,11 +193,18 @@
             </div>
 
             <!-- Footer -->
-            <div class="bg-slate-800 px-3 py-1.5 flex justify-between items-center border-t border-slate-700">
-                <span class="text-xs text-slate-500">
+            <div style="
+                background: #1e293b;
+                padding: 6px 12px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-top: 1px solid #334155;
+            ">
+                <span style="font-size: 12px; color: #64748b;">
                     "Bildung verbindet Welten"
                 </span>
-                <span class="text-xs text-blue-400">
+                <span style="font-size: 12px; color: #60a5fa;">
                     ↗ Klick = Website
                 </span>
             </div>

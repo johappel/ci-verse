@@ -112,23 +112,22 @@
     // 
     // Layout (Draufsicht, X nach rechts, Z nach oben):
     //
-    //           Wand 3 (hinten-links)    Wand 4 (hinten-rechts)
+    //           Terminal (hinten-links)    Wand 3 (hinten-rechts)
     //                    \                    /
-    //                     \   [Turm/CI]      /
-    //                      \      |         /
-    //     [Event]           \     |        /
-    //     (links)   Wand 2   \    |       /   Wand 1
+    //                     \   [CI Reception] /
+    //                      \      |         /                                                                      
+    //         [Event]       \     |        /
+    //         [News]         \    |       /   Wand 2                                                                    
     //                         \   |      /
-    //                          \  ●     /    ← Transport-Portal (Mitte)
+    //                   [Start] → ●     /    
     //                           \ |    /
     //                            \|   /
-    //                      [Start] →  [News]
-    //                     (rechts)    (rechts-vorne)
+    //                            Wand 1
     
     // Nexus Terminal: Links seitlich (ehemals ReceptionWall-Position)
     const nexusTerminalPosition = {
-        x: -33,           // Links
-        z: -20,           // Mittig (Z-Achse)
+        x: -31,           // Links
+        z: -21,           // Mittig (Z-Achse)
         rotation: Math.PI * 0.335  // schaut zur Mitte, Gleise ins Dunkel
     };
 
@@ -320,7 +319,7 @@
 
     <!-- ========== NEXUS TERMINAL (Partner-Verbindungen) ========== -->
     <NexusTerminal 
-        position={[nexusTerminalPosition.x, 1.5, nexusTerminalPosition.z]}
+        position={[nexusTerminalPosition.x, 1.8, nexusTerminalPosition.z]}
         rotation={nexusTerminalPosition.rotation}
         platformColor={platformColor}
     />
