@@ -22,6 +22,7 @@
     import MarketplaceStand from './MarketplaceStand.svelte';
     import EnergyFloor from './EnergyFloor.svelte';
     import EnergyBeam from './EnergyBeam.svelte';
+    import NexusTerminal from './NexusTerminal.svelte';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getMarketplaceContent } from '$lib/data/mockProjects';
     import { mockProjects } from '$lib/data/mockProjects';
@@ -129,6 +130,13 @@
         x: -25,           // Links
         z: -15,             // Mittig (Z-Achse)
         rotation: Math.PI * 0.335  // schaut zur Mitte
+    };
+
+    // Nexus Terminal: Rechts neben der Empfangswand (andockend)
+    const nexusTerminalPosition = {
+        x: -18,           // Rechts von ReceptionWall
+        z: -25,           // Weiter hinten (ins Dunkel zeigend)
+        rotation: Math.PI * 0.5  // Gleise zeigen nach hinten
     };
 
     // Team-Mitglieder (von comenius.de)
@@ -308,6 +316,13 @@
         rotation={receptionWallPosition.rotation}
         platformPosition={[platform.x, platform.y, platform.z]}
         {teamMembers}
+    />
+
+    <!-- ========== NEXUS TERMINAL (Partner-Verbindungen) ========== -->
+    <NexusTerminal 
+        position={[nexusTerminalPosition.x, 1.5, nexusTerminalPosition.z]}
+        rotation={nexusTerminalPosition.rotation}
+        platformColor={platformColor}
     />
 
     <!-- ========== TERMINAL STÄNDE (News rechts, Events links) ========== -->

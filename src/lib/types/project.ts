@@ -163,3 +163,38 @@ export interface AppState {
     // Content-Card für Aspects
     selectedAspect: PlatformAspect | null;
 }
+
+// ============================================
+// NEXUS TERMINAL - Partner-Verbindungen
+// ============================================
+
+/** Kategorie der Partner-Einrichtung */
+export type PartnerCategory = 
+    | 'ministry'      // Ministerien (BMBF)
+    | 'church'        // Kirchliche Einrichtungen (EKD)
+    | 'university'    // Universitäten
+    | 'institute'     // Andere Institute (ALPIKA)
+    | 'international' // EU, internationale Orgs
+    | 'association';  // Verbände, Gesellschaften
+
+/** Partner-Einrichtung für Nexus Terminal */
+export interface PartnerConnection {
+    id: string;
+    name: string;              // Voller Name
+    shortName: string;         // Kurzname für Tafel
+    logoUrl: string;           // Logo-URL
+    color: string;             // Primärfarbe (Hex)
+    url: string;               // Externe Website
+    category: PartnerCategory;
+}
+
+/** Zug-Status im Fahrplan */
+export type TrainStatus = 'arriving' | 'boarding' | 'departing' | 'departed';
+
+/** Eintrag im Fahrplan */
+export interface TrainSchedule {
+    destination: PartnerConnection;
+    departureTime: string;     // Fake-Zeit (z.B. "12:34")
+    platform: 1 | 2;           // Gleis-Nummer
+    status: TrainStatus;
+}

@@ -1,4 +1,93 @@
-import type { ProjectData, StaffMember, PlatformContent, WorldData, Department, MarketplaceContent, MarketplaceStand } from '../types/project';
+import type { ProjectData, StaffMember, PlatformContent, WorldData, Department, MarketplaceContent, MarketplaceStand, PartnerConnection } from '../types/project';
+
+// ============================================================================
+// PARTNER-EINRICHTUNGEN (Nexus Terminal)
+// ============================================================================
+
+export const partnerConnections: PartnerConnection[] = [
+    {
+        id: 'bmbf',
+        name: 'Bundesministerium für Bildung und Forschung',
+        shortName: 'BMBF Berlin',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Bundesministerium_f%C3%BCr_Bildung_und_Forschung_Logo.svg/320px-Bundesministerium_f%C3%BCr_Bildung_und_Forschung_Logo.svg.png',
+        color: '#003366',
+        url: 'https://www.bmbf.de',
+        category: 'ministry'
+    },
+    {
+        id: 'ekd',
+        name: 'Evangelische Kirche in Deutschland',
+        shortName: 'EKD Hannover',
+        logoUrl: 'https://www.ekd.de/system/images/logo_small/logo-ekd.png',
+        color: '#7c3aed',
+        url: 'https://www.ekd.de',
+        category: 'church'
+    },
+    {
+        id: 'eu',
+        name: 'Europäische Kommission',
+        shortName: 'EU Brüssel',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Flag_of_Europe.svg/320px-Flag_of_Europe.svg.png',
+        color: '#003399',
+        url: 'https://ec.europa.eu',
+        category: 'international'
+    },
+    {
+        id: 'alpika',
+        name: 'ALPIKA - Arbeitsgemeinschaft der Pädagogischen Institute',
+        shortName: 'ALPIKA',
+        logoUrl: 'https://alpika.de/wp-content/uploads/2020/07/alpika-logo.png',
+        color: '#059669',
+        url: 'https://alpika.de',
+        category: 'institute'
+    },
+    {
+        id: 'eftre',
+        name: 'European Forum for Teachers of Religious Education',
+        shortName: 'EFTRE Europa',
+        logoUrl: 'https://www.eftre.net/wp-content/uploads/2019/09/eftre-logo.png',
+        color: '#0284c7',
+        url: 'https://www.eftre.net',
+        category: 'international'
+    },
+    {
+        id: 'gpm',
+        name: 'Gesellschaft für Religionspädagogik',
+        shortName: 'GPM e.V.',
+        logoUrl: 'https://www.gfrp.de/images/logo.png',
+        color: '#ea580c',
+        url: 'https://www.gfrp.de',
+        category: 'association'
+    },
+    {
+        id: 'uni-goettingen',
+        name: 'Georg-August-Universität Göttingen',
+        shortName: 'Uni Göttingen',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Uni_G%C3%B6ttingen_Siegel.svg/200px-Uni_G%C3%B6ttingen_Siegel.svg.png',
+        color: '#00447c',
+        url: 'https://www.uni-goettingen.de',
+        category: 'university'
+    },
+    {
+        id: 'hochschulverband',
+        name: 'Evangelischer Hochschulverband',
+        shortName: 'EHV',
+        logoUrl: 'https://www.ekd.de/system/images/logo_small/logo-ekd.png',
+        color: '#6366f1',
+        url: 'https://www.ev-hochschularbeit.de',
+        category: 'association'
+    }
+];
+
+/** Zufällige Partner-Connection für Fahrplan */
+export function getRandomPartner(): PartnerConnection {
+    return partnerConnections[Math.floor(Math.random() * partnerConnections.length)];
+}
+
+/** Partner nach ID finden */
+export function getPartnerById(id: string): PartnerConnection | undefined {
+    return partnerConnections.find(p => p.id === id);
+}
 
 // ============================================================================
 // PROJEKTE (15 Stück)
