@@ -3,10 +3,10 @@
      * ShuttleTrain - Animierter Licht-Zug aus dem Nebel
      * 
      * Zyklus (20s):
-     * - 0-3s: Zug erscheint aus dem Nebel (von rechts)
+     * - 0-3s: Zug erscheint aus dem Nebel (von hinten/+Z)
      * - 3-8s: Zug hält am Bahnsteig, Türen "öffnen"
      * - 8-10s: Türen schließen, Abfahrts-Signal
-     * - 10-15s: Zug beschleunigt ins Dunkel (nach links)
+     * - 10-15s: Zug beschleunigt ins Dunkel (nach vorne/-Z)
      * - 15-20s: Pause (Zug weg)
      */
     import { T, useTask } from '@threlte/core';
@@ -21,16 +21,16 @@
 
     let { partner, phase, progress }: Props = $props();
 
-    // Zug-Position basierend auf Phase
-    let trainX = $derived.by(() => {
+    // Zug-Position auf Z-Achse basierend auf Phase
+    let trainZ = $derived.by(() => {
         switch (phase) {
             case 'arriving':
-                // Von weit rechts (30) zur Mitte (0)
+                // Von weit hinten (+30) zur Mitte (0)
                 return 30 - progress * 30;
             case 'stopped':
                 return 0;
             case 'departing':
-                // Von Mitte (0) nach links (-40)
+                // Von Mitte (0) nach vorne (-40)
                 return -progress * 40;
             case 'away':
                 return -50; // Komplett weg
@@ -40,11 +40,12 @@
     // Sichtbarkeit
     let isVisible = $derived(phase !== 'away');
 
-    // Waggon-Daten (4 Waggons)
+    // Waggon-Daten (4 Waggons) - Transport-Stil
     const waggonCount = 4;
-    const waggonSpacing = 3.5;
-    const waggonLength = 3;
-    const waggonRadius = 0.8;
+    const waggonSpacing = 4;
+    const waggonLength = 3.5;   // Länge (Z)
+    const waggonWidth = 2.2;    // Breite (X)
+    const waggonHeight = 1.8;   // Höhe (Y)
 
     // Glow-Intensität
     let glowIntensity = $derived.by(() => {
@@ -69,67 +70,104 @@
 </script>
 
 {#if isVisible}
-    <T.Group position.x={trainX}>
-        <!-- Waggons -->
+    <T.Group position.z={trainZ}>
+        <!-- Waggons hintereinander entlang Z-Achse (Fahrtrichtung) -->
         {#each Array(waggonCount) as _, i}
-            {@const waggonX = (i - (waggonCount - 1) / 2) * waggonSpacing}
-            <T.Group position.x={waggonX}>
-                <!-- Haupt-Zylinder (Waggon-Körper) -->
-                <T.Mesh rotation.z={Math.PI / 2}>
-                    <T.CylinderGeometry args={[waggonRadius, waggonRadius, waggonLength, 16]} />
+            {@const waggonZ = (i - (waggonCount - 1) / 2) * waggonSpacing}
+            <T.Group position.z={waggonZ}>
+                
+                <!-- Waggon-Körper (Box statt Zylinder) -->
+                <T.Mesh position.y={waggonHeight / 2}>
+                    <T.BoxGeometry args={[waggonWidth, waggonHeight, waggonLength]} />
                     <T.MeshStandardMaterial
                         color={partnerColor}
                         emissive={partnerColor}
-                        emissiveIntensity={glowIntensity * pulse}
+                        emissiveIntensity={glowIntensity * pulse * 0.5}
+                        metalness={0.6}
+                        roughness={0.3}
+                        transparent
+                        opacity={0.95}
+                    />
+                </T.Mesh>
+
+                <!-- Dach (leicht gewölbt durch schmalere Box) -->
+                <T.Mesh position.y={waggonHeight + 0.15}>
+                    <T.BoxGeometry args={[waggonWidth * 0.9, 0.3, waggonLength * 0.95]} />
+                    <T.MeshStandardMaterial
+                        color={partnerColor}
+                        emissive={partnerColor}
+                        emissiveIntensity={glowIntensity * 0.3}
                         metalness={0.7}
                         roughness={0.2}
-                        transparent
-                        opacity={0.9}
                     />
                 </T.Mesh>
 
-                <!-- Leuchtender Kern -->
-                <T.Mesh rotation.z={Math.PI / 2}>
-                    <T.CylinderGeometry args={[waggonRadius * 0.6, waggonRadius * 0.6, waggonLength * 0.95, 16]} />
-                    <T.MeshBasicMaterial
-                        color="#ffffff"
-                        transparent
-                        opacity={glowIntensity * 0.5}
-                    />
-                </T.Mesh>
+                <!-- Fensterband (beide Seiten) -->
+                {#each [-1, 1] as side}
+                    <T.Mesh position={[side * (waggonWidth / 2 + 0.01), waggonHeight * 0.65, 0]}>
+                        <T.BoxGeometry args={[0.05, waggonHeight * 0.35, waggonLength * 0.8]} />
+                        <T.MeshBasicMaterial
+                            color="#ffffff"
+                            transparent
+                            opacity={glowIntensity * 0.7}
+                        />
+                    </T.Mesh>
+                {/each}
 
-                <!-- Glow-Halo -->
-                <T.Mesh rotation.z={Math.PI / 2}>
-                    <T.CylinderGeometry args={[waggonRadius * 1.3, waggonRadius * 1.3, waggonLength * 0.8, 16]} />
+                <!-- Große Fenster links -->
+                <T.Mesh position={[-waggonWidth / 2 - 0.02, waggonHeight * 0.55, 0]}>
+                    <T.BoxGeometry args={[0.06, waggonHeight * 0.5, waggonLength * 0.7]} />
+                    <T.MeshBasicMaterial color="#e0f0ff" />
+                </T.Mesh>
+                
+                <!-- Große Fenster rechts -->
+                <T.Mesh position={[waggonWidth / 2 + 0.02, waggonHeight * 0.55, 0]}>
+                    <T.BoxGeometry args={[0.06, waggonHeight * 0.5, waggonLength * 0.7]} />
+                    <T.MeshBasicMaterial color="#e0f0ff" />
+                </T.Mesh>
+                
+                <!-- Innenlicht durch Fenster (warmweiß) -->
+                <T.PointLight
+                    position.y={waggonHeight * 0.5}
+                    color="#fff8e0"
+                    intensity={8}
+                    distance={3}
+                    decay={2}
+                />
+
+                <!-- Leuchtstreifen unten -->
+                <T.Mesh position.y={0.1}>
+                    <T.BoxGeometry args={[waggonWidth * 1.05, 0.1, waggonLength * 0.9]} />
                     <T.MeshBasicMaterial
                         color={partnerColor}
                         transparent
-                        opacity={glowIntensity * 0.2}
+                        opacity={glowIntensity * 0.8}
+                    />
+                </T.Mesh>
+
+                <!-- Glow-Aura um den Waggon -->
+                <T.Mesh position.y={waggonHeight / 2}>
+                    <T.BoxGeometry args={[waggonWidth * 1.15, waggonHeight * 1.1, waggonLength * 1.05]} />
+                    <T.MeshBasicMaterial
+                        color={partnerColor}
+                        transparent
+                        opacity={glowIntensity * 0.15}
                     />
                 </T.Mesh>
 
                 <!-- Punktlicht pro Waggon -->
                 <T.PointLight
+                    position.y={waggonHeight / 2}
                     color={partnerColor}
-                    intensity={glowIntensity * 15}
-                    distance={8}
+                    intensity={glowIntensity * 20}
+                    distance={10}
                     decay={2}
                 />
 
-                <!-- Fenster-Streifen (dekorativ) -->
-                <T.Mesh position.y={0.2} rotation.z={Math.PI / 2}>
-                    <T.BoxGeometry args={[0.3, waggonLength * 0.8, waggonRadius * 2.1]} />
-                    <T.MeshBasicMaterial
-                        color="#ffffff"
-                        transparent
-                        opacity={glowIntensity * 0.6}
-                    />
-                </T.Mesh>
-
-                <!-- Tür-Indikator (öffnet bei Halt) -->
-                {#if doorOpen && i === 1}
-                    <T.Mesh position={[0, -waggonRadius - 0.1, 0]}>
-                        <T.BoxGeometry args={[0.8, 0.1, 1.2]} />
+                <!-- Tür-Markierung (öffnet bei Halt) -->
+                {#if doorOpen && (i === 1 || i === 2)}
+                    <T.Mesh position={[waggonWidth / 2 + 0.1, waggonHeight * 0.4, 0]}>
+                        <T.BoxGeometry args={[0.08, waggonHeight * 0.6, 0.8]} />
                         <T.MeshBasicMaterial
                             color="#4ade80"
                             transparent
@@ -142,20 +180,20 @@
 
         <!-- Verbindungen zwischen Waggons -->
         {#each Array(waggonCount - 1) as _, i}
-            {@const connX = (i - (waggonCount - 2) / 2) * waggonSpacing + waggonSpacing / 2}
-            <T.Mesh position.x={connX} rotation.z={Math.PI / 2}>
-                <T.CylinderGeometry args={[0.2, 0.2, 0.8, 8]} />
-                <T.MeshBasicMaterial
-                    color={partnerColor}
-                    transparent
-                    opacity={glowIntensity * 0.7}
+            {@const connZ = (i - (waggonCount - 2) / 2) * waggonSpacing + waggonSpacing / 2}
+            <T.Mesh position={[0, 0.6, connZ]}>
+                <T.BoxGeometry args={[0.8, 0.6, 0.4]} />
+                <T.MeshStandardMaterial
+                    color="#334155"
+                    metalness={0.5}
+                    roughness={0.4}
                 />
             </T.Mesh>
         {/each}
 
         <!-- Partner-Logo auf mittlerem Waggon (HTML Billboard) -->
         {#if phase === 'stopped' && partner?.logoUrl}
-            <HTML position={[0, waggonRadius + 1.5, 0]} center transform sprite>
+            <HTML position={[0, waggonHeight + 1.5, 0]} center transform sprite>
                 <div class="flex flex-col items-center gap-1 pointer-events-none select-none">
                     <img 
                         src={partner.logoUrl} 
@@ -173,10 +211,10 @@
             </HTML>
         {/if}
 
-        <!-- Kopf-Licht (vorne am Zug) -->
+        <!-- Kopf-Licht (vorne am Zug, Richtung -Z) -->
         <T.SpotLight
-            position={[(waggonCount / 2) * waggonSpacing + 1, 0, 0]}
-            target.position={[(waggonCount / 2) * waggonSpacing + 10, 0, 0]}
+            position={[0, waggonHeight / 2, -(waggonCount / 2) * waggonSpacing - 1]}
+            target.position={[0, 0, -(waggonCount / 2) * waggonSpacing - 10]}
             color="#ffffff"
             intensity={glowIntensity * 50}
             distance={20}
@@ -184,9 +222,9 @@
             penumbra={0.5}
         />
 
-        <!-- Rück-Licht (hinten am Zug) -->
+        <!-- Rück-Licht (hinten am Zug, Richtung +Z) -->
         <T.PointLight
-            position={[-(waggonCount / 2) * waggonSpacing - 1, 0, 0]}
+            position={[0, waggonHeight / 2, (waggonCount / 2) * waggonSpacing + 1]}
             color="#ef4444"
             intensity={glowIntensity * 10}
             distance={5}

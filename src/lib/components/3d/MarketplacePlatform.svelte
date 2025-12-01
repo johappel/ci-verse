@@ -125,18 +125,18 @@
     //                      [Start] →  [News]
     //                     (rechts)    (rechts-vorne)
     
-    // Empfangswand: Links seitlich, schaut zur Plattform-Mitte
-    const receptionWallPosition = { 
-        x: -25,           // Links
-        z: -15,             // Mittig (Z-Achse)
-        rotation: Math.PI * 0.335  // schaut zur Mitte
+    // Nexus Terminal: Links seitlich (ehemals ReceptionWall-Position)
+    const nexusTerminalPosition = {
+        x: -33,           // Links
+        z: -20,           // Mittig (Z-Achse)
+        rotation: Math.PI * 0.335  // schaut zur Mitte, Gleise ins Dunkel
     };
 
-    // Nexus Terminal: Rechts neben der Empfangswand (andockend)
-    const nexusTerminalPosition = {
-        x: -18,           // Rechts von ReceptionWall
-        z: -25,           // Weiter hinten (ins Dunkel zeigend)
-        rotation: Math.PI * 0.5  // Gleise zeigen nach hinten
+    // Empfangswand: Rechts neben Nexus Terminal (ehemals Terminal-Position)
+    const receptionWallPosition = { 
+        x: -1,           // Rechts vom Terminal
+        z: -30,           // Weiter hinten
+        rotation: Math.PI * 2.0  // schaut zur Plattform
     };
 
     // Team-Mitglieder (von comenius.de)

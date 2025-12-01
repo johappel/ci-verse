@@ -113,18 +113,23 @@
     let schedule = $derived(generateSchedule());
 
     // ========== GLEIS-GEOMETRIE ==========
-    const trackLength = 50;
+    // Gleise verlaufen entlang X-Achse (links-rechts)
+    // Bahnsteig ist bei Z=0, Gleise bei Z > 0
+    const trackLength = 60;
     const trackWidth = 0.15;
-    const trackSpacing = 2;
+    const trackSpacing = 2;  // Abstand zwischen den Schienen
+    const trackY = 0;        // Höhe der Gleise
+    const trackZ = 4;        // Z-Position der Gleismitte (vor dem Bahnsteig)
 </script>
 
 <T.Group position={position} rotation.y={rotation}>
     
     <!-- ========== BAHNSTEIG-PLATTFORM ========== -->
+    <!-- Bahnsteig parallel zu den Gleisen (entlang X) -->
     <T.Group position={[0, 0, 0]}>
-        <!-- Hauptplattform -->
+        <!-- Hauptplattform: Lang entlang X, schmal in Z -->
         <T.Mesh position.y={-0.5} receiveShadow>
-            <T.BoxGeometry args={[12, 1, 8]} />
+            <T.BoxGeometry args={[18, 1, 6]} />
             <T.MeshStandardMaterial 
                 color={platformColor}
                 metalness={0.3}
@@ -132,9 +137,9 @@
             />
         </T.Mesh>
 
-        <!-- Plattform-Rand (Sicherheitslinie) -->
-        <T.Mesh position={[0, 0.01, 3.5]}>
-            <T.BoxGeometry args={[12, 0.02, 0.3]} />
+        <!-- Plattform-Rand / Sicherheitslinie (am Gleis-Rand, Z=2.5) -->
+        <T.Mesh position={[0, 0.01, 2.5]}>
+            <T.BoxGeometry args={[18, 0.02, 0.3]} />
             <T.MeshStandardMaterial 
                 color="#fbbf24"
                 emissive="#fbbf24"
@@ -144,7 +149,7 @@
 
         <!-- Wartezone-Markierung -->
         <T.Mesh position={[0, 0.01, 0]}>
-            <T.BoxGeometry args={[10, 0.02, 6]} />
+            <T.BoxGeometry args={[16, 0.02, 4]} />
             <T.MeshStandardMaterial 
                 color="#334155"
                 metalness={0.2}
@@ -153,10 +158,10 @@
         </T.Mesh>
     </T.Group>
 
-    <!-- ========== GLEISE ========== -->
-    <T.Group position={[0, -0.5, 5]}>
-        <!-- Linke Schiene -->
-        <T.Mesh position={[-trackSpacing / 2, 0, trackLength / 2 - 5]} rotation.x={-Math.PI / 2}>
+    <!-- ========== GLEISE (entlang X-Achse) ========== -->
+    <T.Group position={[0, trackY, trackZ]}>
+        <!-- Vordere Schiene (näher zum Bahnsteig) -->
+        <T.Mesh position={[0, 0, -trackSpacing / 2]} rotation.z={Math.PI / 2} rotation.x={-Math.PI / 2}>
             <T.PlaneGeometry args={[trackWidth, trackLength]} />
             <T.MeshStandardMaterial 
                 color="#64748b"
@@ -165,8 +170,8 @@
             />
         </T.Mesh>
         
-        <!-- Rechte Schiene -->
-        <T.Mesh position={[trackSpacing / 2, 0, trackLength / 2 - 5]} rotation.x={-Math.PI / 2}>
+        <!-- Hintere Schiene (weiter vom Bahnsteig) -->
+        <T.Mesh position={[0, 0, trackSpacing / 2]} rotation.z={Math.PI / 2} rotation.x={-Math.PI / 2}>
             <T.PlaneGeometry args={[trackWidth, trackLength]} />
             <T.MeshStandardMaterial 
                 color="#64748b"
@@ -175,10 +180,10 @@
             />
         </T.Mesh>
 
-        <!-- Schwellen -->
-        {#each Array(15) as _, i}
-            <T.Mesh position={[0, -0.05, i * 3 - 2]}>
-                <T.BoxGeometry args={[3, 0.1, 0.3]} />
+        <!-- Schwellen (quer zu den Gleisen, also entlang Z) -->
+        {#each Array(20) as _, i}
+            <T.Mesh position={[i * 3 - 28, -0.05, 0]}>
+                <T.BoxGeometry args={[0.3, 0.1, 3]} />
                 <T.MeshStandardMaterial 
                     color="#3f3f46"
                     roughness={0.9}
@@ -186,20 +191,22 @@
             </T.Mesh>
         {/each}
 
-        <!-- Gleis-Beleuchtung (kleine Lichter entlang der Schienen) -->
-        {#each Array(8) as _, i}
+        <!-- Gleis-Beleuchtung entlang der Schienen -->
+        {#each Array(10) as _, i}
             <T.PointLight
-                position={[trackSpacing, 0.2, i * 5]}
+                position={[i * 6 - 27, 0.3, 0]}
                 color="#3b82f6"
                 intensity={2}
-                distance={4}
+                distance={5}
                 decay={2}
             />
         {/each}
     </T.Group>
 
     <!-- ========== ZUG ========== -->
-    <T.Group position={[0, 0.8, 12]} rotation.y={Math.PI / 2}>
+    <!-- Position: Auf den Gleisen (Z=trackZ, Y=0.8 über Boden) -->
+    <!-- Der ShuttleTrain bewegt sich intern auf Z, wir rotieren die ganze Gruppe um 90° -->
+    <T.Group position={[0, 0.8, trackZ]} rotation.y={Math.PI / 2}>
         <ShuttleTrain 
             partner={currentPartner}
             phase={trainPhase}
@@ -210,14 +217,14 @@
     <!-- ========== ABFAHRTSTAFEL ========== -->
     <DepartureBoard 
         {schedule}
-        position={[0, 4, -3]}
-        rotation={0}
+        position={[-6, 4, -2]}
+        rotation={Math.PI * 0.1}
     />
 
     <!-- ========== TERMINAL-SCHILD ========== -->
-    <T.Group position={[0, 6.5, -3]}>
+    <T.Group position={[0, 5, -2.5]}>
         <T.Mesh>
-            <T.BoxGeometry args={[6, 1.2, 0.2]} />
+            <T.BoxGeometry args={[8, 1.2, 0.2]} />
             <T.MeshStandardMaterial 
                 color="#0f172a"
                 metalness={0.5}
@@ -236,8 +243,8 @@
 
     <!-- ========== DEKORATIVE ELEMENTE ========== -->
     
-    <!-- Säulen -->
-    {#each [-5, 5] as x}
+    <!-- Säulen entlang des Bahnsteigs -->
+    {#each [-7, -2, 3, 8] as x}
         <T.Group position={[x, 0, -2]}>
             <T.Mesh position.y={2}>
                 <T.CylinderGeometry args={[0.2, 0.25, 4, 8]} />
@@ -257,9 +264,9 @@
         </T.Group>
     {/each}
 
-    <!-- Bänke -->
-    {#each [-3, 3] as x}
-        <T.Group position={[x, 0.4, 0]}>
+    <!-- Bänke entlang des Bahnsteigs -->
+    {#each [-5, 0, 5] as x}
+        <T.Group position={[x, 0.4, -0.5]}>
             <!-- Sitzfläche -->
             <T.Mesh>
                 <T.BoxGeometry args={[2, 0.1, 0.6]} />
@@ -277,16 +284,25 @@
 
     <!-- ========== ATMOSPHÄRISCHE BELEUCHTUNG ========== -->
     <T.PointLight
-        position={[0, 5, 5]}
+        position={[0, 5, 2]}
         color="#3b82f6"
         intensity={20}
         distance={25}
     />
     
-    <!-- Gleis-Ende-Nebel-Effekt (Spot ins Dunkel) -->
+    <!-- Spots ins Dunkel (beide Gleis-Enden) -->
     <T.SpotLight
-        position={[0, 3, 25]}
-        target.position={[0, 0, 50]}
+        position={[-25, 3, trackZ]}
+        target.position={[-50, 0, trackZ]}
+        color="#1e3a5f"
+        intensity={30}
+        distance={40}
+        angle={0.4}
+        penumbra={1}
+    />
+    <T.SpotLight
+        position={[25, 3, trackZ]}
+        target.position={[50, 0, trackZ]}
         color="#1e3a5f"
         intensity={30}
         distance={40}
