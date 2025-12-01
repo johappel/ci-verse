@@ -115,7 +115,7 @@
     // ========== GLEIS-GEOMETRIE ==========
     // Gleise verlaufen entlang X-Achse (links-rechts)
     // Bahnsteig ist bei Z=0, Gleise bei Z > 0
-    const trackLength = 60;
+    const trackLength = 120;
     const trackWidth = 0.15;
     const trackSpacing = 2;  // Abstand zwischen den Schienen
     const trackY = 0;        // Höhe der Gleise
@@ -217,12 +217,12 @@
     <!-- ========== ABFAHRTSTAFEL ========== -->
     <DepartureBoard 
         {schedule}
-        position={[-6, 4, -2]}
+        position={[-6, 6, -2]}
         rotation={Math.PI * 0.1}
     />
 
     <!-- ========== TERMINAL-SCHILD ========== -->
-    <T.Group position={[0, 5, -2.5]}>
+    <T.Group position={[2, 5, -2.5]}>
         <T.Mesh>
             <T.BoxGeometry args={[8, 1.2, 0.2]} />
             <T.MeshStandardMaterial 

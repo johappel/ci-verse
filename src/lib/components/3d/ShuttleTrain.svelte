@@ -21,19 +21,30 @@
 
     let { partner, phase, progress }: Props = $props();
 
-    // Zug-Position auf Z-Achse basierend auf Phase
+    // Easing-Funktionen für smooth Animation
+    function easeOutQuad(t: number): number {
+        return 1 - (1 - t) * (1 - t);
+    }
+    function easeInQuad(t: number): number {
+        return t * t;
+    }
+    function easeInOutQuad(t: number): number {
+        return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    }
+
+    // Zug-Position auf Z-Achse basierend auf Phase (mit Easing)
     let trainZ = $derived.by(() => {
         switch (phase) {
             case 'arriving':
-                // Von weit hinten (+30) zur Mitte (0)
-                return 30 - progress * 30;
+                // Von weit hinten (+60) zur Mitte (0) - smooth abbremsen
+                return 60 - easeOutQuad(progress) * 60;
             case 'stopped':
                 return 0;
             case 'departing':
-                // Von Mitte (0) nach vorne (-40)
-                return -progress * 40;
+                // Von Mitte (0) nach vorne (-70) - smooth beschleunigen
+                return -easeInQuad(progress) * 70;
             case 'away':
-                return -50; // Komplett weg
+                return -80; // Komplett weg
         }
     });
 
