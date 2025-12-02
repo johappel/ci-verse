@@ -196,6 +196,37 @@ const current = worldStore.state.currentPlatform;
 - **UI-Overlays**: TailwindCSS (liegen über Canvas mit z-index)
 - **Keine Inline-Styles** außer dynamische Three.js-Werte
 
+### ⚠️ HTML-Overlay Z-Fighting Problem
+
+**Problem:** Das `<HTML>` Element von `@threlte/extras` ignoriert die Z-Tiefe von 3D-Objekten. HTML-Inhalte "bluten" durch andere Plattformen und Objekte durch, auch wenn diese eigentlich davor liegen sollten.
+
+**Lösung:** Bei Marktplatz-spezifischen Komponenten ALLE `<HTML>` Elemente nur rendern, wenn der User auf dem Marktplatz ist:
+
+```svelte
+<script>
+    // Ist der User auf dem Marktplatz?
+    let isOnMarketplace = $derived(worldStore.state.currentPlatform === 'S');
+</script>
+
+<!-- HTML nur auf Marktplatz rendern -->
+{#if isOnMarketplace}
+<HTML position={[0, 0, 0.1]} transform center>
+    <!-- Interaktiver Inhalt -->
+</HTML>
+{/if}
+
+<!-- 3D-Strukturen (Rahmen, Tafel) bleiben IMMER sichtbar -->
+<T.Mesh>
+    <T.BoxGeometry args={[5, 3, 0.2]} />
+    <T.MeshStandardMaterial color="#1e293b" />
+</T.Mesh>
+```
+
+**Betroffene Komponenten:**
+- `DepartureBoard.svelte` - Fahrplan-Tafel
+- `ReceptionWall.svelte` - Team-Slideshow, Chatbot-Video, "Frag mich!"-Button
+- `MarketplaceStand.svelte` - News/Events-Tafeln, Institution-Button
+
 ---
 
 ## 3. Dateistruktur (Neu)

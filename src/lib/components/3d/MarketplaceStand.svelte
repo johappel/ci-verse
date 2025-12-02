@@ -9,6 +9,12 @@
      * 
      * Die Terminal-Tafeln zeigen immer nur EINEN Eintrag an,
      * der regelmäßig wechselt - wie eine Anzeigetafel am Bahnhof.
+     * 
+     * WICHTIG für AI Agents:
+     * HTML-Overlays in Threlte ignorieren Z-Tiefe und "bluten" durch andere
+     * 3D-Objekte. Daher werden alle <HTML>-Elemente nur gerendert wenn
+     * isOnMarketplace === true (currentPlatform === 'S').
+     * Die 3D-Strukturen (Rahmen, Pfosten etc.) bleiben immer sichtbar.
      */
     import { T } from '@threlte/core';
     import { Text, useCursor, HTML } from '@threlte/extras';
@@ -186,6 +192,9 @@
             default: return '🔗 Mehr erfahren';
         }
     });
+    
+    // Ist der User auf dem Marktplatz? HTML nur dort rendern!
+    let isOnMarketplace = $derived(worldStore.state.currentPlatform === 'S');
 </script>
 
 <T.Group position={position} rotation.y={rotation}>
@@ -223,12 +232,14 @@
             <Text text={stand.title} fontSize={0.35} color="#1f2937" position={[0, dimensions.height - 1.2, -dimensions.depth / 2 + 0.12]} anchorX="center" anchorY="top" maxWidth={dimensions.width - 1} />
             <Text text={stand.description} fontSize={0.18} color="#4b5563" position={[0, dimensions.height - 2, -dimensions.depth / 2 + 0.12]} anchorX="center" anchorY="top" maxWidth={dimensions.width - 1.5} lineHeight={1.4} textAlign="center" />
 
-            <!-- Button -->
+            <!-- Button - NUR auf Marktplatz rendern -->
+            {#if isOnMarketplace}
             <HTML position={[0, -0.27, dimensions.depth / 3 + 0.3]} transform scale={0.4} pointerEvents="auto">
                 <button class="marketplace-button institution" class:hovered={isButtonHovered} onclick={handleButtonClick} onmouseenter={() => isButtonHovered = true} onmouseleave={() => isButtonHovered = false}>
                     {buttonText}
                 </button>
             </HTML>
+            {/if}
         </T.Group>
 
         <!-- Seitenwände -->
@@ -280,7 +291,8 @@
                 />
             </T.Mesh>
 
-            <!-- HTML Content -->
+            <!-- HTML Content - NUR auf Marktplatz rendern -->
+            {#if isOnMarketplace}
             <HTML 
                 position={[0, 0, 0.2]} 
                 transform 
@@ -353,6 +365,7 @@
                     </div>
                 </div>
             </HTML>
+            {/if}
         </T.Group>
 
         <!-- Dezente Beleuchtung -->

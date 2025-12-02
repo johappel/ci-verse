@@ -5,6 +5,9 @@
      * Zeigt die nächsten "Verbindungen" zu Partner-Einrichtungen.
      * Die aktive Verbindung wird hervorgehoben.
      * Klickbar nur wenn Kamera in der Nähe ist.
+     * 
+     * WICHTIG: HTML-Overlay wird NUR auf dem Marktplatz gerendert,
+     * um "Durchbluten" durch andere Plattformen zu verhindern.
      */
     import { T, useThrelte, useTask } from '@threlte/core';
     import { HTML } from '@threlte/extras';
@@ -48,6 +51,9 @@
     // Distanz zur Kamera berechnen (nur X-Z Ebene, ignoriere Höhe)
     let cameraDistance = $state(Infinity);
     let isNearby = $derived(cameraDistance <= interactionDistance);
+    
+    // Ist der User auf dem Marktplatz?
+    let isOnMarketplace = $derived(worldStore.state.currentPlatform === 'S');
     
     useTask(() => {
         if ($camera && groupRef) {
@@ -111,7 +117,8 @@
         />
     </T.Mesh>
 
-    <!-- HTML-Overlay für Tafel-Inhalt - weiter nach vorne -->
+    <!-- HTML-Overlay für Tafel-Inhalt - NUR auf Marktplatz rendern -->
+    {#if isOnMarketplace}
     <HTML position={[0, 0, 0.1]} transform center>
         <div style="
             width: 320px;
@@ -245,6 +252,7 @@
             </div>
         </div>
     </HTML>
+    {/if}
 
     <!-- Beleuchtung der Tafel -->
     <T.SpotLight

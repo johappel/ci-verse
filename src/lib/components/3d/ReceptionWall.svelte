@@ -6,6 +6,9 @@
      * - Links: Chatbot-Avatar (klickbar, pulsierend)
      * - Mitte: Institutions-Info (Name, Mission, Ort)
      * - Rechts: Team-Slideshow mit Mitarbeiter:innen-Fotos
+     * 
+     * WICHTIG: HTML-Overlays werden NUR auf dem Marktplatz gerendert,
+     * um "Durchbluten" durch andere Plattformen zu verhindern.
      */
     import { T, useTask } from '@threlte/core';
     import { HTML, useCursor, useTexture } from '@threlte/extras';
@@ -113,6 +116,9 @@
         slideTimer = 0;
         currentTeamIndex = (currentTeamIndex - 1 + teamMembers.length) % teamMembers.length;
     }
+    
+    // Ist der User auf dem Marktplatz?
+    let isOnMarketplace = $derived(worldStore.state.currentPlatform === 'S');
 </script>
 
 <T.Group position={position} rotation.y={rotation} scale={1.0}>
@@ -154,7 +160,8 @@
             <T.MeshBasicMaterial color={darkColor} />
         </T.Mesh>
 
-        <!-- Team Content via HTML -->
+        <!-- Team Content via HTML - NUR auf Marktplatz -->
+        {#if isOnMarketplace}
         <HTML position={[0, 0, 0.1]} center transform scale={0.35}>
             <div class="text-center text-white" style="width: 400px;">
                 <h3 class="text-2xl font-bold mb-4" style="color: #fbbf24;">TEAM</h3>
@@ -203,9 +210,9 @@
                 {/if}
             </div>
         </HTML>
+        {/if}
     </T.Group>
     
-
     <!-- ========== INSTITUTIONS-PANEL (Mitte) mit Bild ========== -->
     <T.Group position={[0, wall.height / 2 + 1.5, wall.depth / 2 + 0.1]} onclick={handleWallClick}>
         
@@ -270,7 +277,8 @@
             <T.MeshBasicMaterial color={darkColor} />
         </T.Mesh>
 
-        <!-- Chatbot-Video -->
+        <!-- Chatbot-Video - NUR auf Marktplatz -->
+        {#if isOnMarketplace}
         <T.Group position={[0, 0.5, 0.1]} scale={chatScale}>
             <HTML center transform scale={0.12}>
                 <div class="flex flex-col items-center">
@@ -286,8 +294,10 @@
                 </div>
             </HTML>
         </T.Group>
+        {/if}
         
-        <!-- "Frag mich!" Button unter dem Video -->
+        <!-- "Frag mich!" Button unter dem Video - NUR auf Marktplatz -->
+        {#if isOnMarketplace}
         <HTML center transform scale={0.3} position={[0, -2, 0.1]}>
             <button 
                 onclick={handleChatClick}
@@ -311,6 +321,7 @@
                 Frag mich!
             </button>
         </HTML>
+        {/if}
 
         {#if isChatHovered}
             <T.Mesh position.z={0.02}>
