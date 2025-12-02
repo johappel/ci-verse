@@ -4,6 +4,64 @@
 
 ---
 
+## 2025-12-02: v2.1.0 – Marktplatz & Partner-Vernetzung
+
+### ✅ Status: Feature Complete
+
+**Neue Features:**
+
+#### 🚂 Shuttle-Train System
+- **DepartureBoard** - Abfahrtstafel im Bahnhofs-Stil für Partner-Verbindungen
+- **ShuttleTrain** - Animierter Zug mit Partner-Branding (Ein-/Ausfahrt)
+- Partner-Kategorien: ministry, church, university, institute, international, association
+- Farbcodierung nach Kategorie
+
+#### 💬 PartnerDialog - Vernetzungs-Erklärung
+- Zwischengeschalteter Dialog vor externem Link
+- Erklärt die Vernetzungsidee je nach Partner-Kategorie
+- Zeigt Partner-Logo, Kategorie-Badge und Statistiken
+- Inline-Styles für Portal-Kompatibilität
+
+#### 📺 Dynamische MarketplaceStand-Terminals
+- **Publikationen-Terminal** (grün) - Rotierende News-Anzeige
+- **Events-Terminal** (rot) - Rotierende Termin-Anzeige  
+- Auto-Rotation alle 8-15 Sekunden
+- Pagination-Dots und "Alle anzeigen →" Button
+- Kompakte Date-Badges für Events
+
+#### 📰 RssFeedPanel (GlassDialog)
+- Vollständige Umstellung auf GlassDialog-Pattern
+- Inline-Styles statt Tailwind für Portal-Kompatibilität
+- Kategorie-Tags mit Farbcodierung
+- Aktualisieren-Button
+
+#### 📅 EventsPanel (GlassDialog)
+- NIP52 Nostr Calendar Event Format (kind 31923)
+- Datum-Badge mit rotem Hintergrund
+- Event-Typ-Tags (Tagung, Workshop, Webinar, etc.)
+- Online/Vor-Ort Kennzeichnung
+
+**Verbesserungen:**
+- Alle Dialoge außerhalb `<main>` für korrekten z-index
+- Einheitliches GlassDialog-Pattern für alle Overlays
+- ShuttleTrain-Logo auf Marktplatz entfernt (störend)
+- Kleineres Event-Date-Badge im Terminal
+
+**Neue/Erweiterte Komponenten:**
+```
+src/lib/components/3d/
+├── DepartureBoard.svelte      # Partner-Abfahrtstafel (NEU)
+├── ShuttleTrain.svelte        # Animierter Partner-Zug (NEU)
+├── MarketplaceStand.svelte    # Dynamische Terminals (REWRITTEN)
+
+src/lib/components/ui/
+├── PartnerDialog.svelte       # Vernetzungs-Dialog (NEU)
+├── RssFeedPanel.svelte        # News-Panel (REWRITTEN)
+├── EventsPanel.svelte         # Termine-Panel (REWRITTEN)
+```
+
+---
+
 ## 2025-11-30: v2.0.0 – Energie-Visualisierung
 
 ### ✅ Status: Feature Complete
@@ -99,25 +157,27 @@ src/lib/components/3d/
 - [ ] REST API `/civerse/v1/world` testen
 - [ ] Bilder aus WordPress Media Library
 - [ ] Cache-Strategie für API-Daten
+- [ ] Partner-Daten aus WordPress ACF
 
-### Phase 4: Polish & Performance
+### Phase 4: Live-Daten Integration
+- [ ] Echter RSS-Feed für Publikationen
+- [ ] Echte Nostr NIP52 Events (kind 31923)
+- [ ] n8n Webhook für Chat-Integration
+- [ ] iCal-Import für Termine
+
+### Phase 5: Polish & Performance
 - [ ] Bloom Post-Processing (UnrealBloomPass)
 - [ ] LOD für entfernte Plattformen
 - [ ] Lazy Loading für Plattform-Inhalte
 - [ ] Mobile Touch-Controls
 - [ ] Loading-Screen mit Progress
-
-### Phase 5: Live-Daten
-- [ ] RSS-Feed Integration (Publikationen)
-- [ ] iCal Events-Anzeige
-- [ ] Nostr Live-Pulse für Aktivitäten
-- [ ] WebSocket für Echtzeit-Updates
+- [ ] Audio-Feedback für Interaktionen
 
 ### Phase 6: Erweiterungen
-- [ ] Audio-Feedback für Interaktionen
 - [ ] Ambient Soundscape
 - [ ] VR-Modus (WebXR)
 - [ ] Multi-User Presence
+- [ ] Weitere Partner-Kategorien
 
 ---
 
@@ -128,6 +188,7 @@ src/lib/components/3d/
 - [ ] Unit Tests für Store-Methoden
 - [ ] E2E Tests mit Playwright
 - [ ] Accessibility-Audit
+- [ ] TypeScript strict mode
 
 ---
 
@@ -139,7 +200,8 @@ src/lib/components/3d/
   "@threlte/core": "^8.0.0",
   "@threlte/extras": "^9.0.0",
   "tailwindcss": "^4.0.0",
-  "@tailwindcss/postcss": "^4.0.0"
+  "@tailwindcss/postcss": "^4.0.0",
+  "lucide-svelte": "^0.460.0"
 }
 ```
 
@@ -151,3 +213,8 @@ pnpm build     # Production Build
 pnpm preview   # Preview → http://localhost:4173
 pnpm check     # TypeScript Check
 ```
+
+---
+
+**Letztes Update**: 2025-12-02  
+**Aktuelle Version**: 2.1.0

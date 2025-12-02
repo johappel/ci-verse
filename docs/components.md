@@ -697,3 +697,147 @@ let oktaederEmissive = $derived(1.5 + energyPulse * 2.0);
 />
 ```
 
+---
+
+## Partner-Vernetzung (NEU in v2.1)
+
+Diese Komponenten visualisieren die Vernetzung des Instituts mit Bildungspartnern.
+
+---
+
+### DepartureBoard.svelte
+Abfahrtstafel im Bahnhofs-Stil für Partner-Verbindungen.
+
+**Props:**
+| Prop | Typ | Default | Beschreibung |
+|------|-----|---------|--------------|
+| `partners` | PartnerConnection[] | required | Liste der Partner |
+| `position` | [x, y, z] | [0, 0, 0] | Position im 3D-Raum |
+| `rotation` | [x, y, z] | [0, 0, 0] | Rotation |
+
+**PartnerConnection Interface:**
+```typescript
+interface PartnerConnection {
+    id: string;
+    name: string;
+    category: 'ministry' | 'church' | 'university' | 'institute' | 'international' | 'association';
+    url: string;
+    description?: string;
+    logo?: string;
+    departureTime?: string;
+    platform?: string;
+}
+```
+
+**Kategorie-Farben:**
+```typescript
+const categoryColors = {
+    ministry: '#3b82f6',     // Blau
+    church: '#a855f7',       // Violett
+    university: '#22c55e',   // Grün
+    institute: '#06b6d4',    // Cyan
+    international: '#f59e0b', // Amber
+    association: '#ec4899',   // Pink
+};
+```
+
+**Features:**
+- Flip-Board Animation für Texte
+- Kategorie-Badge mit Icon
+- Klick öffnet PartnerDialog (nicht direkt externen Link)
+- LED-Anzeige-Stil
+
+---
+
+### ShuttleTrain.svelte
+Animierter Zug mit Partner-Branding für visuelles Feedback.
+
+**Props:**
+| Prop | Typ | Default | Beschreibung |
+|------|-----|---------|--------------|
+| `partner` | PartnerConnection | null | Aktueller Partner |
+| `position` | [x, y, z] | [0, 0, 0] | Start-Position |
+| `isArriving` | boolean | false | Einfahrt-Animation |
+| `isDeparting` | boolean | false | Ausfahrt-Animation |
+
+**Features:**
+- Smooth Ein-/Ausfahrt-Animation
+- Partner-Logo auf Zug-Seite
+- Partner-Farbe basierend auf Kategorie
+- Sound-Ready (Audio später hinzufügen)
+
+**Animation-Phasen:**
+1. **Idle** - Zug außerhalb sichtbar
+2. **Arriving** - Zug fährt ein (2s)
+3. **Stopped** - Zug steht am Bahnsteig
+4. **Departing** - Zug fährt aus (2s)
+
+---
+
+### MarketplaceStand.svelte
+Dynamische Terminal-Stände für Events und Publikationen.
+
+**Props:**
+| Prop | Typ | Default | Beschreibung |
+|------|-----|---------|--------------|
+| `standType` | 'institution' \| 'publications' \| 'events' | required | Art des Terminals |
+| `position` | [x, y, z] | [0, 0, 0] | Position |
+| `rotation` | number | 0 | Y-Rotation |
+
+**Features für publications/events:**
+- **Auto-Rotation** - Wechselt Inhalt alle 8-15 Sekunden
+- **Pagination Dots** - Zeigt aktuellen Index
+- **Display Board** - Schlanke Säule mit Anzeige-Tafel
+- **"Alle anzeigen →"** Button öffnet RssFeedPanel/EventsPanel
+
+**Stand-Typen:**
+| Typ | Farbe | Icon | Aktion |
+|-----|-------|------|--------|
+| `institution` | Blau | 🏛️ | Chat öffnen |
+| `publications` | Grün | 📰 | RssFeedPanel |
+| `events` | Rot | 📅 | EventsPanel |
+
+**Event-Card Design:**
+```
+┌──────────────────────┐
+│ 🟥 NÄCHSTER TERMIN ● │
+├──────────────────────┤
+│ ┌────┐               │
+│ │ 10 │ Event-Titel   │
+│ │DEZ │ 🕐 14:00      │
+│ └────┘ 📍 Ort        │
+├──────────────────────┤
+│ ● ○ ○   Alle anzeigen│
+└──────────────────────┘
+```
+
+---
+
+### Signpost.svelte
+Wegweiser für verwandte Projekte auf anderen Plattformen.
+
+**Props:**
+| Prop | Typ | Default | Beschreibung |
+|------|-----|---------|--------------|
+| `relatedProjects` | ProjectData[] | required | Projekte mit relatedDepartments |
+| `position` | [x, y, z] | [0, 0, 0] | Position |
+| `platformId` | string | required | ID der aktuellen Plattform |
+| `compact` | boolean | false | Kompakt unter Schild |
+
+**Features:**
+- Zeigt Projekte die `relatedDepartments` zur aktuellen Plattform haben
+- Klick navigiert zur Heimat-Plattform des Projekts
+- Kompakt-Modus: Horizontal unter Plattform-Schild
+- Standard-Modus: Vertikale Holztafel
+
+**Beispiel-Konfiguration:**
+```typescript
+// Konfi-App ist auf B2 + Q3, zeigt Wegweiser auf B3
+{
+    id: 'p5',
+    title: 'Konfi-App',
+    departments: ['B2', 'Q3'],
+    relatedDepartments: ['B3'],  // ← Wegweiser auf B3
+}
+```
+

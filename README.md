@@ -1,9 +1,9 @@
 # CI-Verse: Das Comenius-Orbital
-**Status: 🚀 Feature Complete (v2.0)**
+**Status: 🚀 Feature Complete (v2.1)**
 
 ## 🎯 Übersicht
 
-Interaktive 3D-Visualisierung der Comenius-Institut Bildungslandschaft als explorative Browser-Anwendung. Eine immersive Messe-Erfahrung mit schwebenden Plattformen, Energie-Visualisierungen und intuitivem Transport-System.
+Interaktive 3D-Visualisierung der Comenius-Institut Bildungslandschaft als explorative Browser-Anwendung. Eine immersive Messe-Erfahrung mit schwebenden Plattformen, Energie-Visualisierungen, Partner-Vernetzung und intuitivem Transport-System.
 
 ## 🚀 Quick Start
 
@@ -22,11 +22,17 @@ pnpm preview      # → http://localhost:4173
 ### 🏛️ Marktplatz (S-Plattform)
 - ✅ **Hexagonale Plattform** mit MesseWalls für Leitlinien-Poster
 - ✅ **Institutions-Booth** (Comenius-Institut) mit Team-Anzeige
-- ✅ **Terminal-Stände** für Events und Publikationen (RSS)
+- ✅ **Dynamische Terminal-Stände** für Events und Publikationen mit Auto-Rotation
 - ✅ **Reception Wall** mit KI-Chat Integration
 - ✅ **Transport-Portal** mit Destinations-Buttons zu allen Plattformen
 
-### ⚡ Energie-Visualisierung (NEU in v2.0!)
+### 🚂 Partner-Vernetzung (NEU in v2.1!)
+- ✅ **DepartureBoard** - Abfahrtstafel im Bahnhofs-Stil mit Partner-Verbindungen
+- ✅ **ShuttleTrain** - Animierter Zug mit Partner-Branding (Ein-/Ausfahrt)
+- ✅ **PartnerDialog** - Erklärt Vernetzungsidee vor externem Link
+- ✅ **Kategorien**: Ministerien, Kirchen, Hochschulen, Institute, Internationale Partner
+
+### ⚡ Energie-Visualisierung (v2.0)
 - ✅ **EnergyFloor** - 6 animierte Ströme fließen von den Leitlinien-Postern zur Mitte
 - ✅ **EnergyBeam** - Vertikale Energie-Säule vom Boden zum Oktaeder
 - ✅ **Pulsierender Oktaeder** - Empfängt und visualisiert die gesammelte Leitlinien-Energie
@@ -38,16 +44,20 @@ pnpm preview      # → http://localhost:4173
 - ✅ **Kamera-Animation** entlang der Transport-Linien
 - ✅ **Perspektiven-Filter** ändern Atmosphäre und Hervorhebung
 
-### 🎨 UI & Interaktion
-- ✅ **GlassDialog** - Glassmorphism-Modals für Projekt-Details
-- ✅ **IframeDialog** - Eingebettete externe Websites
+### 🎨 UI & Dialoge
+- ✅ **GlassDialog** - Glassmorphism-Modals (ziehbar, einheitliches Design)
 - ✅ **ChatModal** - KI-Assistent Integration (n8n Webhook)
+- ✅ **RssFeedPanel** - News & Publikationen mit Kategorie-Tags
+- ✅ **EventsPanel** - Termine im NIP52 Nostr-Format
+- ✅ **PartnerDialog** - Vernetzungs-Erklärung vor externem Link
+- ✅ **IframeDialog** - Eingebettete externe Websites
 - ✅ **NavigationControls** - Kamera-Steuerung
 - ✅ **FilterBar** - Leitperspektiven-Buttons
 
 ### 📡 Daten-Integration
 - ✅ **Mock-Daten System** mit vollständigem Datenmodell
 - ✅ **WordPress REST API** vorbereitet (ACF Fields definiert)
+- ✅ **NIP52 Nostr Events** vorbereitet (kind 31923)
 - ✅ **example-data.json** als Referenz für WordPress-Export
 
 ## 📚 Dokumentation
@@ -55,7 +65,9 @@ pnpm preview      # → http://localhost:4173
 | Dokument | Beschreibung |
 |----------|--------------|
 | [architektur.md](./docs/architektur.md) | Technische Architektur & Layer |
-| [components.md](./docs/components.md) | Komponenten-Spezifikation |
+| [components.md](./docs/components.md) | 3D-Komponenten-Spezifikation |
+| [dialog-components.md](./docs/dialog-components.md) | UI-Dialog-Pattern & GlassDialog |
+| [marketplace-guide.md](./docs/marketplace-guide.md) | Marktplatz, Terminals & Partner |
 | [platform-guide.md](./docs/platform-guide.md) | Anleitung: Neue Plattform hinzufügen |
 | [svelte-stores.md](./docs/svelte-stores.md) | State Management |
 | [wp-setup.md](./docs/wp-setup.md) | WordPress Integration |
@@ -69,6 +81,7 @@ pnpm preview      # → http://localhost:4173
 | 3D Engine | Threlte 8 (Three.js) |
 | Shader | GLSL (Custom Fragment Shader) |
 | Styling | TailwindCSS v4 |
+| Icons | Lucide Svelte |
 | State | Svelte 5 Runes (`$state`, `$derived`, `$effect`) |
 | Language | TypeScript |
 
@@ -81,14 +94,20 @@ src/
 │   │   ├── 3d/                    # 3D Threlte-Komponenten
 │   │   │   ├── MarketplacePlatform.svelte  # Hauptplattform (S)
 │   │   │   ├── Platform.svelte             # Generische Plattform (B/Q)
+│   │   │   ├── DepartureBoard.svelte       # Partner-Abfahrtstafel 🚂
+│   │   │   ├── ShuttleTrain.svelte         # Animierter Partner-Zug 🚂
+│   │   │   ├── MarketplaceStand.svelte     # Dynamische Terminals
 │   │   │   ├── EnergyFloor.svelte          # Boden-Energie-Shader ⚡
 │   │   │   ├── EnergyBeam.svelte           # Vertikale Energie-Säule ⚡
 │   │   │   ├── MesseWall.svelte            # Poster-Wände
 │   │   │   ├── TransportPortal.svelte      # Navigation-Hub
 │   │   │   └── ...
 │   │   └── ui/                    # HTML UI-Overlays
-│   │       ├── GlassDialog.svelte
-│   │       ├── ChatModal.svelte
+│   │       ├── GlassDialog.svelte          # Basis-Dialog (ziehbar)
+│   │       ├── ChatModal.svelte            # KI-Assistent
+│   │       ├── PartnerDialog.svelte        # Vernetzungs-Dialog
+│   │       ├── RssFeedPanel.svelte         # News-Panel
+│   │       ├── EventsPanel.svelte          # Termine-Panel
 │   │       └── ...
 │   ├── logic/
 │   │   ├── store.svelte.ts        # WorldStore State Management
@@ -108,7 +127,7 @@ src/
 
 ### Die Energie-Metapher
 
-Die 4 Leitlinien des Instituts (Gerechtigkeit, Nachhaltigkeit, Digitalität, Strukturen) **fließen als sichtbare Energie** durch das System:
+Die 6 Leitlinien des Instituts  **fließen als sichtbare Energie** durch das System:
 
 ```
     [Poster]     [Poster]     [Poster]     [Poster]
@@ -117,7 +136,7 @@ Die 4 Leitlinien des Instituts (Gerechtigkeit, Nachhaltigkeit, Digitalität, Str
                     │ EnergyFloor (6 Ströme)
                     ▼
               ╔═══════════╗
-              ║  Oktaeder ║ ← Pulsiert mit Energie
+              ║  Oktaeder ║ ← Pulsiert mit  Energie
               ╚═════╦═════╝
                     ║ EnergyBeam
                     ║
@@ -142,18 +161,19 @@ Y=8    [B1 Kita]·····[S Marktplatz]·····[B3 Erwachsene]
 ### Phase 3: WordPress Integration
 - [ ] WordPress Plugin aktivieren und testen
 - [ ] REST API Endpoint `/civerse/v1/world` anbinden
+- [ ] Partner-Daten aus WordPress ACF
 - [ ] Bilder/Assets aus WordPress Media Library laden
 
-### Phase 4: Polish & Performance
+### Phase 4: Live-Daten
+- [ ] Echter RSS-Feed für Publikationen
+- [ ] Echte Nostr NIP52 Events (kind 31923)
+- [ ] n8n Webhook für Chat-Integration
+- [ ] iCal-Import für Termine
+
+### Phase 5: Polish & Performance
 - [ ] Bloom Post-Processing für verstärkte Glow-Effekte
 - [ ] LOD (Level of Detail) für entfernte Plattformen
-- [ ] Lazy Loading für Plattform-Inhalte
 - [ ] Mobile Touch-Controls
-
-### Phase 5: Erweiterungen
-- [ ] Live-RSS-Feed Integration
-- [ ] iCal Events-Anzeige
-- [ ] Nostr Live-Pulse Animationen
 - [ ] Audio-Feedback für Interaktionen
 
 ## 🧪 Entwicklung
@@ -174,5 +194,5 @@ pnpm check         # TypeScript Check
 
 ---
 
-**Letztes Update**: 2025-11-30  
-**Version**: 2.0.0
+**Letztes Update**: 2025-12-02  
+**Version**: 2.1.0

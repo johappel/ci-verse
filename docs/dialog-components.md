@@ -331,11 +331,128 @@ function handleBackdropClick(e: MouseEvent) {
 src/lib/components/ui/
 ├── GlassDialog.svelte      # Basis-Dialog mit Glasmorphismus
 ├── ChatModal.svelte        # KI-Chat Dialog
+├── PartnerDialog.svelte    # Partner-Vernetzung Dialog (NEU)
+├── RssFeedPanel.svelte     # RSS-Feed Dialog (REWRITTEN)
+├── EventsPanel.svelte      # Events Dialog (REWRITTEN)
 ├── ProjectCard.svelte      # Projekt-Detail Dialog
 ├── ContentCard.svelte      # Content-Detail Dialog
-├── RssFeedPanel.svelte     # RSS-Feed Dialog
-└── EventsPanel.svelte      # Events Dialog
+└── IframeDialog.svelte     # Eingebettete Website Dialog
 ```
+
+---
+
+## Implementierte Dialoge (v2.1)
+
+### PartnerDialog.svelte
+Erklärt die Vernetzungsidee vor dem Öffnen eines externen Partner-Links.
+
+**Store-State:**
+```typescript
+isPartnerDialogOpen: boolean;
+selectedPartner: PartnerConnection | null;
+```
+
+**Store-Methoden:**
+```typescript
+openPartnerDialog(partner: PartnerConnection): void;
+closePartnerDialog(): void;
+```
+
+**Features:**
+- Partner-Logo und Name
+- Kategorie-Badge mit farbigem Icon
+- Kontextabhängige Erklärung je nach Partner-Kategorie
+- Netzwerk-Statistiken
+- "Website besuchen" Button
+
+**Kategorie-Texte:**
+| Kategorie | Erklärung |
+|-----------|-----------|
+| ministry | Zusammenarbeit mit Landeskirchen und EKD |
+| church | Partnerschaft mit Kirchengemeinden |
+| university | Kooperation mit Hochschulen |
+| institute | Austausch mit Forschungsinstituten |
+| international | Europäische Bildungsnetzwerke |
+| association | Verbindung mit Fachverbänden |
+
+**Verwendung:**
+```svelte
+<!-- In DepartureBoard.svelte -->
+<script>
+    import { worldStore } from '$lib/logic/store.svelte';
+    
+    function handlePartnerClick(partner: PartnerConnection) {
+        worldStore.openPartnerDialog(partner);
+    }
+</script>
+```
+
+---
+
+### RssFeedPanel.svelte
+News und Publikationen Anzeige.
+
+**Store-State:**
+```typescript
+isRssPanelOpen: boolean;
+```
+
+**Store-Methoden:**
+```typescript
+openRssPanel(): void;
+closeRssPanel(): void;
+```
+
+**Features:**
+- Artikel-Liste mit Titel, Excerpt, Datum
+- Kategorie-Tags mit Farbcodierung
+- Aktualisieren-Button
+- "Alle Artikel" Link zu externer Seite
+- Inline-Styles für Portal-Kompatibilität
+
+**Geplant:**
+- Echter RSS-Feed Fetch
+- WordPress REST API Integration
+
+---
+
+### EventsPanel.svelte
+Termine und Veranstaltungen im NIP52 Nostr-Format.
+
+**Store-State:**
+```typescript
+isEventsPanelOpen: boolean;
+```
+
+**Store-Methoden:**
+```typescript
+openEventsPanel(): void;
+closeEventsPanel(): void;
+```
+
+**NIP52 Format (kind 31923):**
+```typescript
+interface NostrCalendarEvent {
+    id: string;
+    pubkey: string;
+    created_at: number;
+    kind: 31923;  // Time-Based Calendar Event
+    content: string;
+    tags: string[][];  // ['title', '...'], ['start', '...'], etc.
+}
+```
+
+**Features:**
+- Datum-Badge mit rotem Hintergrund
+- Event-Typ Tags (Tagung, Workshop, Webinar, etc.)
+- Online/Vor-Ort Kennzeichnung
+- Zeitraum-Anzeige
+- Ort und Teilnehmer-Info
+- Inline-Styles für Portal-Kompatibilität
+
+**Geplant:**
+- Echter Nostr NIP52 Stream
+- Relay-Subscription
 
 ---
 
