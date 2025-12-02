@@ -10,7 +10,6 @@
      * - 15-20s: Pause (Zug weg)
      */
     import { T } from '@threlte/core';
-    import { HTML } from '@threlte/extras';
     import type { PartnerConnection } from '$lib/types/project';
 
     interface Props {
@@ -152,26 +151,6 @@
                 />
             </T.Mesh>
         {/each}
-
-        <!-- Partner-Logo auf mittlerem Waggon (HTML Billboard) -->
-        {#if phase === 'stopped' && partner?.logoUrl}
-            <HTML position={[0, waggonHeight + 1.5, 0]} center transform sprite>
-                <div class="flex flex-col items-center gap-1 pointer-events-none select-none">
-                    <img 
-                        src={partner.logoUrl} 
-                        alt={partner.shortName}
-                        class="w-16 h-16 object-contain bg-white/90 rounded-lg p-1 shadow-lg"
-                        style="filter: drop-shadow(0 0 10px {partnerColor});"
-                    />
-                    <span 
-                        class="text-xs font-bold px-2 py-0.5 rounded bg-black/70 text-white whitespace-nowrap"
-                        style="text-shadow: 0 0 8px {partnerColor};"
-                    >
-                        {partner.shortName}
-                    </span>
-                </div>
-            </HTML>
-        {/if}
 
         <!-- Kopf-Scheinwerfer (kleine leuchtende Kugeln) - direkt am ersten Waggon -->
         {@const frontZ = -((waggonCount - 1) / 2) * waggonSpacing - waggonLength / 2 - 0.1}

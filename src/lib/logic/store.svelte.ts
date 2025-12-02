@@ -1,4 +1,4 @@
-import type { AppState, ProjectData, Perspective, Department, PlatformAspect } from '../types/project';
+import type { AppState, ProjectData, Perspective, Department, PlatformAspect, PartnerConnection } from '../types/project';
 
 // Erweiterte AppState für Marketplace-Panels
 interface ExtendedAppState extends AppState {
@@ -8,6 +8,9 @@ interface ExtendedAppState extends AppState {
     isIframeOpen: boolean;
     iframeUrl: string | null;
     iframeTitle: string | null;
+    // Partner Dialog (Nexus Terminal)
+    isPartnerDialogOpen: boolean;
+    selectedPartner: PartnerConnection | null;
 }
 
 export class WorldStore {
@@ -36,7 +39,10 @@ export class WorldStore {
         // NEU: Iframe Dialog
         isIframeOpen: false,
         iframeUrl: null,
-        iframeTitle: null
+        iframeTitle: null,
+        // NEU: Partner Dialog (Nexus Terminal)
+        isPartnerDialogOpen: false,
+        selectedPartner: null
     });
 
     // Derived: Theme-Farbe basierend auf aktiver Perspektive
@@ -208,6 +214,22 @@ export class WorldStore {
         this.state.isIframeOpen = false;
         this.state.iframeUrl = null;
         this.state.iframeTitle = null;
+    }
+
+    // NEU: Partner Dialog für Nexus Terminal
+    openPartnerDialog(partner: PartnerConnection) {
+        this.state.selectedPartner = partner;
+        this.state.isPartnerDialogOpen = true;
+        // Schließe andere Modals
+        this.state.selectedId = null;
+        this.state.isChatOpen = false;
+        this.state.isRssPanelOpen = false;
+        this.state.isEventsPanelOpen = false;
+    }
+
+    closePartnerDialog() {
+        this.state.isPartnerDialogOpen = false;
+        this.state.selectedPartner = null;
     }
 
     // Hilfsfunktion: Domain aus URL extrahieren

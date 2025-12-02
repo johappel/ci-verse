@@ -11,6 +11,7 @@
     import { Vector3 } from 'three';
     import type { Group } from 'three';
     import type { PartnerConnection, TrainStatus } from '$lib/types/project';
+    import { worldStore } from '$lib/logic/store.svelte';
 
     interface ScheduleEntry {
         destination: PartnerConnection;
@@ -74,10 +75,10 @@
         }
     }
 
-    // Klick auf Partner-Link (nur wenn nah genug)
+    // Klick auf Partner-Link (nur wenn nah genug) - öffnet Dialog statt direkten Link
     function handlePartnerClick(partner: PartnerConnection) {
         if (!isNearby) return;
-        window.open(partner.url, '_blank');
+        worldStore.openPartnerDialog(partner);
     }
 </script>
 

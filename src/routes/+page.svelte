@@ -9,6 +9,7 @@
     import RssFeedPanel from "$lib/components/ui/RssFeedPanel.svelte";
     import EventsPanel from "$lib/components/ui/EventsPanel.svelte";
     import IframeDialog from "$lib/components/ui/IframeDialog.svelte";
+    import PartnerDialog from "$lib/components/ui/PartnerDialog.svelte";
     import { initWorldStore, worldStore } from "$lib/logic/store.svelte";
     import { mockProjects } from "$lib/data/mockProjects";
     import { platforms } from "$lib/logic/platforms";
@@ -197,6 +198,7 @@
 {#if !isLoading}
     <ChatModal />
     <IframeDialog />
+    <PartnerDialog />
 {/if}
 
 <style>
