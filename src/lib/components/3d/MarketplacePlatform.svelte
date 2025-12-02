@@ -361,7 +361,7 @@
     <!-- ========== ENERGIE-SÄULE (vom Boden zum Oktaeder) ========== -->
     <EnergyBeam 
         height={13}
-        baseY={2}
+        baseY={2.1}
         radius={0.6}
         colors={['#facc15', '#4ade80', '#22d3ee', '#a78bfa']}
     />

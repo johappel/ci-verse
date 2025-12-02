@@ -80,7 +80,9 @@
 	
 	// Kamera-Bewegung (A = rechts drehen, D = links drehen - intuitiver!)
 	function handleMovement(key: string) {
-		if (!cameraControls) return;
+		// Schnelle Reaktion für Tastatur-Steuerung
+		const currentSmoothTime = cameraControls?.smoothTime > 0.3 ? cameraControls.smoothTime : 1;
+		cameraControls!.smoothTime = 0.1;
 		
 		switch (key) {
 			case 'w':
@@ -96,14 +98,21 @@
 			case 'a':
 			case 'arrowleft':
 				// A = Kamera dreht nach RECHTS (Blick bewegt sich nach links)
-				cameraControls.rotate(-ROTATE_SPEED, 0, true);
+				cameraControls.rotate(ROTATE_SPEED, 0, true);
 				break;
 			case 'd':
 			case 'arrowright':
 				// D = Kamera dreht nach LINKS (Blick bewegt sich nach rechts)
-				cameraControls.rotate(ROTATE_SPEED, 0, true);
+				cameraControls.rotate(-ROTATE_SPEED, 0, true);
 				break;
 		}
+		
+		// Verzögert zurücksetzen, damit die Bewegung erst abgeschlossen wird
+		setTimeout(() => {
+			if (cameraControls) {
+				cameraControls.smoothTime = currentSmoothTime;
+			}
+		}, 300);
 	}
 	
 	// Button-Handler für Klicks

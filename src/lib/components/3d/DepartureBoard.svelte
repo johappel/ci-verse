@@ -4,8 +4,9 @@
      * 
      * Zeigt die nächsten "Verbindungen" zu Partner-Einrichtungen.
      * Die aktive Verbindung wird hervorgehoben.
+     * Klickbar nur wenn Kamera in der Nähe ist.
      */
-    import { T } from '@threlte/core';
+    import { T, useThrelte, useTask } from '@threlte/core';
     import { HTML } from '@threlte/extras';
     import type { PartnerConnection, TrainStatus } from '$lib/types/project';
 
@@ -22,6 +23,7 @@
         rotation?: number;
         rotationX?: number;  // Kippung zum Betrachter
         rotationZ?: number;  // Seitliche Kippung
+        interactionDistance?: number;  // Max Distanz für Klicks
     }
 
     let { 
@@ -29,8 +31,26 @@
         position = [0, 4, 0],
         rotation = 0,
         rotationX = 0,
-        rotationZ = 0
+        rotationZ = 0,
+        interactionDistance = 25  // Standard: 25 Einheiten
     }: Props = $props();
+
+    // Kamera-Referenz
+    const { camera } = useThrelte();
+    
+    // Distanz zur Kamera berechnen
+    let cameraDistance = $state(Infinity);
+    let isNearby = $derived(cameraDistance <= interactionDistance);
+    
+    useTask(() => {
+        if ($camera) {
+            const camPos = $camera.position;
+            const dx = camPos.x - position[0];
+            const dy = camPos.y - position[1];
+            const dz = camPos.z - position[2];
+            cameraDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        }
+    });
 
     // Status-Text und Farbe
     function getStatusDisplay(status: TrainStatus): { text: string; color: string; blink: boolean } {
@@ -46,8 +66,9 @@
         }
     }
 
-    // Klick auf Partner-Link
+    // Klick auf Partner-Link (nur wenn nah genug)
     function handlePartnerClick(partner: PartnerConnection) {
+        if (!isNearby) return;
         window.open(partner.url, '_blank');
     }
 </script>
@@ -126,7 +147,7 @@
             </div>
 
             <!-- Fahrplan-Einträge -->
-            <div>
+            <div style="opacity: {isNearby ? 1 : 0.6};">
                 {#each schedule.slice(0, 5) as entry, i}
                     {@const statusDisplay = getStatusDisplay(entry.status)}
                     {@const isFirst = i === 0}
@@ -141,7 +162,8 @@
                             background: {isFirst ? '#1e293b' : 'transparent'};
                             border: none;
                             border-bottom: 1px solid rgba(51, 65, 85, 0.5);
-                            cursor: pointer;
+                            cursor: {isNearby ? 'pointer' : 'default'};
+                            pointer-events: {isNearby ? 'auto' : 'none'};
                         "
                         onclick={() => handlePartnerClick(entry.destination)}
                     >
@@ -208,8 +230,8 @@
                 <span style="font-size: 12px; color: #64748b;">
                     "Bildung verbindet uns"
                 </span>
-                <span style="font-size: 12px; color: #60a5fa;">
-                    ↗ Klick = Website
+                <span style="font-size: 12px; color: {isNearby ? '#60a5fa' : '#64748b'};">
+                    {isNearby ? '↗ Klick = Website' : 'Näher kommen...'}
                 </span>
             </div>
         </div>

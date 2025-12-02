@@ -115,7 +115,7 @@
     }
 </script>
 
-<T.Group position={position} rotation.y={rotation} scale={1.2}>
+<T.Group position={position} rotation.y={rotation} scale={1.0}>
     
     <!-- ========== WAND-HINTERGRUND ========== -->
     <T.Mesh position.y={wall.height / 2 + 1.5} receiveShadow>

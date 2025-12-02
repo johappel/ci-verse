@@ -6,7 +6,7 @@
      * - Bahnsteig-Plattform (andockend an Hauptplattform)
      * - Gleise ins Dunkel
      * - Abfahrtstafel
-     * - Animierter Licht-Zug (alle 30s CYCLE_DURATION)
+     * - Animierter Licht-Zug (alle 60s CYCLE_DURATION)
      * 
      * Positionierung: Rechts neben der ReceptionWall
      */
@@ -31,8 +31,8 @@
     }: Props = $props();
 
     // ========== ZUG-ANIMATION ==========
-    // Zyklus: 20 Sekunden
-    const CYCLE_DURATION = 30;
+    // Zyklus: 60 Sekunden
+    const CYCLE_DURATION = 60;
     const PHASE_TIMINGS = {
         arriving: { start: 0, end: 3 },      // 0-3s
         stopped: { start: 3, end: 10 },      // 3-10s
