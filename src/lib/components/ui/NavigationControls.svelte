@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { worldStore } from '$lib/logic/store.svelte';
-	import { platforms } from '$lib/logic/platforms';
+	import { platforms, getCameraY } from '$lib/logic/platforms';
+	import { getBoothProjectsForPlatform, getWallPostersForPlatform, getMarketplaceContent } from '$lib/data/mockProjects';
+	import type { ProjectData } from '$lib/types/project';
 	
 	// Kamera-Referenz wird von außen gesetzt
 	let { cameraControls }: { cameraControls?: any } = $props();
@@ -10,6 +12,13 @@
 	
 	// Aktive Tasten für visuelles Feedback
 	let activeKeys = $state<Set<string>>(new Set());
+	
+	// Poster-Navigation State
+	let currentPosterIndex = $state(-1); // -1 = noch kein Poster angefahren
+	
+	// Plattform-Tour State
+	const platformTourOrder = ['S', 'B1', 'B2', 'B3', 'Q1', 'Q2', 'Q3'] as const;
+	let currentPlatformTourIndex = $state(-1); // -1 = noch nicht gestartet
 	
 	// Draggable Panel Position
 	let panelX = $state(0);  // Offset von Mitte
@@ -34,7 +43,7 @@
 			
 			const key = e.key.toLowerCase();
 			
-			if (['w', 's', 'a', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'h', 'home', 'c'].includes(key)) {
+			if (['w', 's', 'a', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'h', 'home', 'c', 'n', 'p'].includes(key)) {
 				e.preventDefault();
 				activeKeys.add(key);
 				activeKeys = activeKeys; // Trigger reactivity
@@ -44,6 +53,12 @@
 					goHome();
 				} else if (key === 'c') {
 					goToCenter();
+				} else if (key === 'n') {
+					// N = Nächstes Poster
+					goToNextPoster();
+				} else if (key === 'p') {
+					// P = Nächste Plattform
+					goToNextPlatform();
 				} else {
 					handleMovement(key);
 				}
@@ -145,7 +160,344 @@
 				px, py + 3, pz,          // Blickziel (InfoHexagon in der Mitte)
 				true                      // animiert
 			);
+			
+			// Poster-Index zurücksetzen wenn zum Zentrum navigiert wird
+			currentPosterIndex = -1;
 		}
+	}
+	
+	// ============================================
+	// PLATTFORM-TOUR (Play-Button)
+	// ============================================
+	
+	// Aktueller Index in der Plattform-Tour basierend auf aktueller Plattform
+	let currentPlatformIndex = $derived(
+		platformTourOrder.indexOf(worldStore.state.currentPlatform as typeof platformTourOrder[number])
+	);
+	
+	// Nächste Plattform in der Tour
+	let nextPlatformId = $derived.by(() => {
+		const nextIndex = (currentPlatformIndex + 1) % platformTourOrder.length;
+		return platformTourOrder[nextIndex];
+	});
+	
+	let nextPlatformName = $derived(platforms[nextPlatformId]?.shortName || nextPlatformId);
+	
+	// Zur nächsten Plattform in der Tour navigieren
+	function goToNextPlatform() {
+		if (worldStore.state.isTransporting || isInputFocused) return;
+		
+		// Poster-Index zurücksetzen
+		currentPosterIndex = -1;
+		
+		// Zur nächsten Plattform transportieren
+		worldStore.startTransport(nextPlatformId);
+	}
+	
+	// ============================================
+	// POSTER-NAVIGATION
+	// ============================================
+	
+	// Interface für einheitliche Poster-Liste
+	interface PosterTarget {
+		type: 'booth' | 'wall' | 'reception' | 'leitlinie-left' | 'leitlinie-right';
+		project?: ProjectData;
+		position: number; // Index innerhalb des Typs
+		label?: string; // Für Marktplatz-Tour
+	}
+	
+	// Marktplatz-Positionen (aus MarketplacePlatform.svelte)
+	const receptionWallPosition = { x: -1, z: -30, rotation: Math.PI * 2.0 };
+	
+	// Alle anfahrbaren Poster/Booths der aktuellen Plattform
+	// Marktplatz (S): ReceptionWall → Leitlinien-Poster
+	// Andere Plattformen: Booths → Wall-Poster
+	let allPosters = $derived.by(() => {
+		const platformId = worldStore.state.currentPlatform;
+		
+		// Spezielle Tour für Marktplatz
+		if (platformId === 'S') {
+			const marketplace = getMarketplaceContent();
+			const targets: PosterTarget[] = [
+				// 1. ReceptionWall
+				{ type: 'reception', position: 0, label: 'Empfang' },
+				// 2-5. Linke Wand (4 Leitlinien-Poster, startEdge=5, 2 Wände)
+				...marketplace.wallPosters.slice(0, 4).map((_, i) => ({
+					type: 'leitlinie-left' as const,
+					position: i,
+					label: `Leitlinie ${i + 1}`
+				})),
+				// 6-7. Rechte Wand (2 Leitlinien-Poster, startEdge=1, 1 Wand)
+				...marketplace.wallPosters.slice(4, 6).map((_, i) => ({
+					type: 'leitlinie-right' as const,
+					position: i,
+					label: `Leitlinie ${i + 5}`
+				}))
+			];
+			return targets;
+		}
+		
+		// Standard-Tour für andere Plattformen
+		const booths = getBoothProjectsForPlatform(platformId);
+		const walls = getWallPostersForPlatform(platformId);
+		
+		const targets: PosterTarget[] = [
+			...booths.map((project, i) => ({ type: 'booth' as const, project, position: i })),
+			...walls.map(({ project }, i) => ({ type: 'wall' as const, project, position: i }))
+		];
+		
+		return targets;
+	});
+	
+	// Poster-Index zurücksetzen wenn Plattform wechselt
+	$effect(() => {
+		// Bei Plattformwechsel resetten
+		const _platform = worldStore.state.currentPlatform;
+		currentPosterIndex = -1;
+	});
+	
+	// Hat die Plattform überhaupt Poster?
+	let hasPosters = $derived(allPosters.length > 0);
+	
+	// Zum nächsten Poster navigieren
+	function goToNextPoster() {
+		if (isInputFocused || !cameraControls || allPosters.length === 0) return;
+		
+		// Nächster Index (loopt am Ende)
+		currentPosterIndex = (currentPosterIndex + 1) % allPosters.length;
+		
+		const target = allPosters[currentPosterIndex];
+		const platformId = worldStore.state.currentPlatform;
+		const platform = platforms[platformId];
+		
+		if (!platform || !target) return;
+		
+		// Plattform-Position
+		const px = platform.x;
+		const py = platform.y;
+		const pz = platform.z;
+		const platformSize = platform.size;
+		
+		// Marktplatz-spezifische Navigation
+		if (target.type === 'reception') {
+			navigateToReceptionWall(px, py, pz);
+		} else if (target.type === 'leitlinie-left') {
+			navigateToLeitlinie(target.position, px, py, pz, platformSize, 'left');
+		} else if (target.type === 'leitlinie-right') {
+			navigateToLeitlinie(target.position, px, py, pz, platformSize, 'right');
+		} else if (target.type === 'booth') {
+			// Booth-Positionen (vorne auf der Plattform, in Reihe)
+			navigateToBooth(target.position, px, py, pz, platformSize);
+		} else {
+			// Wall-Poster (an den Hexagon-Wänden)
+			navigateToWallPoster(target.position, px, py, pz, platformSize);
+		}
+	}
+	
+	// Navigation zur ReceptionWall auf dem Marktplatz
+	function navigateToReceptionWall(px: number, py: number, pz: number) {
+		// Position aus MarketplacePlatform.svelte
+		const worldX = px + receptionWallPosition.x;
+		const worldZ = pz + receptionWallPosition.z;
+		const rotation = receptionWallPosition.rotation;
+		
+		const viewDistance = 9;
+		const cameraY = getCameraY(py);
+		const cos = Math.cos(rotation);
+		const sin = Math.sin(rotation);
+		
+		cameraControls.setLookAt(
+			worldX + sin * viewDistance, cameraY, worldZ + cos * viewDistance,
+			worldX, cameraY, worldZ,
+			true
+		);
+	}
+	
+	// Navigation zu einem Leitlinien-Poster auf dem Marktplatz
+	function navigateToLeitlinie(posterIndex: number, px: number, py: number, pz: number, platformSize: number, side: 'left' | 'right') {
+		// Hexagon-Berechnung (wie in MesseWall.svelte)
+		const hexInnerRadius = platformSize * Math.cos(Math.PI / 6);
+		const hexEdgeLength = platformSize;
+		const edgeAngleStep = Math.PI / 3;
+		const platformRotationOffset = Math.PI / 6;
+		
+		// Linke Wände: startEdge=5, wallCount=2
+		// Rechte Wand: startEdge=1, wallCount=1
+		const startEdge = side === 'left' ? 5 : 1;
+		const wallCount = side === 'left' ? 2 : 1;
+		const postersPerWall = 2;
+		
+		// Auf welcher Wand ist das Poster?
+		const wallIndex = Math.floor(posterIndex / postersPerWall) % wallCount;
+		const positionOnWall = posterIndex % postersPerWall;
+		
+		// Wand-Position
+		const edgeIndex = (startEdge + wallIndex) % 6;
+		const angleToEdge = edgeIndex * edgeAngleStep + platformRotationOffset;
+		
+		const wallX = Math.cos(angleToEdge) * hexInnerRadius * 0.98;
+		const wallZ = Math.sin(angleToEdge) * hexInnerRadius * 0.98;
+		const wallRotY = -angleToEdge - Math.PI / 2;
+		
+		// Poster-Spacing (imageOnly-Modus hat größere Poster)
+		const wallHeight = 8;
+		const imageOnlyWidth = 12;
+		const posterSpacing = imageOnlyWidth + 2;
+		
+		// Poster-Anzahl auf dieser Wand
+		const totalPosters = side === 'left' ? 4 : 2;
+		const postersOnThisWall = Math.min(2, totalPosters - wallIndex * 2);
+		
+		let offsetX = 0;
+		if (postersOnThisWall > 1) {
+			const totalWidth = (postersOnThisWall - 1) * posterSpacing;
+			offsetX = -totalWidth / 2 + positionOnWall * posterSpacing;
+		}
+		
+		// Offset in Weltkoordinaten
+		const cosR = Math.cos(wallRotY);
+		const sinR = Math.sin(wallRotY);
+		const offsetWorldX = offsetX * cosR;
+		const offsetWorldZ = -offsetX * sinR;
+		
+		// Welt-Position
+		const worldPosterX = px + wallX + offsetWorldX;
+		const worldPosterZ = pz + wallZ + offsetWorldZ;
+		
+		// Kamera vor dem Poster
+		const cameraY = getCameraY(py);
+		const viewDistance = 8; // Weiter weg für große Leitlinien-Bilder
+		const normalX = sinR;
+		const normalZ = cosR;
+		
+		cameraControls.setLookAt(
+			worldPosterX + normalX * viewDistance, cameraY, worldPosterZ + normalZ * viewDistance,
+			worldPosterX, cameraY, worldPosterZ,
+			true
+		);
+	}
+	
+	// Navigation zu einem Booth
+	function navigateToBooth(boothIndex: number, px: number, py: number, pz: number, platformSize: number) {
+		// Booth-Positionen aus Platform.svelte: Im Halbkreis vorne auf der Plattform
+		const booths = getBoothProjectsForPlatform(worldStore.state.currentPlatform);
+		const boothCount = booths.length;
+		
+		// Gleiche Berechnung wie in Platform.svelte:
+		// {@const spreadAngle = Math.min(boothCount * 0.4, Math.PI * 0.5)}
+		// {@const startAngle = -spreadAngle / 2}
+		// {@const angle = startAngle + (i / Math.max(boothCount - 1, 1)) * spreadAngle}
+		// {@const radius = platform.size * 0.5}
+		// position={[Math.cos(angle) * radius, 1.5, Math.sin(angle) * radius]}
+		// rotation={-angle + Math.PI / 2}
+		
+		const spreadAngle = Math.min(boothCount * 0.4, Math.PI * 0.5);
+		const startAngle = -spreadAngle / 2;
+		const angle = startAngle + (boothIndex / Math.max(boothCount - 1, 1)) * spreadAngle;
+		const radius = platformSize * 0.5;
+		
+		// Lokale Booth-Position
+		const boothLocalX = Math.cos(angle) * radius;
+		const boothLocalZ = Math.sin(angle) * radius;
+		const boothRotation = -angle + Math.PI / 2;
+		
+		// Welt-Koordinaten
+		const worldBoothX = px + boothLocalX;
+		const worldBoothZ = pz + boothLocalZ;
+		
+		// Kamera steht vor dem Booth (in Richtung der Booth-Rotation)
+		const cameraY = getCameraY(py);
+		const viewDistance = 5;
+		
+		// Booth-Rotation zeigt nach vorne, Kamera steht davor
+		const cos = Math.cos(boothRotation);
+		const sin = Math.sin(boothRotation);
+		const cameraOffsetX = viewDistance * sin;
+		const cameraOffsetZ = viewDistance * cos;
+		
+		cameraControls.setLookAt(
+			worldBoothX + cameraOffsetX, cameraY, worldBoothZ + cameraOffsetZ,  // Kamera-Position
+			worldBoothX, cameraY, worldBoothZ,                                   // Blickziel (Booth)
+			true
+		);
+	}
+	
+	// Navigation zu einem Wall-Poster
+	function navigateToWallPoster(posterIndex: number, px: number, py: number, pz: number, platformSize: number) {
+		// Wall-Positionen aus MesseWall.svelte: An den Hexagon-Kanten
+		// WICHTIG: Gleiche Berechnung wie in Platform.svelte und MesseWall.svelte
+		
+		const hexInnerRadius = platformSize * Math.cos(Math.PI / 6); // Apothem
+		const hexEdgeLength = platformSize; // Kantenlänge = Radius
+		const edgeAngleStep = Math.PI / 3; // 60°
+		const platformRotationOffset = Math.PI / 6; // Plattform ist um 30° rotiert
+		
+		// Parameter aus Platform.svelte:
+		// wallCount={Math.min(wallPosters.length, 3)}
+		// startEdge={3}
+		const walls = getWallPostersForPlatform(worldStore.state.currentPlatform);
+		const wallCount = Math.min(walls.length, 3);
+		const startEdge = 3; // WICHTIG: startEdge ist 3, nicht 2!
+		
+		// Poster pro Wand (aus MesseWall.svelte)
+		const wallHeight = 10;
+		const posterHeight = wallHeight * 0.85;
+		const maxImageWidth = posterHeight * 1.2;
+		const textAreaWidth = posterHeight * 0.5;
+		const maxPosterWidth = textAreaWidth + maxImageWidth + 0.8;
+		const idealSpacing = maxPosterWidth + 4;
+		const minSpacingFor2 = hexEdgeLength / 2.2;
+		const posterSpacing = Math.max(maxPosterWidth + 1, Math.min(idealSpacing, minSpacingFor2));
+		const postersPerWall = 2; // Max 2 pro Wand
+		
+		// Auf welcher Wand und Position ist das Poster?
+		const wallIndex = Math.floor(posterIndex / postersPerWall) % wallCount;
+		const positionOnWall = posterIndex % postersPerWall;
+		
+		// Wand-Position berechnen (wie in MesseWall.svelte)
+		const edgeIndex = (startEdge + wallIndex) % 6;
+		const angleToEdge = edgeIndex * edgeAngleStep + platformRotationOffset;
+		
+		const wallX = Math.cos(angleToEdge) * hexInnerRadius * 0.98;
+		const wallZ = Math.sin(angleToEdge) * hexInnerRadius * 0.98;
+		const wallRotY = -angleToEdge - Math.PI / 2;
+		
+		// Wie viele Poster sind auf dieser Wand?
+		const postersOnThisWall = walls.filter((_, idx) => 
+			Math.floor(idx / postersPerWall) % wallCount === wallIndex
+		).length;
+		const actualOnWall = Math.min(postersOnThisWall, postersPerWall);
+		
+		// Offset auf der Wand (links/rechts verteilt)
+		let offsetX = 0;
+		if (actualOnWall === 1) {
+			offsetX = 0; // Einzelnes Poster mittig
+		} else {
+			const totalWidth = (actualOnWall - 1) * posterSpacing;
+			offsetX = -totalWidth / 2 + positionOnWall * posterSpacing;
+		}
+		
+		// Offset in Weltkoordinaten umrechnen
+		const cosR = Math.cos(wallRotY);
+		const sinR = Math.sin(wallRotY);
+		const offsetWorldX = offsetX * cosR;
+		const offsetWorldZ = -offsetX * sinR;
+		
+		// Welt-Position des Posters
+		const worldPosterX = px + wallX + offsetWorldX;
+		const worldPosterZ = pz + wallZ + offsetWorldZ;
+		
+		// Kamera-Position (vor dem Poster, in Richtung der Wand-Normale)
+		const cameraY = getCameraY(py);
+		const viewDistance = 6;
+		const normalX = sinR;
+		const normalZ = cosR;
+		
+		cameraControls.setLookAt(
+			worldPosterX + normalX * viewDistance, cameraY, worldPosterZ + normalZ * viewDistance,
+			worldPosterX, cameraY, worldPosterZ,
+			true
+		);
 	}
 	
 	// Aktuelle Plattform-Info
@@ -318,6 +670,55 @@
 			</button>
 		</div>
 		
+		<!-- Nächstes Poster + Nächste Plattform in einer Reihe -->
+		{#if hasPosters}
+			<div style="display: flex; gap: 8px; margin-top: 4px;">
+				<!-- Nächstes Poster -->
+				<button
+					onclick={goToNextPoster}
+					class="nav-key nav-key-wide"
+					title="Nächstes Poster ({currentPosterIndex + 2}/{allPosters.length})"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+					</svg>
+					<span style="font-size: 0.65rem; margin-left: 4px;">
+						{currentPosterIndex + 2 > allPosters.length ? 1 : currentPosterIndex + 2}/{allPosters.length}
+					</span>
+				</button>
+				
+				<!-- Nächste Plattform (Skip-Forward Icon) -->
+				<button
+					onclick={goToNextPlatform}
+					disabled={isTransporting}
+					class="nav-key nav-key-play"
+					class:nav-key-disabled={isTransporting}
+					title="Zur nächsten Plattform: {nextPlatformName}"
+				>
+					<!-- Skip-Forward Icon -->
+					<svg class="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+						<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+					</svg>
+				</button>
+			</div>
+		{:else}
+			<!-- Nur Plattform-Button wenn keine Poster vorhanden -->
+			<div style="display: flex; gap: 12px; margin-top: 4px;">
+				<button
+					onclick={goToNextPlatform}
+					disabled={isTransporting}
+					class="nav-key nav-key-play"
+					class:nav-key-disabled={isTransporting}
+					title="Zur nächsten Plattform: {nextPlatformName}"
+				>
+					<!-- Skip-Forward Icon -->
+					<svg class="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+						<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+					</svg>
+				</button>
+			</div>
+		{/if}
+		
 		
 	</div>
 </div>
@@ -397,6 +798,38 @@
 	.nav-key-disabled {
 		opacity: 0.3;
 		cursor: not-allowed;
+	}
+	
+	/* Breiter Button für "Nächstes Poster" */
+	.nav-key-wide {
+		width: auto;
+		padding: 0 0.75rem;
+		min-width: 5rem;
+	}
+	
+	/* Play-Button für Plattform-Tour (grüner Akzent) */
+	.nav-key-play {
+		background: linear-gradient(
+			145deg,
+			rgba(74, 222, 128, 0.25) 0%,
+			rgba(34, 197, 94, 0.15) 50%,
+			rgba(22, 163, 74, 0.2) 100%
+		);
+		border-color: rgba(74, 222, 128, 0.5);
+	}
+	
+	.nav-key-play:hover:not(.nav-key-disabled) {
+		background: linear-gradient(
+			145deg,
+			rgba(74, 222, 128, 0.4) 0%,
+			rgba(34, 197, 94, 0.25) 50%,
+			rgba(22, 163, 74, 0.3) 100%
+		);
+		border-color: rgba(74, 222, 128, 0.7);
+		box-shadow: 
+			0 0 15px rgba(74, 222, 128, 0.4),
+			0 4px 12px rgba(0, 0, 0, 0.4),
+			inset 0 1px 0 rgba(255, 255, 255, 0.4);
 	}
 	
 	/* Keyboard-Indicator bei aktivem Fokus */
