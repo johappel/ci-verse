@@ -598,7 +598,7 @@
 		<!-- Obere Reihe: H - W - C -->
 		 <!-- Nächstes Poster + Nächste Plattform in einer Reihe -->
 		{#if hasPosters}
-			<div style="display: flex; gap: 8px; margin-top: 4px;">
+			<div style="display: flex; gap: 30px; margin-top: 4px; margin-botton: 10px;">
 				<!-- Nächstes Poster -->
 				<button
 					onclick={goToNextPoster}
