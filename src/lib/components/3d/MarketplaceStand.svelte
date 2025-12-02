@@ -280,7 +280,7 @@
             <!-- Bildschirm-Inhalt (simuliert) -->
             <T.Mesh rotation.x={-0.3} position.z={0.08}>
                 <T.PlaneGeometry args={[dimensions.width * 0.65, 2.3]} />
-                <T.MeshBasicMaterial color={stand.type === 'publications' ? '#1a1a1a' : '#7f1d1d'} />
+                <T.MeshBasicMaterial color={stand.type === 'publications' ? '#1a1a1a' : '#1a1a1a'} />
             </T.Mesh>
             
             <!-- Bildschirm-Text -->

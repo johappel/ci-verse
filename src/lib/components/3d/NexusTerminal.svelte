@@ -129,7 +129,11 @@
     <!-- Bahnsteig parallel zu den Gleisen (entlang X) -->
     <T.Group position={[0, 0, 0]}>
         <!-- Hauptplattform: Lang entlang X, schmal in Z -->
-        <T.Mesh position.y={-0.5} receiveShadow>
+        <T.Mesh position.y={-0.5} receiveShadow
+            onclick={() => {
+                worldStore.setViewTarget(cameraPos, terminalWorldPos);
+            }}
+        >
             <T.BoxGeometry args={[18, 1, 6]} />
             <T.MeshStandardMaterial 
                 color={platformColor}
@@ -216,7 +220,7 @@
         y: terminalWorldPos.y + 3.1,
         z: terminalWorldPos.z + Math.cos(rotation) * cameraOffset
     }}
-    <T.Group position={[-0.5, 4.5, -2.0]}>
+    <T.Group position={[3, 4.5, -2.0]}>
         <T.Mesh
             onclick={() => {
                 worldStore.setViewTarget(cameraPos, terminalWorldPos);
@@ -224,7 +228,7 @@
             onpointerenter={() => document.body.style.cursor = 'pointer'}
             onpointerleave={() => document.body.style.cursor = 'default'}
         >
-            <T.BoxGeometry args={[18, 1.4, 0.2]} />
+            <T.BoxGeometry args={[11.5, 1.4, 0.2]} />
             <T.MeshStandardMaterial 
                 color="#0f172a"
                 metalness={0.5}
@@ -232,7 +236,7 @@
             />
         </T.Mesh>
         <Text
-            text="                                                   🚉 NEXUS TERMINAL"
+            text="🚉 NEXUS TERMINAL"
             color="#3b82f6"
             fontSize={0.5}
             position={[0, 0, 0.15]}

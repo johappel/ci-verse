@@ -61,7 +61,7 @@
         <Billboard>
             <!-- "Siehe auch:" Label -->
             <Text
-                text="🔗 Besuche auch:"
+                text="Besuchen Sie auch:"
                 color="#94a3b8"
                 fontSize={0.3}
                 anchorX="center"
