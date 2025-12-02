@@ -171,17 +171,6 @@
         <!-- <FilterBar /> -->
         <NavigationControls {cameraControls} />
 
-        <!-- Marketplace-Panels (verwenden Store direkt) - ChatModal wurde nach außen verschoben -->
-        
-        <RssFeedPanel 
-            isOpen={worldStore.state.isRssPanelOpen} 
-            onClose={() => worldStore.closeRssPanel()} 
-        />
-        <EventsPanel 
-            isOpen={worldStore.state.isEventsPanelOpen} 
-            onClose={() => worldStore.closeEventsPanel()} 
-        />
-
         <!-- Logo/Title Overlay -->
         <!-- <div class="absolute top-6 left-6 z-20">
             <h1 class="text-2xl font-bold text-white drop-shadow-lg">
@@ -194,11 +183,19 @@
     {/if}
 </main>
 
-<!-- ChatModal außerhalb des main-Containers für korrekten z-index -->
+<!-- Dialoge außerhalb des main-Containers für korrekten z-index -->
 {#if !isLoading}
     <ChatModal />
     <IframeDialog />
     <PartnerDialog />
+    <RssFeedPanel 
+        isOpen={worldStore.state.isRssPanelOpen} 
+        onClose={() => worldStore.closeRssPanel()} 
+    />
+    <EventsPanel 
+        isOpen={worldStore.state.isEventsPanelOpen} 
+        onClose={() => worldStore.closeEventsPanel()} 
+    />
 {/if}
 
 <style>
