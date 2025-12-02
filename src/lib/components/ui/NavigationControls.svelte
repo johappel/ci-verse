@@ -406,7 +406,7 @@
 		const worldBoothZ = pz + boothLocalZ;
 		
 		// Kamera steht vor dem Booth (in Richtung der Booth-Rotation)
-		const cameraY = getCameraY(py);
+		const cameraY = getCameraY(py) - 2; // Kamera etwas niedriger für bessere Booth-Sicht
 		const viewDistance = 5;
 		
 		// Booth-Rotation zeigt nach vorne, Kamera steht davor
