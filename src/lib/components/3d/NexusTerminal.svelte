@@ -204,15 +204,6 @@
         />
     </T.Group>
 
-    <!-- ========== ABFAHRTSTAFEL ========== -->
-    <DepartureBoard 
-        {schedule}
-        position={[-7, 6, -2]}
-        rotation={Math.PI * 0.0}
-        rotationX={0.04}
-        rotationZ={-0.0}
-    />
-
     <!-- ========== TERMINAL-SCHILD (klickbar) ========== -->
     {@const terminalWorldPos = {
         x: position[0] + Math.cos(rotation) * 3.5 - Math.sin(rotation) * (-2),
@@ -222,10 +213,10 @@
     {@const cameraOffset = 12}
     {@const cameraPos = {
         x: terminalWorldPos.x + Math.sin(rotation) * cameraOffset,
-        y: terminalWorldPos.y + 4,
+        y: terminalWorldPos.y + 3.1,
         z: terminalWorldPos.z + Math.cos(rotation) * cameraOffset
     }}
-    <T.Group position={[3.5, 4.5, -2.0]}>
+    <T.Group position={[-0.5, 4.5, -2.0]}>
         <T.Mesh
             onclick={() => {
                 worldStore.setViewTarget(cameraPos, terminalWorldPos);
@@ -233,7 +224,7 @@
             onpointerenter={() => document.body.style.cursor = 'pointer'}
             onpointerleave={() => document.body.style.cursor = 'default'}
         >
-            <T.BoxGeometry args={[10, 1.4, 0.2]} />
+            <T.BoxGeometry args={[18, 1.4, 0.2]} />
             <T.MeshStandardMaterial 
                 color="#0f172a"
                 metalness={0.5}
@@ -241,7 +232,7 @@
             />
         </T.Mesh>
         <Text
-            text="🚉 NEXUS TERMINAL"
+            text="                                                   🚉 NEXUS TERMINAL"
             color="#3b82f6"
             fontSize={0.5}
             position={[0, 0, 0.15]}
@@ -318,5 +309,15 @@
         angle={0.4}
         penumbra={1}
     />
+    <!-- ========== ABFAHRTSTAFEL ========== -->
+    <DepartureBoard 
+        {schedule}
+        position={[-4, 5.5, -0.8]}
+        rotation={Math.PI * 0.02}
+        rotationX={-0.1}
+        rotationZ={-0.0}
+    />
+
+    
 
 </T.Group>

@@ -8,6 +8,8 @@
      */
     import { T, useThrelte, useTask } from '@threlte/core';
     import { HTML } from '@threlte/extras';
+    import { Vector3 } from 'three';
+    import type { Group } from 'three';
     import type { PartnerConnection, TrainStatus } from '$lib/types/project';
 
     interface ScheduleEntry {
@@ -32,23 +34,29 @@
         rotation = 0,
         rotationX = 0,
         rotationZ = 0,
-        interactionDistance = 25  // Standard: 25 Einheiten
+        interactionDistance = 25  // Standard: 15 Einheiten (nah am Terminal)
     }: Props = $props();
 
     // Kamera-Referenz
     const { camera } = useThrelte();
     
-    // Distanz zur Kamera berechnen
+    // Referenz zur Group für Weltposition
+    let groupRef: Group | undefined = $state();
+    const worldPos = new Vector3();
+    
+    // Distanz zur Kamera berechnen (nur X-Z Ebene, ignoriere Höhe)
     let cameraDistance = $state(Infinity);
     let isNearby = $derived(cameraDistance <= interactionDistance);
     
     useTask(() => {
-        if ($camera) {
+        if ($camera && groupRef) {
+            // Hole die echte Weltposition der Group
+            groupRef.getWorldPosition(worldPos);
             const camPos = $camera.position;
-            const dx = camPos.x - position[0];
-            const dy = camPos.y - position[1];
-            const dz = camPos.z - position[2];
-            cameraDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            // 2D-Distanz (nur X und Z), Höhe ignorieren
+            const dx = camPos.x - worldPos.x;
+            const dz = camPos.z - worldPos.z;
+            cameraDistance = Math.sqrt(dx * dx + dz * dz);
         }
     });
 
@@ -73,7 +81,7 @@
     }
 </script>
 
-<T.Group position={position} rotation.y={rotation} rotation.x={rotationX} rotation.z={rotationZ}>
+<T.Group bind:ref={groupRef} position={position} rotation.y={rotation} rotation.x={rotationX} rotation.z={rotationZ} scale={0.8}    >
     <!-- Tafel-Rahmen (3D) - weiter nach hinten -->
     <T.Mesh position={[0, 0, -0.15]}>
         <T.BoxGeometry args={[8, 5, 0.2]} />
