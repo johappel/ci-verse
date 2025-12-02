@@ -275,7 +275,7 @@
                     color: rgba(255, 255, 255, 0.5);
                     padding: 4px 0;
                 ">
-                    Unser Netzwerk umfasst {networkStats.total} Partner:
+                    Wir sind in vielfältig vernetzt. An dieser Station sind nur einige Partner exemplarisch in der Liste der Verbindungen zu unterschiedlichen Bildungskontexten:
                 </span>
                 {#each Object.entries(networkStats.categories) as [cat, count]}
                     {#if count > 0}
@@ -289,8 +289,10 @@
                         ">
                             {count}× {info.label}
                         </span>
+                        
                     {/if}
                 {/each}
+                <span style="font-size: 12px;">{networkStats.total} Verbindungen</span>
             </div>
 
             <!-- Action Buttons -->
