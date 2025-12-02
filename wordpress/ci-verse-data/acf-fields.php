@@ -212,6 +212,23 @@ function civerse_register_acf_fields() {
                 'wrapper' => ['width' => '50'],
             ],
             [
+                'key' => 'field_project_related_departments',
+                'label' => 'Wegweiser-Plattformen',
+                'name' => 'project_related_departments',
+                'type' => 'checkbox',
+                'choices' => [
+                    'B1' => 'B1 - Kita',
+                    'B2' => 'B2 - Schule',
+                    'B3' => 'B3 - Erwachsene',
+                    'Q1' => 'Q1 - Forschung',
+                    'Q2' => 'Q2 - Europa',
+                    'Q3' => 'Q3 - Digital',
+                ],
+                'layout' => 'horizontal',
+                'wrapper' => ['width' => '50'],
+                'instructions' => 'Plattformen, auf denen ein Wegweiser zu diesem Projekt erscheint (ohne eigenen Stand).',
+            ],
+            [
                 'key' => 'field_project_perspectives',
                 'label' => 'Leitlinien (Perspektiven)',
                 'name' => 'project_perspectives',
@@ -296,6 +313,19 @@ function civerse_register_acf_fields() {
                 'return_format' => 'array',
                 'preview_size' => 'medium',
                 'instructions' => 'Empfohlen: 800×1200px (Portrait)',
+            ],
+            [
+                'key' => 'field_project_poster_image_format',
+                'label' => 'Poster-Bildformat',
+                'name' => 'project_poster_image_format',
+                'type' => 'select',
+                'choices' => [
+                    'portrait' => '📐 Portrait (800×1200px)',
+                    'landscape' => '🖼️ Landscape (1200×800px)',
+                    'square' => '⬜ Quadratisch (1000×1000px)',
+                ],
+                'default_value' => 'portrait',
+                'instructions' => 'Format des Poster-Bildes für optimale Darstellung.',
             ],
             [
                 'key' => 'field_project_logo',
@@ -545,7 +575,7 @@ function civerse_register_acf_fields() {
                 'label' => 'Wandposter (Leitlinien)',
                 'name' => 'marketplace_wall_posters',
                 'type' => 'repeater',
-                'max' => 4,
+                'max' => 6,
                 'layout' => 'block',
                 'button_label' => 'Poster hinzufügen',
                 'sub_fields' => [
@@ -577,6 +607,106 @@ function civerse_register_acf_fields() {
                         'type' => 'image',
                         'return_format' => 'array',
                         'wrapper' => ['width' => '40'],
+                    ],
+                ],
+            ],
+        ],
+        'location' => [
+            [
+                ['param' => 'options_page', 'operator' => '==', 'value' => 'civerse-marketplace-settings'],
+            ],
+        ],
+    ]);
+
+    // =========================================================================
+    // PARTNER-EINRICHTUNGEN (Nexus Terminal)
+    // =========================================================================
+    
+    acf_add_local_field_group([
+        'key' => 'group_partners',
+        'title' => 'Partner-Einrichtungen (Nexus Terminal)',
+        'fields' => [
+            [
+                'key' => 'field_partners_info',
+                'label' => 'Partner-Netzwerk',
+                'type' => 'message',
+                'message' => 'Partner-Einrichtungen erscheinen im Nexus Terminal auf dem Marktplatz als animierter "Fahrplan" mit Verbindungen zu anderen Institutionen.',
+            ],
+            [
+                'key' => 'field_partner_connections',
+                'label' => 'Partner-Verbindungen',
+                'name' => 'partner_connections',
+                'type' => 'repeater',
+                'layout' => 'block',
+                'button_label' => 'Partner hinzufügen',
+                'sub_fields' => [
+                    [
+                        'key' => 'field_partner_id',
+                        'label' => 'Partner ID',
+                        'name' => 'id',
+                        'type' => 'text',
+                        'required' => 1,
+                        'placeholder' => 'z.B. ekd, bmbf, eu',
+                        'wrapper' => ['width' => '20'],
+                    ],
+                    [
+                        'key' => 'field_partner_name',
+                        'label' => 'Vollständiger Name',
+                        'name' => 'name',
+                        'type' => 'text',
+                        'required' => 1,
+                        'placeholder' => 'z.B. Evangelische Kirche in Deutschland',
+                        'wrapper' => ['width' => '40'],
+                    ],
+                    [
+                        'key' => 'field_partner_short_name',
+                        'label' => 'Kurzname (für Anzeige)',
+                        'name' => 'shortName',
+                        'type' => 'text',
+                        'required' => 1,
+                        'placeholder' => 'z.B. EKD Hannover',
+                        'wrapper' => ['width' => '40'],
+                    ],
+                    [
+                        'key' => 'field_partner_category',
+                        'label' => 'Kategorie',
+                        'name' => 'category',
+                        'type' => 'select',
+                        'choices' => [
+                            'ministry' => '🏛️ Ministerium',
+                            'church' => '⛪ Kirchliche Einrichtung',
+                            'university' => '🎓 Universität',
+                            'institute' => '🔬 Institut',
+                            'international' => '🌍 International',
+                            'association' => '🤝 Verband/Gesellschaft',
+                        ],
+                        'wrapper' => ['width' => '30'],
+                    ],
+                    [
+                        'key' => 'field_partner_color',
+                        'label' => 'Primärfarbe',
+                        'name' => 'color',
+                        'type' => 'color_picker',
+                        'default_value' => '#3b82f6',
+                        'wrapper' => ['width' => '20'],
+                    ],
+                    [
+                        'key' => 'field_partner_url',
+                        'label' => 'Website URL',
+                        'name' => 'url',
+                        'type' => 'url',
+                        'required' => 1,
+                        'wrapper' => ['width' => '50'],
+                    ],
+                    [
+                        'key' => 'field_partner_logo',
+                        'label' => 'Logo',
+                        'name' => 'logoUrl',
+                        'type' => 'image',
+                        'return_format' => 'url',
+                        'preview_size' => 'thumbnail',
+                        'wrapper' => ['width' => '50'],
+                        'instructions' => 'Logo für die Anzeige im Nexus Terminal',
                     ],
                 ],
             ],

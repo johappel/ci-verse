@@ -152,6 +152,7 @@ function civerse_register_rest_routes() {
 
 function civerse_get_world_data() {
     return [
+        'partnerConnections' => civerse_get_partner_connections(),
         'marketplace' => civerse_get_marketplace(),
         'platforms' => civerse_get_platforms(),
         'projects' => civerse_get_projects(),
@@ -162,6 +163,22 @@ function civerse_get_world_data() {
 // ============================================================================
 // DATA GETTERS
 // ============================================================================
+
+function civerse_get_partner_connections() {
+    $partners = get_field('partner_connections', 'civerse_marketplace') ?: [];
+    
+    return array_map(function($partner) {
+        return [
+            'id' => $partner['id'],
+            'name' => $partner['name'],
+            'shortName' => $partner['shortName'],
+            'logoUrl' => is_array($partner['logoUrl']) ? $partner['logoUrl']['url'] : ($partner['logoUrl'] ?? ''),
+            'color' => $partner['color'] ?? '#3b82f6',
+            'url' => $partner['url'],
+            'category' => $partner['category'],
+        ];
+    }, $partners);
+}
 
 function civerse_get_marketplace() {
     $stands = get_field('marketplace_stands', 'civerse_marketplace') ?: [];
@@ -279,14 +296,16 @@ function civerse_get_projects() {
             'slug' => $post->post_name,
             'externalUrl' => get_field('project_external_url', $post->ID),
             'departments' => get_field('project_departments', $post->ID) ?: [],
+            'relatedDepartments' => get_field('project_related_departments', $post->ID) ?: [],
             'perspectives' => get_field('project_perspectives', $post->ID) ?: [],
             'targetGroups' => get_field('project_target_groups', $post->ID) ?: [],
-            'type' => get_field('project_type', $post->ID) ?: 'ground',
+            'displayType' => get_field('project_display_type', $post->ID) ?: 'booth',
             'staff' => $staff_ids,
             'shortTeaser' => get_field('project_teaser', $post->ID),
             'display' => [
                 'slogan' => get_field('project_slogan', $post->ID),
                 'posterImage' => $poster_image['url'] ?? '',
+                'posterImageFormat' => get_field('project_poster_image_format', $post->ID) ?: 'portrait',
                 'logoUrl' => $logo['url'] ?? '',
                 'color' => get_field('project_color', $post->ID) ?: '#3b82f6',
                 'screenshotUrl' => $screenshot['url'] ?? '',

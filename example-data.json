@@ -1,11 +1,85 @@
 {
+  "partnerConnections": [
+    {
+      "id": "bmbf",
+      "name": "Bundesministerium für Bildung und Forschung",
+      "shortName": "BMBF Berlin",
+      "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Bundesministerium_f%C3%BCr_Bildung_und_Forschung_Logo.svg/320px-Bundesministerium_f%C3%BCr_Bildung_und_Forschung_Logo.svg.png",
+      "color": "#003366",
+      "url": "https://www.bmbf.de",
+      "category": "ministry"
+    },
+    {
+      "id": "ekd",
+      "name": "Evangelische Kirche in Deutschland",
+      "shortName": "EKD Hannover",
+      "logoUrl": "https://www.ekd.de/system/images/logo_small/logo-ekd.png",
+      "color": "#7c3aed",
+      "url": "https://www.ekd.de",
+      "category": "church"
+    },
+    {
+      "id": "eu",
+      "name": "Europäische Kommission",
+      "shortName": "EU Brüssel",
+      "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Flag_of_Europe.svg/320px-Flag_of_Europe.svg.png",
+      "color": "#003399",
+      "url": "https://ec.europa.eu",
+      "category": "international"
+    },
+    {
+      "id": "alpika",
+      "name": "ALPIKA - Arbeitsgemeinschaft der Pädagogischen Institute",
+      "shortName": "ALPIKA",
+      "logoUrl": "https://alpika.de/wp-content/uploads/2020/07/alpika-logo.png",
+      "color": "#059669",
+      "url": "https://alpika.de",
+      "category": "institute"
+    },
+    {
+      "id": "eftre",
+      "name": "European Forum for Teachers of Religious Education",
+      "shortName": "EFTRE Europa",
+      "logoUrl": "https://www.eftre.net/wp-content/uploads/2019/09/eftre-logo.png",
+      "color": "#0284c7",
+      "url": "https://www.eftre.net",
+      "category": "international"
+    },
+    {
+      "id": "gpm",
+      "name": "Gesellschaft für Religionspädagogik",
+      "shortName": "GPM e.V.",
+      "logoUrl": "https://www.gfrp.de/images/logo.png",
+      "color": "#ea580c",
+      "url": "https://www.gfrp.de",
+      "category": "association"
+    },
+    {
+      "id": "uni-goettingen",
+      "name": "Georg-August-Universität Göttingen",
+      "shortName": "Uni Göttingen",
+      "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Uni_G%C3%B6ttingen_Siegel.svg/200px-Uni_G%C3%B6ttingen_Siegel.svg.png",
+      "color": "#00447c",
+      "url": "https://www.uni-goettingen.de",
+      "category": "university"
+    },
+    {
+      "id": "hochschulverband",
+      "name": "Evangelischer Hochschulverband",
+      "shortName": "EHV",
+      "logoUrl": "https://www.ekd.de/system/images/logo_small/logo-ekd.png",
+      "color": "#6366f1",
+      "url": "https://www.ev-hochschularbeit.de",
+      "category": "association"
+    }
+  ],
   "marketplace": {
     "id": "S",
     "title": "Marktplatz",
     "short": "Marktplatz",
     "description": "Bildungsmarktplatz des Comenius-Instituts.",
-    "color": "#64748b",
-    "glowColor": "#94a3b8",
+    "color": "#1e293b",
+    "glowColor": "#475569",
     "stands": [
       {
         "id": "s-institut",
@@ -57,30 +131,44 @@
       {
         "id": "leitlinie-justice",
         "title": "Gerechtigkeit",
-        "imageUrl": "https://picsum.photos/seed/leitlinie-justice/800/1200",
+        "imageUrl": "/assets/leitlinien/leitlinie1.jpg",
         "perspective": "justice",
         "position": 0
       },
       {
         "id": "leitlinie-sustainability",
         "title": "Nachhaltigkeit",
-        "imageUrl": "https://picsum.photos/seed/leitlinie-sustainability/800/1200",
+        "imageUrl": "/assets/leitlinien/leitlinie2.jpg",
         "perspective": "sustainability",
         "position": 1
       },
       {
         "id": "leitlinie-digitality",
         "title": "Digitalität",
-        "imageUrl": "https://picsum.photos/seed/leitlinie-digitality/800/1200",
+        "imageUrl": "/assets/leitlinien/leitlinie3.jpg",
         "perspective": "digitality",
         "position": 2
       },
       {
         "id": "leitlinie-structure",
         "title": "Strukturen",
-        "imageUrl": "https://picsum.photos/seed/leitlinie-structure/800/1200",
+        "imageUrl": "/assets/leitlinien/leitlinie4.jpg",
         "perspective": "structure",
         "position": 3
+      },
+      {
+        "id": "leitlinie-community",
+        "title": "Gemeinschaft",
+        "imageUrl": "/assets/leitlinien/leitlinie5.jpg",
+        "perspective": "justice",
+        "position": 4
+      },
+      {
+        "id": "leitlinie-tradition",
+        "title": "Tradition & Innovation",
+        "imageUrl": "/assets/leitlinien/leitlinie6.jpg",
+        "perspective": "sustainability",
+        "position": 5
       }
     ]
   },
@@ -204,7 +292,7 @@
       "departments": ["B3", "Q3"],
       "perspectives": ["digitality", "structure"],
       "targetGroups": ["adults", "employees"],
-      "displayType": "booth",
+      "displayType": "both",
       "staff": ["m3"],
       "shortTeaser": "Moderne Tools für die Gemeindearbeit - effizient, transparent und zukunftsorientiert.",
       "display": {
@@ -228,7 +316,8 @@
       "shortTeaser": "Evidenzbasierte Forschung zur evangelischen Bildungslandschaft in Deutschland.",
       "display": {
         "slogan": "Wissen schafft Bildung",
-        "posterImage": "https://picsum.photos/seed/research-poster/800/1200",
+        "posterImage": "https://picsum.photos/seed/research-poster/1200/800",
+        "posterImageFormat": "landscape",
         "logoUrl": "/logos/comenius.svg",
         "color": "#8b5cf6",
         "screenshotUrl": "https://picsum.photos/seed/research/800/600"
@@ -259,9 +348,10 @@
       "slug": "konfi-app",
       "externalUrl": "https://konfi-app.de",
       "departments": ["B2", "Q3"],
+      "relatedDepartments": ["B3"],
       "perspectives": ["digitality"],
       "targetGroups": ["11-14", "15-18"],
-      "displayType": "booth",
+      "displayType": "both",
       "staff": ["m3", "m5"],
       "shortTeaser": "Die digitale Begleitung für die Konfirmandenzeit - interaktiv und jugendgerecht.",
       "display": {
@@ -297,9 +387,10 @@
       "slug": "godly-play",
       "externalUrl": "https://godlyplay.de",
       "departments": ["B1", "B2"],
+      "relatedDepartments": ["Q1"],
       "perspectives": ["justice", "sustainability"],
       "targetGroups": ["4-6", "7-10"],
-      "displayType": "booth",
+      "displayType": "wall",
       "staff": ["m1", "m6"],
       "shortTeaser": "Biblische Geschichten spielerisch entdecken - ein Konzept aus den USA.",
       "display": {
@@ -318,7 +409,7 @@
       "departments": ["B2"],
       "perspectives": ["justice"],
       "targetGroups": ["7-10", "11-14", "15-18", "employees"],
-      "displayType": "booth",
+      "displayType": "both",
       "staff": ["m5", "m6"],
       "shortTeaser": "Unterstützung und Begleitung in schulischen Krisensituationen.",
       "display": {
@@ -335,6 +426,7 @@
       "slug": "senioren-digital",
       "externalUrl": "https://senioren-digital.de",
       "departments": ["B3", "Q3"],
+      "relatedDepartments": ["B2"],
       "perspectives": ["digitality", "justice"],
       "targetGroups": ["seniors"],
       "displayType": "booth",
@@ -361,7 +453,8 @@
       "shortTeaser": "Interaktive Karte aller evangelischen Bildungseinrichtungen.",
       "display": {
         "slogan": "Bildung sichtbar machen",
-        "posterImage": "https://picsum.photos/seed/atlas-poster/800/1200",
+        "posterImage": "https://picsum.photos/seed/atlas-poster/1200/800",
+        "posterImageFormat": "landscape",
         "logoUrl": "/logos/bildungsatlas.svg",
         "color": "#7c3aed",
         "screenshotUrl": "https://picsum.photos/seed/atlas/800/600"
@@ -399,7 +492,8 @@
       "shortTeaser": "Europäische Zusammenarbeit in der religiösen Bildung.",
       "display": {
         "slogan": "Bildung ohne Grenzen",
-        "posterImage": "https://picsum.photos/seed/erasmus-poster/800/1200",
+        "posterImage": "https://picsum.photos/seed/erasmus-poster/1200/800",
+        "posterImageFormat": "landscape",
         "logoUrl": "/logos/erasmus.svg",
         "color": "#2563eb",
         "screenshotUrl": "https://picsum.photos/seed/erasmus/800/600"
@@ -418,7 +512,8 @@
       "shortTeaser": "Interreligiöser und interkonfessioneller Dialog in der Bildung.",
       "display": {
         "slogan": "Vielfalt verbindet",
-        "posterImage": "https://picsum.photos/seed/oekumene-poster/800/1200",
+        "posterImage": "https://picsum.photos/seed/oekumene-poster/800/800",
+        "posterImageFormat": "square",
         "logoUrl": "/logos/oekumene.svg",
         "color": "#ca8a04",
         "screenshotUrl": "https://picsum.photos/seed/oekumene/800/600"
@@ -451,7 +546,7 @@
       "departments": ["Q3"],
       "perspectives": ["structure", "digitality"],
       "targetGroups": ["employees"],
-      "displayType": "booth",
+      "displayType": "both",
       "staff": ["m3", "m4"],
       "shortTeaser": "Beratung und Unterstützung bei Datenschutzfragen.",
       "display": {

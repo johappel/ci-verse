@@ -596,6 +596,54 @@
 			<span class="select-none" style="color: white;">{currentPlatformName}</span>
 		</div>
 		<!-- Obere Reihe: H - W - C -->
+		 <!-- Nächstes Poster + Nächste Plattform in einer Reihe -->
+		{#if hasPosters}
+			<div style="display: flex; gap: 8px; margin-top: 4px;">
+				<!-- Nächstes Poster -->
+				<button
+					onclick={goToNextPoster}
+					class="nav-key nav-key-wide"
+					title="Nächstes Poster ({currentPosterIndex + 2}/{allPosters.length})"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+					</svg>
+					<span style="font-size: 0.65rem; margin-left: 4px;">
+						{currentPosterIndex + 2 > allPosters.length ? 1 : currentPosterIndex + 2}/{allPosters.length}
+					</span>
+				</button>
+				
+				<!-- Nächste Plattform (Skip-Forward Icon) -->
+				<button
+					onclick={goToNextPlatform}
+					disabled={isTransporting}
+					class="nav-key nav-key-play"
+					class:nav-key-disabled={isTransporting}
+					title="Zur nächsten Plattform: {nextPlatformName}"
+				>
+					<!-- Skip-Forward Icon -->
+					<svg class="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+						<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+					</svg>
+				</button>
+			</div>
+		{:else}
+			<!-- Nur Plattform-Button wenn keine Poster vorhanden -->
+			<div style="display: flex; gap: 12px; margin-top: 4px;">
+				<button
+					onclick={goToNextPlatform}
+					disabled={isTransporting}
+					class="nav-key nav-key-play"
+					class:nav-key-disabled={isTransporting}
+					title="Zur nächsten Plattform: {nextPlatformName}"
+				>
+					<!-- Skip-Forward Icon -->
+					<svg class="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+						<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+					</svg>
+				</button>
+			</div>
+		{/if}
 		<div style="display: flex; gap: 12px;">
 			<!-- H = Home -->
 			<button
@@ -670,54 +718,7 @@
 			</button>
 		</div>
 		
-		<!-- Nächstes Poster + Nächste Plattform in einer Reihe -->
-		{#if hasPosters}
-			<div style="display: flex; gap: 8px; margin-top: 4px;">
-				<!-- Nächstes Poster -->
-				<button
-					onclick={goToNextPoster}
-					class="nav-key nav-key-wide"
-					title="Nächstes Poster ({currentPosterIndex + 2}/{allPosters.length})"
-				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-					</svg>
-					<span style="font-size: 0.65rem; margin-left: 4px;">
-						{currentPosterIndex + 2 > allPosters.length ? 1 : currentPosterIndex + 2}/{allPosters.length}
-					</span>
-				</button>
-				
-				<!-- Nächste Plattform (Skip-Forward Icon) -->
-				<button
-					onclick={goToNextPlatform}
-					disabled={isTransporting}
-					class="nav-key nav-key-play"
-					class:nav-key-disabled={isTransporting}
-					title="Zur nächsten Plattform: {nextPlatformName}"
-				>
-					<!-- Skip-Forward Icon -->
-					<svg class="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
-						<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
-					</svg>
-				</button>
-			</div>
-		{:else}
-			<!-- Nur Plattform-Button wenn keine Poster vorhanden -->
-			<div style="display: flex; gap: 12px; margin-top: 4px;">
-				<button
-					onclick={goToNextPlatform}
-					disabled={isTransporting}
-					class="nav-key nav-key-play"
-					class:nav-key-disabled={isTransporting}
-					title="Zur nächsten Plattform: {nextPlatformName}"
-				>
-					<!-- Skip-Forward Icon -->
-					<svg class="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
-						<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
-					</svg>
-				</button>
-			</div>
-		{/if}
+		
 		
 		
 	</div>
