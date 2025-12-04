@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { worldStore } from '$lib/logic/store.svelte';
-	import { platforms, getCameraY } from '$lib/logic/platforms';
+	import { platforms } from '$lib/logic/platforms';
+	import { getViewPoint, getMarketplaceViewPoint, getCenterViewPoint } from '$lib/logic/viewpoints';
 	import { getBoothProjectsForPlatform, getWallPostersForPlatform, getMarketplaceContent } from '$lib/data/mockProjects';
 	import type { ProjectData } from '$lib/types/project';
 	
@@ -147,18 +148,12 @@
 	function goToCenter() {
 		if (isInputFocused || !cameraControls) return;
 		
-		const currentPlatform = platforms[worldStore.state.currentPlatform];
-		if (currentPlatform) {
-			// Kamera zum InfoHexagon der aktuellen Plattform bewegen
-			// Plattform hat x, y, z als separate Properties
-			const px = currentPlatform.x;
-			const py = currentPlatform.y;
-			const pz = currentPlatform.z;
-			
+		const viewPoint = getCenterViewPoint(worldStore.state.currentPlatform);
+		if (viewPoint) {
 			cameraControls.setLookAt(
-				px, py + 12, pz + 18,    // Kamera-Position (etwas höher und weiter weg)
-				px, py + 3, pz,          // Blickziel (InfoHexagon in der Mitte)
-				true                      // animiert
+				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
+				viewPoint.target.x, viewPoint.target.y, viewPoint.target.z,
+				true
 			);
 			
 			// Poster-Index zurücksetzen wenn zum Zentrum navigiert wird
@@ -205,9 +200,6 @@
 		position: number; // Index innerhalb des Typs
 		label?: string; // Für Marktplatz-Tour
 	}
-	
-	// Marktplatz-Positionen (aus MarketplacePlatform.svelte)
-	const receptionWallPosition = { x: -1, z: -30, rotation: Math.PI * 2.0 };
 	
 	// Alle anfahrbaren Poster/Booths der aktuellen Plattform
 	// Marktplatz (S): ReceptionWall → Leitlinien-Poster
@@ -268,236 +260,70 @@
 		
 		const target = allPosters[currentPosterIndex];
 		const platformId = worldStore.state.currentPlatform;
-		const platform = platforms[platformId];
 		
-		if (!platform || !target) return;
-		
-		// Plattform-Position
-		const px = platform.x;
-		const py = platform.y;
-		const pz = platform.z;
-		const platformSize = platform.size;
+		if (!target) return;
 		
 		// Marktplatz-spezifische Navigation
 		if (target.type === 'reception') {
-			navigateToReceptionWall(px, py, pz);
-		} else if (target.type === 'leitlinie-left') {
-			navigateToLeitlinie(target.position, px, py, pz, platformSize, 'left');
-		} else if (target.type === 'leitlinie-right') {
-			navigateToLeitlinie(target.position, px, py, pz, platformSize, 'right');
-		} else if (target.type === 'booth') {
-			// Booth-Positionen (vorne auf der Plattform, in Reihe)
-			navigateToBooth(target.position, px, py, pz, platformSize);
-		} else {
-			// Wall-Poster (an den Hexagon-Wänden)
-			navigateToWallPoster(target.position, px, py, pz, platformSize);
+			navigateToReceptionWall();
+		} else if (target.type === 'leitlinie-left' || target.type === 'leitlinie-right') {
+			// Konvertiere Position: left 0-3 = absolut 0-3, right 0-1 = absolut 4-5
+			const absoluteIndex = target.type === 'leitlinie-left' ? target.position : target.position + 4;
+			navigateToLeitlinie(absoluteIndex);
+		} else if (target.type === 'booth' && target.project) {
+			// Booth: Nutze Projekt-ID
+			navigateToBooth(target.project.id, platformId);
+		} else if (target.type === 'wall' && target.project) {
+			// Wall-Poster: Nutze Projekt-ID
+			navigateToWallPoster(target.project.id, platformId);
 		}
 	}
 	
-	// Navigation zur ReceptionWall auf dem Marktplatz
-	function navigateToReceptionWall(px: number, py: number, pz: number) {
-		// Position aus MarketplacePlatform.svelte
-		const worldX = px + receptionWallPosition.x;
-		const worldZ = pz + receptionWallPosition.z;
-		const rotation = receptionWallPosition.rotation;
-		
-		const viewDistance = 9;
-		const cameraY = getCameraY(py);
-		const cos = Math.cos(rotation);
-		const sin = Math.sin(rotation);
-		
-		cameraControls.setLookAt(
-			worldX + sin * viewDistance, cameraY, worldZ + cos * viewDistance,
-			worldX, cameraY, worldZ,
-			true
-		);
-	}
-	
-	// Navigation zu einem Leitlinien-Poster auf dem Marktplatz
-	function navigateToLeitlinie(posterIndex: number, px: number, py: number, pz: number, platformSize: number, side: 'left' | 'right') {
-		// Hexagon-Berechnung (wie in MesseWall.svelte)
-		const hexInnerRadius = platformSize * Math.cos(Math.PI / 6);
-		const hexEdgeLength = platformSize;
-		const edgeAngleStep = Math.PI / 3;
-		const platformRotationOffset = Math.PI / 6;
-		
-		// Linke Wände: startEdge=5, wallCount=2
-		// Rechte Wand: startEdge=1, wallCount=1
-		const startEdge = side === 'left' ? 5 : 1;
-		const wallCount = side === 'left' ? 2 : 1;
-		const postersPerWall = 2;
-		
-		// Auf welcher Wand ist das Poster?
-		const wallIndex = Math.floor(posterIndex / postersPerWall) % wallCount;
-		const positionOnWall = posterIndex % postersPerWall;
-		
-		// Wand-Position
-		const edgeIndex = (startEdge + wallIndex) % 6;
-		const angleToEdge = edgeIndex * edgeAngleStep + platformRotationOffset;
-		
-		const wallX = Math.cos(angleToEdge) * hexInnerRadius * 0.98;
-		const wallZ = Math.sin(angleToEdge) * hexInnerRadius * 0.98;
-		const wallRotY = -angleToEdge - Math.PI / 2;
-		
-		// Poster-Spacing (imageOnly-Modus hat größere Poster)
-		const wallHeight = 8;
-		const imageOnlyWidth = 12;
-		const posterSpacing = imageOnlyWidth + 2;
-		
-		// Poster-Anzahl auf dieser Wand
-		const totalPosters = side === 'left' ? 4 : 2;
-		const postersOnThisWall = Math.min(2, totalPosters - wallIndex * 2);
-		
-		let offsetX = 0;
-		if (postersOnThisWall > 1) {
-			const totalWidth = (postersOnThisWall - 1) * posterSpacing;
-			offsetX = -totalWidth / 2 + positionOnWall * posterSpacing;
+	// Navigation zu Marktplatz-Elementen (ReceptionWall, Leitlinien)
+	function navigateToReceptionWall() {
+		const viewPoint = getMarketplaceViewPoint('reception');
+		if (viewPoint && cameraControls) {
+			cameraControls.setLookAt(
+				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
+				viewPoint.target.x, viewPoint.target.y, viewPoint.target.z,
+				true
+			);
 		}
-		
-		// Offset in Weltkoordinaten
-		const cosR = Math.cos(wallRotY);
-		const sinR = Math.sin(wallRotY);
-		const offsetWorldX = offsetX * cosR;
-		const offsetWorldZ = -offsetX * sinR;
-		
-		// Welt-Position
-		const worldPosterX = px + wallX + offsetWorldX;
-		const worldPosterZ = pz + wallZ + offsetWorldZ;
-		
-		// Kamera vor dem Poster
-		const cameraY = getCameraY(py);
-		const viewDistance = 8; // Weiter weg für große Leitlinien-Bilder
-		const normalX = sinR;
-		const normalZ = cosR;
-		
-		cameraControls.setLookAt(
-			worldPosterX + normalX * viewDistance, cameraY, worldPosterZ + normalZ * viewDistance,
-			worldPosterX, cameraY, worldPosterZ,
-			true
-		);
 	}
 	
-	// Navigation zu einem Booth
-	function navigateToBooth(boothIndex: number, px: number, py: number, pz: number, platformSize: number) {
-		// Booth-Positionen aus Platform.svelte: Im Halbkreis vorne auf der Plattform
-		const booths = getBoothProjectsForPlatform(worldStore.state.currentPlatform);
-		const boothCount = booths.length;
-		
-		// Gleiche Berechnung wie in Platform.svelte:
-		// {@const spreadAngle = Math.min(boothCount * 0.4, Math.PI * 0.5)}
-		// {@const startAngle = -spreadAngle / 2}
-		// {@const angle = startAngle + (i / Math.max(boothCount - 1, 1)) * spreadAngle}
-		// {@const radius = platform.size * 0.5}
-		// position={[Math.cos(angle) * radius, 1.5, Math.sin(angle) * radius]}
-		// rotation={-angle + Math.PI / 2}
-		
-		const spreadAngle = Math.min(boothCount * 0.4, Math.PI * 0.5);
-		const startAngle = -spreadAngle / 2;
-		const angle = startAngle + (boothIndex / Math.max(boothCount - 1, 1)) * spreadAngle;
-		const radius = platformSize * 0.5;
-		
-		// Lokale Booth-Position
-		const boothLocalX = Math.cos(angle) * radius;
-		const boothLocalZ = Math.sin(angle) * radius;
-		const boothRotation = -angle + Math.PI / 2;
-		
-		// Welt-Koordinaten
-		const worldBoothX = px + boothLocalX;
-		const worldBoothZ = pz + boothLocalZ;
-		
-		// Kamera steht vor dem Booth (in Richtung der Booth-Rotation)
-		const cameraY = getCameraY(py) - 2; // Kamera etwas niedriger für bessere Booth-Sicht
-		const viewDistance = 5;
-		
-		// Booth-Rotation zeigt nach vorne, Kamera steht davor
-		const cos = Math.cos(boothRotation);
-		const sin = Math.sin(boothRotation);
-		const cameraOffsetX = viewDistance * sin;
-		const cameraOffsetZ = viewDistance * cos;
-		
-		cameraControls.setLookAt(
-			worldBoothX + cameraOffsetX, cameraY, worldBoothZ + cameraOffsetZ,  // Kamera-Position
-			worldBoothX, cameraY, worldBoothZ,                                   // Blickziel (Booth)
-			true
-		);
-	}
-	
-	// Navigation zu einem Wall-Poster
-	function navigateToWallPoster(posterIndex: number, px: number, py: number, pz: number, platformSize: number) {
-		// Wall-Positionen aus MesseWall.svelte: An den Hexagon-Kanten
-		// WICHTIG: Gleiche Berechnung wie in Platform.svelte und MesseWall.svelte
-		
-		const hexInnerRadius = platformSize * Math.cos(Math.PI / 6); // Apothem
-		const hexEdgeLength = platformSize; // Kantenlänge = Radius
-		const edgeAngleStep = Math.PI / 3; // 60°
-		const platformRotationOffset = Math.PI / 6; // Plattform ist um 30° rotiert
-		
-		// Parameter aus Platform.svelte:
-		// wallCount={Math.min(wallPosters.length, 3)}
-		// startEdge={3}
-		const walls = getWallPostersForPlatform(worldStore.state.currentPlatform);
-		const wallCount = Math.min(walls.length, 3);
-		const startEdge = 3; // WICHTIG: startEdge ist 3, nicht 2!
-		
-		// Poster pro Wand (aus MesseWall.svelte)
-		const wallHeight = 10;
-		const posterHeight = wallHeight * 0.85;
-		const maxImageWidth = posterHeight * 1.2;
-		const textAreaWidth = posterHeight * 0.5;
-		const maxPosterWidth = textAreaWidth + maxImageWidth + 0.8;
-		const idealSpacing = maxPosterWidth + 4;
-		const minSpacingFor2 = hexEdgeLength / 2.2;
-		const posterSpacing = Math.max(maxPosterWidth + 1, Math.min(idealSpacing, minSpacingFor2));
-		const postersPerWall = 2; // Max 2 pro Wand
-		
-		// Auf welcher Wand und Position ist das Poster?
-		const wallIndex = Math.floor(posterIndex / postersPerWall) % wallCount;
-		const positionOnWall = posterIndex % postersPerWall;
-		
-		// Wand-Position berechnen (wie in MesseWall.svelte)
-		const edgeIndex = (startEdge + wallIndex) % 6;
-		const angleToEdge = edgeIndex * edgeAngleStep + platformRotationOffset;
-		
-		const wallX = Math.cos(angleToEdge) * hexInnerRadius * 0.98;
-		const wallZ = Math.sin(angleToEdge) * hexInnerRadius * 0.98;
-		const wallRotY = -angleToEdge - Math.PI / 2;
-		
-		// Wie viele Poster sind auf dieser Wand?
-		const postersOnThisWall = walls.filter((_, idx) => 
-			Math.floor(idx / postersPerWall) % wallCount === wallIndex
-		).length;
-		const actualOnWall = Math.min(postersOnThisWall, postersPerWall);
-		
-		// Offset auf der Wand (links/rechts verteilt)
-		let offsetX = 0;
-		if (actualOnWall === 1) {
-			offsetX = 0; // Einzelnes Poster mittig
-		} else {
-			const totalWidth = (actualOnWall - 1) * posterSpacing;
-			offsetX = -totalWidth / 2 + positionOnWall * posterSpacing;
+	function navigateToLeitlinie(posterIndex: number) {
+		const viewPoint = getMarketplaceViewPoint('leitlinie', posterIndex);
+		if (viewPoint && cameraControls) {
+			cameraControls.setLookAt(
+				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
+				viewPoint.target.x, viewPoint.target.y, viewPoint.target.z,
+				true
+			);
 		}
-		
-		// Offset in Weltkoordinaten umrechnen
-		const cosR = Math.cos(wallRotY);
-		const sinR = Math.sin(wallRotY);
-		const offsetWorldX = offsetX * cosR;
-		const offsetWorldZ = -offsetX * sinR;
-		
-		// Welt-Position des Posters
-		const worldPosterX = px + wallX + offsetWorldX;
-		const worldPosterZ = pz + wallZ + offsetWorldZ;
-		
-		// Kamera-Position (vor dem Poster, in Richtung der Wand-Normale)
-		const cameraY = getCameraY(py);
-		const viewDistance = 6;
-		const normalX = sinR;
-		const normalZ = cosR;
-		
-		cameraControls.setLookAt(
-			worldPosterX + normalX * viewDistance, cameraY, worldPosterZ + normalZ * viewDistance,
-			worldPosterX, cameraY, worldPosterZ,
-			true
-		);
+	}
+	
+	// Navigation zu einem Booth (nutzt zentrale API)
+	function navigateToBooth(projectId: string, platformId: string) {
+		const viewPoint = getViewPoint(projectId, 'booth', platformId);
+		if (viewPoint && cameraControls) {
+			cameraControls.setLookAt(
+				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
+				viewPoint.target.x, viewPoint.target.y, viewPoint.target.z,
+				true
+			);
+		}
+	}
+	
+	// Navigation zu einem Wall-Poster (nutzt zentrale API)
+	function navigateToWallPoster(projectId: string, platformId: string) {
+		const viewPoint = getViewPoint(projectId, 'wall', platformId);
+		if (viewPoint && cameraControls) {
+			cameraControls.setLookAt(
+				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
+				viewPoint.target.x, viewPoint.target.y, viewPoint.target.z,
+				true
+			);
+		}
 	}
 	
 	// Aktuelle Plattform-Info

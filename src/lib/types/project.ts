@@ -2,7 +2,7 @@ export type Department = 'B1' | 'B2' | 'B3' | 'Q1' | 'Q2' | 'Q3' | 'S1' | 'S2' |
 
 export type Perspective = 'default' | 'education' | 'justice' | 'sustainability' | 'diversity' | 'digitality' | 'structure';
 
-export type TargetGroup = '0-3' | '4-6' | '7-10' | '11-14' | '15-18' | 'young-adults' | 'adults' | 'seniors' | 'employees' | 'volunteers';
+export type TargetGroup = '0-3' | '4-6' | '7-10' | '11-14' | '15-18' | 'young-adults' | 'adults' | 'seniors' | 'employees' | 'volunteers' | 'Religionspädagog*innen' | 'Wissenschaftler*innen' | 'Praxiserprobte';
 
 // ============================================
 // STAFF / MITARBEITER

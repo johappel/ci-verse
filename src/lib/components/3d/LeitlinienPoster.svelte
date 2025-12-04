@@ -47,8 +47,10 @@
     // Farben für jede Perspektive
     const perspectiveColors: Record<Perspective, { primary: string; glow: string; accent: string }> = {
         default: { primary: '#ffffff', glow: '#ffffff', accent: '#94a3b8' },
+        education: { primary: '#fbbf24', glow: '#fcd34d', accent: '#f59e0b' },
         justice: { primary: '#facc15', glow: '#fef08a', accent: '#eab308' },
         sustainability: { primary: '#4ade80', glow: '#86efac', accent: '#22c55e' },
+        diversity: { primary: '#f472b6', glow: '#f9a8d4', accent: '#ec4899' },
         digitality: { primary: '#22d3ee', glow: '#67e8f9', accent: '#06b6d4' },
         structure: { primary: '#a78bfa', glow: '#c4b5fd', accent: '#8b5cf6' }
     };
