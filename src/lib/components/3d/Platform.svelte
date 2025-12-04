@@ -232,9 +232,10 @@
 
     <!-- 3D Namensschild - unter dem Oktaeder -->
     <Billboard position={[0, 12, 0]}>
+        {@const displayName = platformContent?.short ?? platform.name}
         <!-- Halbtransparente Glasscheibe mit mehr Tiefe -->
         <T.Mesh>
-            <T.BoxGeometry args={[platform.name.length * 0.5 + 1.5, 1.8, 0.3]} />
+            <T.BoxGeometry args={[displayName.length * 0.5 + 1.5, 1.8, 0.3]} />
             <T.MeshStandardMaterial 
                 color={isCurrentPlatform ? '#ffffff' : '#1e293b'}
                 transparent
@@ -246,7 +247,7 @@
         
         <!-- Rahmen mit Tiefe -->
         <T.Mesh position.z={-0.05}>
-            <T.BoxGeometry args={[platform.name.length * 0.5 + 1.7, 2, 0.1]} />
+            <T.BoxGeometry args={[displayName.length * 0.5 + 1.7, 2, 0.1]} />
             <T.MeshStandardMaterial 
                 color={platformGlowColor}
                 emissive={platformGlowColor}
@@ -258,7 +259,7 @@
 
         <!-- 3D Text (kleinere Schrift) -->
         <Text
-            text={platform.name}
+            text={displayName}
             color={isCurrentPlatform ? '#1e293b' : '#ffffff'}
             fontSize={0.7}
             anchorX="center"
@@ -290,7 +291,8 @@
         <!-- Info-Hexagon im Zentrum -->
         {#if platformContent.aspects.length > 0}
             <InfoHexagon
-                platformName={platform.name}
+                platformName={platformContent.title}
+                platformDescription={platformContent.description}
                 aspects={platformContent.aspects}
                 position={[0, 1.5, 0]}
                 height={5}

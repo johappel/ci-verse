@@ -19,6 +19,7 @@
 
     interface Props {
         platformName: string;
+        platformDescription?: string;
         aspects: PlatformAspect[];
         position?: [number, number, number];
         height?: number;
@@ -28,7 +29,8 @@
     }
 
     let { 
-        platformName, 
+        platformName,
+        platformDescription = '',
         aspects, 
         position = [0, 0, 0], 
         height = 4,
@@ -217,19 +219,46 @@
                     lineHeight={1.4}
                 />
             {:else}
-                <!-- Titel-Seite: Plattform-Name mit dynamischer Schriftgröße -->
-                {@const nameFontSize = platformName.length > 15 ? 0.32 : platformName.length > 10 ? 0.4 : 0.5}
+                <!-- Titel-Seite: Vollständiger Plattform-Name + Description -->
+                {@const nameFontSize = platformName.length > 25 ? 0.26 : platformName.length > 18 ? 0.30 : 0.36}
+                
+                <!-- Icon/Emoji oben -->
+                <Text
+                    text="ℹ️"
+                    fontSize={0.7}
+                    anchorX="center"
+                    anchorY="middle"
+                    position={[0, height * 0.28, 0.02]}
+                />
+                
+                <!-- Vollständiger Titel -->
                 <Text
                     text={platformName}
                     fontSize={nameFontSize}
                     anchorX="center"
-                    anchorY="middle"
-                    position={[0, 0, 0.02]}
+                    anchorY="top"
+                    position={[0, height * 0.08, 0.02]}
                     color="#ffffff"
                     fontWeight="bold"
-                    maxWidth={radius * 0.9}
+                    maxWidth={radius * 0.95}
                     textAlign="center"
+                    lineHeight={1.2}
                 />
+                
+                <!-- Description -->
+                {#if platformDescription}
+                    <Text
+                        text={platformDescription}
+                        fontSize={0.16}
+                        anchorX="center"
+                        anchorY="top"
+                        position={[0, -height * 0.15, 0.02]}
+                        color="#cbd5e1"
+                        maxWidth={radius * 0.9}
+                        textAlign="center"
+                        lineHeight={1.3}
+                    />
+                {/if}
             {/if}
         </T.Group>
     {/each}

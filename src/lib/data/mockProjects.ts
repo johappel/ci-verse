@@ -593,37 +593,38 @@ export const mockStaff: StaffMember[] = [
 export const mockPlatformContents: Record<string, PlatformContent> = {
     B1: {
         id: 'B1',
-        title: 'Frühkindliche Bildung',
-        short: 'Kita',
-        description: 'Religiöse Bildung für Kinder von 0-6 Jahren',
+        title: 'Bildung in der Schule',
+        short: 'Schule',
+        description: 'Grundlegende Fragen zur allgemeinen und schulischen Bildung sowie zum Religionsunterricht',
         color: '#fcd34d',      // Amber
         glowColor: '#fde68a',
         aspects: [
             { id: 'b1-a1', title: 'Religiöse Bildung', icon: '🙏', description: 'Grundlagen religiöser Erziehung im Kita-Alter', contentUrl: '/content/b1-religioes.html' },
-            { id: 'b1-a2', title: 'Spielerisches Lernen', icon: '🎮', description: 'Spielbasierte pädagogische Konzepte', contentUrl: '/content/b1-spielen.html' },
-            { id: 'b1-a3', title: 'Elternarbeit', icon: '👨‍👩‍👧', description: 'Zusammenarbeit mit Familien', contentUrl: '/content/b1-eltern.html' },
-            { id: 'b1-a4', title: 'Inklusion', icon: '🤝', description: 'Vielfalt als Bereicherung', contentUrl: '/content/b1-inklusion.html' },
-            { id: 'b1-a5', title: 'Fachkräfte', icon: '👩‍🏫', description: 'Fortbildung und Qualifizierung', contentUrl: '/content/b1-fachkraefte.html' }
+            { id: 'b1-a2', title: 'Religionsunterricht', icon: '📖', description: 'Didaktik und Methodik', contentUrl: '/content/b2-ru.html' },
+            { id: 'b1-a3', title: 'Inklusion', icon: '🤝', description: 'Vielfalt als Bereicherung', contentUrl: '/content/b1-inklusion.html' },
+            { id: 'b1-a4', title: 'Fachkräfte', icon: '👩‍🏫', description: 'Fortbildung und Qualifizierung', contentUrl: '/content/b1-fachkraefte.html' },
+            { id: 'b1-a5', title: 'Medienkompetenz', icon: '📱', description: 'Digitale Bildung für Jugendliche', contentUrl: '/content/b2-medien.html' }
         ]
     },
     B2: {
         id: 'B2',
-        title: 'Schule & Jugend',
-        short: 'Schule',
-        description: 'Bildungsangebote für Schule und Jugendarbeit',
+        title: 'Bildung im Kontext von Gemeinde',
+        short: 'Kirche',
+        description: 'Bildungsangebote im Kontext von Gemeinde und Jugendarbeit',
         color: '#fb923c',      // Orange
         glowColor: '#fdba74',
         aspects: [
             { id: 'b2-a1', title: 'Konfirmandenarbeit', icon: '⛪', description: 'Begleitung junger Menschen im Glauben', contentUrl: '/content/b2-konfi.html' },
             { id: 'b2-a2', title: 'Schulseelsorge', icon: '💚', description: 'Unterstützung in schulischen Krisen', contentUrl: '/content/b2-seelsorge.html' },
             { id: 'b2-a3', title: 'Jugendarbeit', icon: '🎸', description: 'Freizeitangebote und Gemeinschaft', contentUrl: '/content/b2-jugend.html' },
-            { id: 'b2-a4', title: 'Religionsunterricht', icon: '📖', description: 'Didaktik und Methodik', contentUrl: '/content/b2-ru.html' },
-            { id: 'b2-a5', title: 'Medienkompetenz', icon: '📱', description: 'Digitale Bildung für Jugendliche', contentUrl: '/content/b2-medien.html' }
+            { id: 'b2-a4', title: 'Elternarbeit', icon: '👨‍👩‍👧', description: 'Zusammenarbeit mit Familien', contentUrl: '/content/b1-eltern.html' },
+            { id: 'b2-a5', title: 'Spielerisches Lernen', icon: '🎮', description: 'Spielbasierte pädagogische Konzepte', contentUrl: '/content/b1-spielen.html' }
+            
         ]
     },
     B3: {
         id: 'B3',
-        title: 'Erwachsenenbildung',
+        title: 'Erwachsenen und Familienbildung',
         short: 'Erwachsene',
         description: 'Fortbildung und Lebenslanges Lernen',
         color: '#f87171',      // Red
@@ -638,7 +639,7 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
     },
     Q1: {
         id: 'Q1',
-        title: 'Forschung',
+        title: 'Evangelische Bildungsberichterstattung und Empirische Bildungsforschung',
         short: 'Forschung',
         description: 'Wissenschaftliche Studien und Publikationen',
         color: '#a78bfa',      // Violet
@@ -653,7 +654,7 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
     },
     Q2: {
         id: 'Q2',
-        title: 'Europa & Internationales',
+        title: 'Evangelische Bildungsverantwortung in Europa',
         short: 'Europa',
         description: 'Internationale Kooperationen und EU-Projekte',
         color: '#fbbf24',      // Yellow
