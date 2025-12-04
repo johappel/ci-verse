@@ -120,26 +120,6 @@ function civerse_register_acf_fields() {
                     ],
                 ],
             ],
-            [
-                'key' => 'field_platform_wall_posters',
-                'label' => 'Wandposter (Projekte)',
-                'name' => 'platform_wall_posters',
-                'type' => 'relationship',
-                'post_type' => ['civerse_project'],
-                'filters' => ['search'],
-                'return_format' => 'object',
-                'instructions' => 'Projekte per Drag & Drop sortieren. Position = Reihenfolge.',
-            ],
-            [
-                'key' => 'field_platform_booth_projects',
-                'label' => 'Messestand-Projekte',
-                'name' => 'platform_booth_projects',
-                'type' => 'relationship',
-                'post_type' => ['civerse_project'],
-                'filters' => ['search'],
-                'return_format' => 'object',
-                'instructions' => 'Projekte die einen eigenen Messestand bekommen.',
-            ],
         ],
         'location' => [
             [
@@ -186,7 +166,7 @@ function civerse_register_acf_fields() {
                 'name' => 'project_teaser',
                 'type' => 'textarea',
                 'rows' => 2,
-                'maxlength' => 200,
+                'maxlength' => 270,
             ],
             
             // Tab: Zuordnung
@@ -328,14 +308,6 @@ function civerse_register_acf_fields() {
                 ],
                 'default_value' => 'portrait',
                 'instructions' => 'Format des Poster-Bildes für optimale Darstellung.',
-            ],
-            [
-                'key' => 'field_project_logo',
-                'label' => 'Logo',
-                'name' => 'project_logo',
-                'type' => 'image',
-                'return_format' => 'array',
-                'preview_size' => 'thumbnail',
             ],
             [
                 'key' => 'field_project_screenshot',
@@ -614,6 +586,95 @@ function civerse_register_acf_fields() {
                     ],
                 ],
             ],
+            [
+                'key' => 'field_marketplace_tab_partners',
+                'label' => 'Partner-Netzwerk',
+                'type' => 'tab',
+            ],
+            [
+                'key' => 'field_partners_info',
+                'label' => 'Partner-Netzwerk',
+                'type' => 'message',
+                'message' => 'Partner-Einrichtungen erscheinen im Nexus Terminal auf dem Marktplatz als animierter "Fahrplan" mit Verbindungen zu anderen Institutionen.',
+            ],
+            [
+                'key' => 'field_partner_connections',
+                'label' => 'Partner-Verbindungen',
+                'name' => 'partner_connections',
+                'type' => 'repeater',
+                'layout' => 'block',
+                'button_label' => 'Partner hinzufügen',
+                'sub_fields' => [
+                    [
+                        'key' => 'field_partner_id',
+                        'label' => 'Partner ID',
+                        'name' => 'id',
+                        'type' => 'text',
+                        'required' => 1,
+                        'placeholder' => 'z.B. ekd, bmbf, eu',
+                        'wrapper' => ['width' => '20'],
+                    ],
+                    [
+                        'key' => 'field_partner_name',
+                        'label' => 'Vollständiger Name',
+                        'name' => 'name',
+                        'type' => 'text',
+                        'required' => 1,
+                        'placeholder' => 'z.B. Evangelische Kirche in Deutschland',
+                        'wrapper' => ['width' => '40'],
+                    ],
+                    [
+                        'key' => 'field_partner_short_name',
+                        'label' => 'Kurzname (für Anzeige)',
+                        'name' => 'shortName',
+                        'type' => 'text',
+                        'required' => 1,
+                        'placeholder' => 'z.B. EKD Hannover',
+                        'wrapper' => ['width' => '40'],
+                    ],
+                    [
+                        'key' => 'field_partner_category',
+                        'label' => 'Kategorie',
+                        'name' => 'category',
+                        'type' => 'select',
+                        'choices' => [
+                            'ministry' => '🏛️ Ministerium',
+                            'church' => '⛪ Kirchliche Einrichtung',
+                            'university' => '🎓 Universität',
+                            'institute' => '🔬 Institut',
+                            'international' => '🌍 International',
+                            'association' => '🤝 Verband/Gesellschaft',
+                        ],
+                        'wrapper' => ['width' => '30'],
+                    ],
+                    [
+                        'key' => 'field_partner_color',
+                        'label' => 'Primärfarbe',
+                        'name' => 'color',
+                        'type' => 'color_picker',
+                        'default_value' => '#3b82f6',
+                        'wrapper' => ['width' => '20'],
+                    ],
+                    [
+                        'key' => 'field_partner_url',
+                        'label' => 'Website URL',
+                        'name' => 'url',
+                        'type' => 'url',
+                        'required' => 1,
+                        'wrapper' => ['width' => '50'],
+                    ],
+                    [
+                        'key' => 'field_partner_logo',
+                        'label' => 'Logo',
+                        'name' => 'logoUrl',
+                        'type' => 'image',
+                        'return_format' => 'url',
+                        'preview_size' => 'thumbnail',
+                        'wrapper' => ['width' => '50'],
+                        'instructions' => 'Logo für die Anzeige im Nexus Terminal',
+                    ],
+                ],
+            ],
         ],
         'location' => [
             [
@@ -623,9 +684,9 @@ function civerse_register_acf_fields() {
     ]);
 
     // =========================================================================
-    // PARTNER-EINRICHTUNGEN (Nexus Terminal)
+    // PARTNER-EINRICHTUNGEN (Nexus Terminal) - DEPRECATED (Merged into Marketplace)
     // =========================================================================
-    
+    /*
     acf_add_local_field_group([
         'key' => 'group_partners',
         'title' => 'Partner-Einrichtungen (Nexus Terminal)',
@@ -721,4 +782,5 @@ function civerse_register_acf_fields() {
             ],
         ],
     ]);
+    */
 }

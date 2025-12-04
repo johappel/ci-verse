@@ -126,6 +126,15 @@ function civerse_get_marketplace() {
 
 function civerse_get_platforms() {
     $platforms = [];
+    
+    // Alle Projekte holen für automatische Zuordnung
+    $all_projects = get_posts([
+        'post_type' => 'civerse_project',
+        'posts_per_page' => -1,
+        'orderby' => 'title',
+        'order' => 'ASC',
+    ]);
+
     $posts = get_posts([
         'post_type' => 'civerse_platform',
         'posts_per_page' => -1,
@@ -138,8 +147,25 @@ function civerse_get_platforms() {
         if (!$id) continue;
         
         $aspects = get_field('platform_aspects', $post->ID) ?: [];
-        $wall_posters = get_field('platform_wall_posters', $post->ID) ?: [];
-        $booth_projects = get_field('platform_booth_projects', $post->ID) ?: [];
+        
+        // Projekte automatisch zuordnen basierend auf 'project_departments'
+        $wall_posters = [];
+        $booth_projects = [];
+
+        foreach ($all_projects as $p) {
+            $p_id = get_field('project_id', $p->ID);
+            $departments = get_field('project_departments', $p->ID) ?: [];
+            $display_type = get_field('project_display_type', $p->ID) ?: 'booth';
+
+            if (in_array($id, $departments)) {
+                if ($display_type === 'wall' || $display_type === 'both') {
+                    $wall_posters[] = $p_id;
+                }
+                if ($display_type === 'booth' || $display_type === 'both') {
+                    $booth_projects[] = $p_id;
+                }
+            }
+        }
         
         $platforms[$id] = [
             'id' => $id,
@@ -157,12 +183,8 @@ function civerse_get_platforms() {
                     'contentUrl' => $aspect['content_url'] ?? null,
                 ];
             }, $aspects, array_keys($aspects)),
-            'wallPosters' => array_map(function($p) {
-                return get_field('project_id', $p->ID);
-            }, $wall_posters),
-            'boothProjects' => array_map(function($p) {
-                return get_field('project_id', $p->ID);
-            }, $booth_projects),
+            'wallPosters' => $wall_posters,
+            'boothProjects' => $booth_projects,
         ];
     }
     

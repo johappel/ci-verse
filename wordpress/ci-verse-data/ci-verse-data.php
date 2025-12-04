@@ -287,7 +287,6 @@ function civerse_get_projects() {
         }, $staff_posts);
         
         $poster_image = get_field('project_poster_image', $post->ID);
-        $logo = get_field('project_logo', $post->ID);
         $screenshot = get_field('project_screenshot', $post->ID);
         
         $projects[] = [
@@ -306,7 +305,6 @@ function civerse_get_projects() {
                 'slogan' => get_field('project_slogan', $post->ID),
                 'posterImage' => $poster_image['url'] ?? '',
                 'posterImageFormat' => get_field('project_poster_image_format', $post->ID) ?: 'portrait',
-                'logoUrl' => $logo['url'] ?? '',
                 'color' => get_field('project_color', $post->ID) ?: '#3b82f6',
                 'screenshotUrl' => $screenshot['url'] ?? '',
             ],

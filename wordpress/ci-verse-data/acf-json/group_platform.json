@@ -126,26 +126,6 @@
                     "type": "url"
                 }
             ]
-        },
-        {
-            "key": "field_platform_wall_posters",
-            "label": "Wandposter (Projekte)",
-            "name": "platform_wall_posters",
-            "type": "relationship",
-            "post_type": ["civerse_project"],
-            "filters": ["search"],
-            "return_format": "object",
-            "instructions": "Projekte per Drag & Drop sortieren. Position = Reihenfolge."
-        },
-        {
-            "key": "field_platform_booth_projects",
-            "label": "Messestand-Projekte",
-            "name": "platform_booth_projects",
-            "type": "relationship",
-            "post_type": ["civerse_project"],
-            "filters": ["search"],
-            "return_format": "object",
-            "instructions": "Projekte die einen eigenen Messestand bekommen."
         }
     ],
     "location": [

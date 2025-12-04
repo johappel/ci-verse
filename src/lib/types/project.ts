@@ -24,7 +24,6 @@ export interface ProjectDisplay {
     slogan: string;
     posterImage?: string;      // Großes Bild für Messewand
     posterImageFormat?: 'portrait' | 'landscape' | 'square'; // Bildformat (default: portrait)
-    logoUrl?: string;          // Projekt-Logo
     color: string;             // Primärfarbe
     screenshotUrl?: string;    // Website-Screenshot
     icon?: string;             // Emoji oder Icon-Name
@@ -44,7 +43,6 @@ export interface ProjectData {
     shortTeaser?: string;
     display?: ProjectDisplay;
     // Legacy (für Abwärtskompatibilität)
-    logoUrl?: string;
     screenshotUrl?: string;
     color?: string;
 }

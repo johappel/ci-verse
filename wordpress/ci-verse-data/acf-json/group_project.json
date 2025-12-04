@@ -42,7 +42,7 @@
             "name": "project_teaser",
             "type": "textarea",
             "rows": 2,
-            "maxlength": 200
+            "maxlength": 270
         },
         {
             "key": "field_project_tab_zuordnung",
@@ -198,14 +198,6 @@
             },
             "default_value": "portrait",
             "instructions": "Format des Poster-Bildes für optimale Darstellung."
-        },
-        {
-            "key": "field_project_logo",
-            "label": "Logo",
-            "name": "project_logo",
-            "type": "image",
-            "return_format": "array",
-            "preview_size": "thumbnail"
         },
         {
             "key": "field_project_screenshot",

@@ -108,7 +108,6 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Glaube entdecken von Anfang an',
             posterImage: 'https://picsum.photos/seed/kita-poster/800/1200',
-            logoUrl: '/logos/relimentar.svg',
             color: '#f97316',
             screenshotUrl: 'https://picsum.photos/seed/kita/800/600'
         }
@@ -127,7 +126,6 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Gemeinde digital gestalten',
             posterImage: 'https://picsum.photos/seed/digital-poster/800/1200',
-            logoUrl: '/logos/efabi.svg',
             color: '#0ea5e9',
             screenshotUrl: 'https://picsum.photos/seed/digital/800/600'
         }
@@ -147,7 +145,6 @@ export const mockProjects: ProjectData[] = [
             slogan: 'Wissen schafft Bildung',
             posterImage: 'https://picsum.photos/seed/research-poster/1200/800',
             posterImageFormat: 'landscape',
-            logoUrl: '/logos/comenius.svg',
             color: '#8b5cf6',
             screenshotUrl: 'https://picsum.photos/seed/research/800/600'
         }
@@ -166,7 +163,6 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Qualität, die Kinder stärkt',
             posterImage: 'https://picsum.photos/seed/quali-poster/800/1200',
-            logoUrl: '/logos/kita-quali.svg',
             color: '#10b981',
             screenshotUrl: 'https://picsum.photos/seed/quali/800/600'
         }
@@ -186,7 +182,6 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Konfi goes digital',
             posterImage: 'https://picsum.photos/seed/konfi-poster/800/1200',
-            logoUrl: '/logos/konfi-app.svg',
             color: '#ec4899',
             screenshotUrl: 'https://picsum.photos/seed/konfi/800/600'
         }
@@ -205,7 +200,6 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Ehrenamt verdient Bildung',
             posterImage: 'https://picsum.photos/seed/ehrenamt-poster/800/1200',
-            logoUrl: '/logos/ehrenamt.svg',
             color: '#f59e0b',
             screenshotUrl: 'https://picsum.photos/seed/ehrenamt/800/600'
         }
@@ -225,7 +219,6 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Spielend Gott entdecken',
             posterImage: 'https://picsum.photos/seed/godly-poster/800/1200',
-            logoUrl: '/logos/godly-play.svg',
             color: '#6366f1',
             screenshotUrl: 'https://picsum.photos/seed/godly/800/600'
         }
@@ -244,7 +237,6 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Da sein, wenn es zählt',
             posterImage: 'https://picsum.photos/seed/seelsorge-poster/800/1200',
-            logoUrl: '/logos/schulseelsorge.svg',
             color: '#14b8a6',
             screenshotUrl: 'https://picsum.photos/seed/seelsorge/800/600'
         }
@@ -264,7 +256,6 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Nie zu alt für Neues',
             posterImage: 'https://picsum.photos/seed/senioren-poster/800/1200',
-            logoUrl: '/logos/senioren.svg',
             color: '#0891b2',
             screenshotUrl: 'https://picsum.photos/seed/senioren/800/600'
         }
@@ -284,7 +275,6 @@ export const mockProjects: ProjectData[] = [
             slogan: 'Bildung sichtbar machen',
             posterImage: 'https://picsum.photos/seed/atlas-poster/1200/800',
             posterImageFormat: 'landscape',
-            logoUrl: '/logos/bildungsatlas.svg',
             color: '#7c3aed',
             screenshotUrl: 'https://picsum.photos/seed/atlas/800/600'
         }
@@ -303,7 +293,6 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Material für guten Unterricht',
             posterImage: 'https://picsum.photos/seed/material-poster/800/1200',
-            logoUrl: '/logos/ru-material.svg',
             color: '#059669',
             screenshotUrl: 'https://picsum.photos/seed/material/800/600'
         }
@@ -323,7 +312,6 @@ export const mockProjects: ProjectData[] = [
             slogan: 'Bildung ohne Grenzen',
             posterImage: 'https://picsum.photos/seed/erasmus-poster/1200/800',
             posterImageFormat: 'landscape',
-            logoUrl: '/logos/erasmus.svg',
             color: '#2563eb',
             screenshotUrl: 'https://picsum.photos/seed/erasmus/800/600'
         }
@@ -342,7 +330,6 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Vielfalt verbindet',
             posterImage: 'https://picsum.photos/seed/oekumene-poster/800/800',
-            logoUrl: '/logos/oekumene.svg',
             color: '#ca8a04',
             posterImageFormat: 'square',
             screenshotUrl: 'https://picsum.photos/seed/oekumene/800/600'
@@ -362,7 +349,6 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'KI verstehen und nutzen',
             posterImage: 'https://picsum.photos/seed/ki-poster/800/1200',
-            logoUrl: '/logos/ki-werkstatt.svg',
             color: '#06b6d4',
             screenshotUrl: 'https://picsum.photos/seed/ki/800/600'
         }
@@ -381,7 +367,6 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Sicher digital arbeiten',
             posterImage: 'https://picsum.photos/seed/dsgvo-poster/800/1200',
-            logoUrl: '/logos/datenschutz.svg',
             color: '#dc2626',
             screenshotUrl: 'https://picsum.photos/seed/dsgvo/800/600'
         }
@@ -400,7 +385,7 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Digitalität in der Religionspädagogik',
             posterImage: 'static/assets/images/rpi-dechow-lohrer-dekt-2023.png',
-            logoUrl: 'https://comenius.de/wp-content/uploads/rpi-virtuell-logo-1.png',
+
             color: '#16a34a',
             screenshotUrl: 'https://news.rpi-virtuell.de/wp-content/uploads/2023/06/grafik-2.png'
         }
@@ -572,9 +557,7 @@ export const mockMarketplace: MarketplaceContent = {
             icon: '🏛️',
             description: 'Evangelische Arbeitsstätte für Erziehungswissenschaft e.V. – Ihr Kompetenzzentrum für religiöse Bildung seit 1954.',
             display: {
-                color: '#1e40af',
-                logoUrl: '/logos/comenius.svg',
-                bannerImage: 'https://picsum.photos/seed/comenius-banner/1200/400'
+                color: '#1e40af'
             },
             chatWebhook: 'https://n8n.comenius.de/webhook/ci-chat',
             externalUrl: 'https://comenius.de'
@@ -586,9 +569,7 @@ export const mockMarketplace: MarketplaceContent = {
             icon: '📚',
             description: 'Aktuelle Veröffentlichungen, Neuigkeiten und Forschungsergebnisse aus dem Comenius-Institut.',
             display: {
-                color: '#059669',
-                logoUrl: '/logos/publikationen.svg',
-                bannerImage: 'https://picsum.photos/seed/publications-banner/1200/400'
+                color: '#059669'
             },
             rssFeedUrls: [
                 'https://comenius.de/feed/',
@@ -603,11 +584,9 @@ export const mockMarketplace: MarketplaceContent = {
             icon: '📅',
             description: 'Aktuelle Termine, Tagungen, Fortbildungen und Workshops des Comenius-Instituts.',
             display: {
-                color: '#dc2626',
-                logoUrl: '/logos/events.svg',
-                bannerImage: 'https://picsum.photos/seed/events-banner/1200/400'
+                color: '#dc2626'
             },
-            calendarUrl: 'https://comenius.de/termine/events.ics',
+            nostrFilter: 'npub1...',
             externalUrl: 'https://comenius.de/termine'
         }
     ],
