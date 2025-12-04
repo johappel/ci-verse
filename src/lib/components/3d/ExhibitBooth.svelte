@@ -157,7 +157,7 @@
     }
 </script>
 
-<T.Group position={position} rotation.y={rotation}>
+<T.Group position={position} rotation.y={rotation} scale={1.1}>
     
     <!-- ========== STELLWAND-FUSS (leicht, Stützen nach beiden Seiten) ========== -->
     <T.Group>
