@@ -7,8 +7,12 @@ const config = {
 
 	kit: {
 		adapter: adapter({
-			fallback: 'index.html'
-		})
+			fallback: 'index.html',
+			precompress: false
+		}),
+		paths: {
+			base: '/ci-verse'
+		}
 	},
 	vitePlugin: {
 		inspector: {

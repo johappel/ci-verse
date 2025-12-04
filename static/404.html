@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>redirect</title>
+    <script>
+      // Get the full URL including the path
+      const segment = location.pathname.split('/').filter(p => p);
+      
+      // If we're in /ci-verse subpath, redirect to /ci-verse/
+      if (segment[0] !== 'ci-verse') {
+        location.replace('/ci-verse' + location.pathname + location.search);
+      }
+      
+      // Otherwise redirect to the index
+      location.replace('/ci-verse/');
+    </script>
+  </head>
+  <body />
+</html>
