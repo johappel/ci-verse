@@ -385,9 +385,154 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Digitalität in der Religionspädagogik',
             posterImage: '/assets/images/rpi-dechow-lohrer-dekt-2023.png',
-
             color: '#16a34a',
             screenshotUrl: 'https://news.rpi-virtuell.de/wp-content/uploads/2023/06/grafik-2.png'
+        }
+    },
+    {
+        id: 'p17',
+        title: 'Digital Labs',
+        slug: 'digital-labs',
+        externalUrl: 'https://digital-labs.de',
+        departments: ['Q3'],
+        perspectives: ['digitality', 'sustainability'],
+        targetGroups: ['employees'],
+        displayType: 'booth',
+        staff: ['m3'],
+        shortTeaser: 'Experimentierräume für digitale Innovation in der Bildungsarbeit.',
+        display: {
+            slogan: 'Zukunft ausprobieren',
+            posterImage: 'https://picsum.photos/seed/labs-poster/800/1200',
+            color: '#8b5cf6',
+            screenshotUrl: 'https://picsum.photos/seed/labs/800/600'
+        }
+    },
+    {
+        id: 'p18',
+        title: 'Cloud-Infrastruktur',
+        slug: 'cloud-infra',
+        externalUrl: 'https://cloud-kirche.de',
+        departments: ['Q3'],
+        perspectives: ['digitality', 'structure'],
+        targetGroups: ['employees'],
+        displayType: 'wall',
+        staff: ['m3', 'm4'],
+        shortTeaser: 'Sichere und datenschutzkonforme Cloud-Lösungen für kirchliche Einrichtungen.',
+        display: {
+            slogan: 'In der Cloud, geerdet',
+            posterImage: 'https://picsum.photos/seed/cloud-poster/1200/800',
+            posterImageFormat: 'landscape',
+            color: '#0ea5e9',
+            screenshotUrl: 'https://picsum.photos/seed/cloud/800/600'
+        }
+    },
+    {
+        id: 'p19',
+        title: 'Webinar-Plattform',
+        slug: 'webinar-platform',
+        externalUrl: 'https://webinar.comenius.de',
+        departments: ['Q3'],
+        perspectives: ['digitality'],
+        targetGroups: ['employees', 'adults'],
+        displayType: 'booth',
+        staff: ['m3'],
+        shortTeaser: 'Professionelle Online-Fortbildungen und virtuelle Veranstaltungen.',
+        display: {
+            slogan: 'Lernen ohne Grenzen',
+            posterImage: 'https://picsum.photos/seed/webinar-poster/800/1200',
+            color: '#f59e0b',
+            screenshotUrl: 'https://picsum.photos/seed/webinar/800/600'
+        }
+    },
+    {
+        id: 'p20',
+        title: 'Barrierefreie Medien',
+        slug: 'accessibility-media',
+        externalUrl: 'https://barrierefrei-medien.de',
+        departments: ['Q3'],
+        perspectives: ['digitality', 'justice'],
+        targetGroups: ['employees'],
+        displayType: 'wall',
+        staff: ['m4'],
+        shortTeaser: 'Digitale Bildungsmedien für alle zugänglich machen.',
+        display: {
+            slogan: 'Teilhabe digital',
+            posterImage: 'https://picsum.photos/seed/access-poster/800/1200',
+            color: '#14b8a6',
+            screenshotUrl: 'https://picsum.photos/seed/access/800/600'
+        }
+    },
+    {
+        id: 'p21',
+        title: 'Social Media Pastoral',
+        slug: 'social-media-pastoral',
+        externalUrl: 'https://social-pastoral.de',
+        departments: ['Q3'],
+        perspectives: ['digitality'],
+        targetGroups: ['employees', 'young-adults'],
+        displayType: 'booth',
+        staff: ['m3', 'm5'],
+        shortTeaser: 'Seelsorge und Verkündigung in sozialen Netzwerken.',
+        display: {
+            slogan: 'Nah bei den Menschen',
+            posterImage: 'https://picsum.photos/seed/social-poster/800/1200',
+            color: '#ec4899',
+            screenshotUrl: 'https://picsum.photos/seed/social/800/600'
+        }
+    },
+    {
+        id: 'p22',
+        title: 'VR-Kirchenraum',
+        slug: 'vr-kirchenraum',
+        externalUrl: 'https://vr-kirche.de',
+        departments: ['Q3'],
+        perspectives: ['digitality', 'sustainability'],
+        targetGroups: ['employees', 'young-adults'],
+        displayType: 'both',
+        staff: ['m3'],
+        shortTeaser: 'Virtuelle Realität für spirituelle Erfahrungen und Kirchenpädagogik.',
+        display: {
+            slogan: 'Räume neu erleben',
+            posterImage: 'https://picsum.photos/seed/vr-poster/800/1200',
+            color: '#a855f7',
+            screenshotUrl: 'https://picsum.photos/seed/vr/800/600'
+        }
+    },
+    {
+        id: 'p23',
+        title: 'Podcast-Studio',
+        slug: 'podcast-studio',
+        externalUrl: 'https://podcast.comenius.de',
+        departments: ['Q3'],
+        perspectives: ['digitality'],
+        targetGroups: ['employees'],
+        displayType: 'wall',
+        staff: ['m3', 'm6'],
+        shortTeaser: 'Professionelle Podcast-Produktion für kirchliche und pädagogische Inhalte.',
+        display: {
+            slogan: 'Hörbar Glauben',
+            posterImage: 'https://picsum.photos/seed/podcast-poster/800/800',
+            posterImageFormat: 'square',
+            color: '#f97316',
+            screenshotUrl: 'https://picsum.photos/seed/podcast/800/600'
+        }
+    },
+    {
+        id: 'p24',
+        title: 'Coding für Kirche',
+        slug: 'coding-kirche',
+        externalUrl: 'https://coding-kirche.de',
+        departments: ['Q3'],
+        perspectives: ['digitality', 'structure'],
+        targetGroups: ['employees', 'young-adults'],
+        displayType: 'booth',
+        staff: ['m3'],
+        shortTeaser: 'Programmier-Workshops und digitale Kompetenzen für kirchliche Mitarbeitende.',
+        display: {
+            slogan: 'Code mit Sinn',
+            posterImage: 'https://picsum.photos/seed/coding-poster/800/1200',
+            color: '#10b981',
+            screenshotUrl: 'https://picsum.photos/seed/coding/800/600'
         }
     }
 ];

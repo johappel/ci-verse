@@ -318,18 +318,38 @@
         {/if}
 
         <!-- Freistehende Exhibit-Booths für Booth-Projekte -->
-        <!-- Positioniert auf der VORDEREN Seite (gegenüber der Wände bei startEdge=3) -->
+        <!-- Im inneren Ring der Plattform verteilt, mit Durchgang vorne -->
         {#each boothProjects as project, i}
             {@const boothCount = boothProjects.length}
-            {@const spreadAngle = Math.min(boothCount * 0.4, Math.PI * 0.5)}
-            {@const startAngle = -spreadAngle / 2}
-            {@const angle = startAngle + (i / Math.max(boothCount - 1, 1)) * spreadAngle}
-            {@const radius = platform.size * 0.5}
+            <!-- Booth-Größen basierend auf Anzahl -->
+            {@const boothSize = boothCount > 6 ? 'small' : (boothCount > 3 ? 'medium' : 'medium')}
+            
+            <!-- Booths in einem Ring INNERHALB der Plattform verteilen -->
+            <!-- Radius: ca. 50-60% des Plattform-Radius (genug Platz zur Mitte und zum Rand) -->
+            {@const boothRadius = platform.size * 0.55}
+            
+            <!-- Verteile auf 4 von 6 Sektoren (hinten + Seiten, vorne frei für Durchgang) -->
+            <!-- Sektoren 2, 3, 4, 5 nutzen (Sektor 0, 1 = vorne frei) -->
+            {@const usedSectors = 4}
+            {@const startSector = 2}
+            
+            <!-- Berechne Winkel für diesen Booth -->
+            {@const sectorSize = (2 * Math.PI) / 6} <!-- 60° pro Sektor -->
+            {@const usedArcSize = usedSectors * sectorSize} <!-- 240° für 4 Sektoren -->
+            {@const angleStep = usedArcSize / Math.max(boothCount - 1, 1)}
+            {@const startAngle = startSector * sectorSize + Math.PI / 6} <!-- Plattform-Rotation berücksichtigen -->
+            {@const angle = startAngle + i * angleStep}
+            
+            <!-- Position im Ring berechnen -->
+            {@const boothX = Math.cos(angle) * boothRadius}
+            {@const boothZ = Math.sin(angle) * boothRadius}
+            {@const boothRotation = -angle + Math.PI / 2} <!-- Booth zeigt zur Mitte -->
+            
             <ExhibitBooth
                 {project}
-                position={[Math.cos(angle) * radius, 1.5, Math.sin(angle) * radius]}
-                rotation={-angle + Math.PI / 2}
-                size={boothCount > 3 ? 'small' : 'medium'}
+                position={[boothX, 1.5, boothZ]}
+                rotation={boothRotation}
+                size={boothSize}
                 platformPosition={[platform.x, platform.y, platform.z]}
             />
         {/each}
