@@ -329,8 +329,8 @@
             {@const rowIndex = Math.floor(i / boothsPerRow)} <!-- Welche Reihe (0, 1, 2...) -->
             {@const posInRow = i % boothsPerRow} <!-- Position in der Reihe (0-3) -->
             
-            <!-- Radius-Staffelung: Stärker gestaffelt, näher zu den Wänden (50% bis 80%) -->
-            {@const baseRadius = platform.size * 0.50} <!-- Startet weiter außen -->
+            <!-- Radius-Staffelung: Mittig positioniert mit genug Abstand zu Wänden -->
+            {@const baseRadius = platform.size * 0.35} <!-- Startet näher zur Mitte -->
             {@const radiusStep = platform.size * 0.12} <!-- 12% pro Reihe (stärkerer Versatz) -->
             {@const boothRadius = baseRadius + rowIndex * radiusStep}
             
