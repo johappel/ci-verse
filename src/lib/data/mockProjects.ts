@@ -594,46 +594,46 @@ export const mockMarketplace: MarketplaceContent = {
     ],
     wallPosters: [
         {
-            id: 'leitlinie-justice',
-            title: 'Gerechtigkeit',
+            id: 'leitlinie-education',
+            title: 'Religiöse Bildung',
             imageUrl: '/assets/leitlinien/leitlinie1.jpg',
-            perspective: 'justice',
+            perspective: 'education',
             position: 0  // Wand 1, links
+        },
+        {
+            id: 'leitlinie-justice',
+            title: 'Bildungsgerechtigkeit',
+            imageUrl: '/assets/leitlinien/leitlinie2.jpg',
+            perspective: 'justice',
+            position: 1  // Wand 1, rechts
         },
         {
             id: 'leitlinie-sustainability',
             title: 'Nachhaltigkeit',
-            imageUrl: '/assets/leitlinien/leitlinie2.jpg',
+            imageUrl: '/assets/leitlinien/leitlinie3.jpg',
             perspective: 'sustainability',
-            position: 1  // Wand 1, rechts
+            position: 2  // Wand 2, links
+        },
+        {
+            id: 'leitlinie-diversity',
+            title: 'Differenzsensibilität',
+            imageUrl: '/assets/leitlinien/leitlinie4.jpg',
+            perspective: 'diversity',
+            position: 3  // Wand 2, rechts
         },
         {
             id: 'leitlinie-digitality',
             title: 'Digitalität',
-            imageUrl: '/assets/leitlinien/leitlinie3.jpg',
+            imageUrl: '/assets/leitlinien/leitlinie5.jpg',
             perspective: 'digitality',
-            position: 2  // Wand 2
+            position: 4  // Wand 3
         },
         {
             id: 'leitlinie-structure',
-            title: 'Strukturen',
-            imageUrl: '/assets/leitlinien/leitlinie4.jpg',
-            perspective: 'structure',
-            position: 3  // Wand 3
-        },
-        {
-            id: 'leitlinie-community',
-            title: 'Gemeinschaft',
-            imageUrl: '/assets/leitlinien/leitlinie5.jpg',
-            perspective: 'justice',
-            position: 4  // Wand 4, links
-        },
-        {
-            id: 'leitlinie-tradition',
-            title: 'Tradition & Innovation',
+            title: 'Strukturveränderungen',
             imageUrl: '/assets/leitlinien/leitlinie6.jpg',
-            perspective: 'sustainability',
-            position: 5  // Wand 4, rechts
+            perspective: 'structure',
+            position: 5  // Wand 4
         }
     ]
 };

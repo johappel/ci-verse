@@ -1,0 +1,169 @@
+{
+    "key": "group_platform",
+    "title": "Plattform Einstellungen",
+    "fields": [
+        {
+            "key": "field_platform_id",
+            "label": "Plattform ID",
+            "name": "platform_id",
+            "type": "select",
+            "required": 1,
+            "choices": {
+                "B1": "B1 - Frühkindliche Bildung",
+                "B2": "B2 - Schule & Jugend",
+                "B3": "B3 - Erwachsenenbildung",
+                "Q1": "Q1 - Forschung",
+                "Q2": "Q2 - Europa & Internationales",
+                "Q3": "Q3 - Digitalisierung"
+            },
+            "default_value": "",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 0,
+            "ajax": 0
+        },
+        {
+            "key": "field_platform_title",
+            "label": "Voller Titel",
+            "name": "platform_title",
+            "type": "text",
+            "required": 1,
+            "placeholder": "z.B. Frühkindliche Bildung"
+        },
+        {
+            "key": "field_platform_short",
+            "label": "Kurzname (für Buttons)",
+            "name": "platform_short",
+            "type": "text",
+            "required": 1,
+            "placeholder": "z.B. Kita",
+            "maxlength": 15
+        },
+        {
+            "key": "field_platform_description",
+            "label": "Beschreibung",
+            "name": "platform_description",
+            "type": "textarea",
+            "rows": 2
+        },
+        {
+            "key": "field_platform_color",
+            "label": "Primärfarbe",
+            "name": "platform_color",
+            "type": "color_picker",
+            "required": 1,
+            "default_value": "#64748b",
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_platform_glow_color",
+            "label": "Leuchtfarbe (Glow)",
+            "name": "platform_glow_color",
+            "type": "color_picker",
+            "required": 1,
+            "default_value": "#94a3b8",
+            "instructions": "Hellere Variante der Primärfarbe für Glow-Effekte",
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_platform_aspects",
+            "label": "Thematische Aspekte",
+            "name": "platform_aspects",
+            "type": "repeater",
+            "max": 5,
+            "layout": "block",
+            "button_label": "Aspekt hinzufügen",
+            "sub_fields": [
+                {
+                    "key": "field_aspect_title",
+                    "label": "Titel",
+                    "name": "title",
+                    "type": "text",
+                    "required": 1,
+                    "wrapper": {
+                        "width": "40",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_aspect_icon",
+                    "label": "Icon (Emoji)",
+                    "name": "icon",
+                    "type": "text",
+                    "required": 1,
+                    "placeholder": "🙏",
+                    "wrapper": {
+                        "width": "15",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_aspect_description",
+                    "label": "Beschreibung",
+                    "name": "description",
+                    "type": "text",
+                    "wrapper": {
+                        "width": "45",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_aspect_content_url",
+                    "label": "Content URL",
+                    "name": "content_url",
+                    "type": "url"
+                }
+            ]
+        },
+        {
+            "key": "field_platform_wall_posters",
+            "label": "Wandposter (Projekte)",
+            "name": "platform_wall_posters",
+            "type": "relationship",
+            "post_type": ["civerse_project"],
+            "filters": ["search"],
+            "return_format": "object",
+            "instructions": "Projekte per Drag & Drop sortieren. Position = Reihenfolge."
+        },
+        {
+            "key": "field_platform_booth_projects",
+            "label": "Messestand-Projekte",
+            "name": "platform_booth_projects",
+            "type": "relationship",
+            "post_type": ["civerse_project"],
+            "filters": ["search"],
+            "return_format": "object",
+            "instructions": "Projekte die einen eigenen Messestand bekommen."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "civerse_platform"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für CI-Verse Plattformen (B1-B3, Q1-Q3)",
+    "show_in_rest": 0
+}

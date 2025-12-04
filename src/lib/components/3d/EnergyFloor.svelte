@@ -39,19 +39,19 @@
             Math.PI * 1.833,  // Wand 5
             Math.PI * 0.167   // Wand 6
         ],
-        // 6 Farben (wiederholt die 4 Perspektiven-Farben)
+        // 6 Farben für die 6 Leitlinien
         posterColors = [
-            '#facc15',  // Gold (justice)
-            '#4ade80',  // Grün (sustainability)
-            '#22d3ee',  // Cyan (digitality)
-            '#a78bfa',  // Violett (structure)
-            '#facc15',  // Gold (justice) - wiederholt
-            '#4ade80'   // Grün (sustainability) - wiederholt
+            '#f59e0b',  // Amber (education - Religiöse Bildung)
+            '#facc15',  // Gold (justice - Bildungsgerechtigkeit)
+            '#4ade80',  // Grün (sustainability - Nachhaltigkeit)
+            '#ec4899',  // Pink (diversity - Differenzsensibilität)
+            '#22d3ee',  // Cyan (digitality - Digitalität)
+            '#a78bfa'   // Violett (structure - Strukturveränderungen)
         ]
     }: Props = $props();
 
-    // Perspektiven in Reihenfolge
-    const perspectives: Perspective[] = ['justice', 'sustainability', 'digitality', 'structure'];
+    // Perspektiven in Reihenfolge (6 Leitlinien)
+    const perspectives: Perspective[] = ['education', 'justice', 'sustainability', 'diversity', 'digitality', 'structure'];
 
     // Aktive Perspektive
     let activePerspective = $derived(worldStore.state.activePerspective);

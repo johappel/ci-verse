@@ -2,8 +2,8 @@
     /**
      * ChatModal - KI-Chat Dialog für das Comenius-Institut
      * 
-     * Aktuell: Mock-Daten mit simulierten Antworten
-     * Später: n8n-Webhook Integration (chatWebhook aus MarketplaceStand)
+     * Sendet Nachrichten an n8n-Webhook und empfängt KI-Antworten.
+     * Fallback auf Mock-Daten wenn kein Webhook konfiguriert.
      */
     import { worldStore } from "$lib/logic/store.svelte";
     import { Send, Bot, User, Loader2 } from "lucide-svelte";
@@ -11,6 +11,9 @@
 
     // Direkt vom Store - reaktiv durch $derived
     let isModalOpen = $derived(worldStore.state.isChatOpen);
+    
+    // chatWebhook URL aus dem Store (vom Institution-Stand)
+    let chatWebhook = $derived(worldStore.state.chatWebhook);
     
     // Debug: Beobachte Änderungen
     $effect(() => {
@@ -81,17 +84,41 @@
             messagesContainer?.scrollTo({ top: messagesContainer.scrollHeight, behavior: 'smooth' });
         }, 50);
 
-        // TODO: Später durch n8n-Webhook ersetzen
-        // const webhook = 'https://n8n.comenius.de/webhook/ci-chat';
-        // const response = await fetch(webhook, { method: 'POST', body: JSON.stringify({ message: query }) });
-        
-        // Mock: Simulierte Verzögerung
-        await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 700));
+        let responseContent: string;
+
+        if (chatWebhook) {
+            // Echte n8n-Webhook Integration
+            try {
+                const response = await fetch(chatWebhook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: query,
+                        sessionId: crypto.randomUUID(),
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    responseContent = data.response || data.message || data.text || 'Keine Antwort erhalten.';
+                } else {
+                    responseContent = 'Entschuldigung, es gab ein Problem mit der Verbindung. Bitte versuchen Sie es später erneut.';
+                }
+            } catch (error) {
+                console.error('Chat webhook error:', error);
+                responseContent = 'Verbindungsfehler. Bitte prüfen Sie Ihre Internetverbindung.';
+            }
+        } else {
+            // Fallback: Mock-Antworten
+            await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 700));
+            responseContent = getResponse(query);
+        }
 
         const assistantMessage: ChatMessage = {
             id: crypto.randomUUID(),
             role: 'assistant',
-            content: getResponse(query),
+            content: responseContent,
             timestamp: new Date()
         };
 
@@ -243,7 +270,7 @@
                 </button>
             </div>
             <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem; text-align: center;">
-                Demo-Modus • Später mit n8n-KI verbunden
+                {chatWebhook ? '🟢 KI-Assistent aktiv' : '🟡 Demo-Modus'}
             </p>
         </div>
     </div>

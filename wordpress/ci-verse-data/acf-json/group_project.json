@@ -1,0 +1,238 @@
+{
+    "key": "group_project",
+    "title": "Projekt Einstellungen",
+    "fields": [
+        {
+            "key": "field_project_tab_basis",
+            "label": "Basis",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_project_id",
+            "label": "Projekt ID",
+            "name": "project_id",
+            "type": "text",
+            "required": 1,
+            "placeholder": "p1, p2, ...",
+            "instructions": "Eindeutige ID (z.B. p1, p2, ...)",
+            "wrapper": {
+                "width": "20",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_project_external_url",
+            "label": "Externe URL",
+            "name": "project_external_url",
+            "type": "url",
+            "required": 1,
+            "wrapper": {
+                "width": "80",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_project_teaser",
+            "label": "Kurzbeschreibung",
+            "name": "project_teaser",
+            "type": "textarea",
+            "rows": 2,
+            "maxlength": 200
+        },
+        {
+            "key": "field_project_tab_zuordnung",
+            "label": "Zuordnung",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_project_departments",
+            "label": "Plattformen (Departments)",
+            "name": "project_departments",
+            "type": "checkbox",
+            "choices": {
+                "B1": "B1 - Kita",
+                "B2": "B2 - Schule",
+                "B3": "B3 - Erwachsene",
+                "Q1": "Q1 - Forschung",
+                "Q2": "Q2 - Europa",
+                "Q3": "Q3 - Digital"
+            },
+            "layout": "horizontal",
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_project_related_departments",
+            "label": "Wegweiser-Plattformen",
+            "name": "project_related_departments",
+            "type": "checkbox",
+            "choices": {
+                "B1": "B1 - Kita",
+                "B2": "B2 - Schule",
+                "B3": "B3 - Erwachsene",
+                "Q1": "Q1 - Forschung",
+                "Q2": "Q2 - Europa",
+                "Q3": "Q3 - Digital"
+            },
+            "layout": "horizontal",
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "instructions": "Plattformen, auf denen ein Wegweiser zu diesem Projekt erscheint (ohne eigenen Stand)."
+        },
+        {
+            "key": "field_project_perspectives",
+            "label": "Leitlinien (Perspektiven)",
+            "name": "project_perspectives",
+            "type": "checkbox",
+            "choices": {
+                "education": "📖 Religiöse Bildung",
+                "justice": "⚖️ Bildungsgerechtigkeit",
+                "sustainability": "🌱 Nachhaltigkeit",
+                "diversity": "🌈 Differenzsensibilität",
+                "digitality": "💻 Digitalität",
+                "structure": "🏗️ Strukturveränderungen"
+            },
+            "layout": "horizontal",
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_project_target_groups",
+            "label": "Zielgruppen",
+            "name": "project_target_groups",
+            "type": "checkbox",
+            "choices": {
+                "0-3": "0-3 Jahre",
+                "4-6": "4-6 Jahre",
+                "7-10": "7-10 Jahre",
+                "11-14": "11-14 Jahre",
+                "15-18": "15-18 Jahre",
+                "young-adults": "Junge Erwachsene",
+                "adults": "Erwachsene",
+                "seniors": "Senioren",
+                "employees": "Fachkräfte",
+                "volunteers": "Ehrenamtliche"
+            },
+            "layout": "horizontal"
+        },
+        {
+            "key": "field_project_display_type",
+            "label": "Anzeigetyp",
+            "name": "project_display_type",
+            "type": "radio",
+            "choices": {
+                "booth": "🏪 Booth (Freistehender Messestand)",
+                "wall": "🖼️ Wall (Poster an der Wand)",
+                "both": "✨ Both (Beides)"
+            },
+            "layout": "horizontal",
+            "default_value": "booth",
+            "instructions": "Legt fest, wie das Projekt auf der Plattform angezeigt wird."
+        },
+        {
+            "key": "field_project_staff",
+            "label": "Zuständige Mitarbeiter",
+            "name": "project_staff",
+            "type": "relationship",
+            "post_type": ["civerse_staff"],
+            "filters": ["search"],
+            "return_format": "object"
+        },
+        {
+            "key": "field_project_tab_display",
+            "label": "Darstellung",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_project_slogan",
+            "label": "Slogan",
+            "name": "project_slogan",
+            "type": "text",
+            "placeholder": "Kurzer, prägnanter Slogan"
+        },
+        {
+            "key": "field_project_color",
+            "label": "Primärfarbe",
+            "name": "project_color",
+            "type": "color_picker",
+            "default_value": "#3b82f6"
+        },
+        {
+            "key": "field_project_poster_image",
+            "label": "Poster-Bild",
+            "name": "project_poster_image",
+            "type": "image",
+            "return_format": "array",
+            "preview_size": "medium",
+            "instructions": "Empfohlen: 800×1200px (Portrait)"
+        },
+        {
+            "key": "field_project_poster_image_format",
+            "label": "Poster-Bildformat",
+            "name": "project_poster_image_format",
+            "type": "select",
+            "choices": {
+                "portrait": "📐 Portrait (800×1200px)",
+                "landscape": "🖼️ Landscape (1200×800px)",
+                "square": "⬜ Quadratisch (1000×1000px)"
+            },
+            "default_value": "portrait",
+            "instructions": "Format des Poster-Bildes für optimale Darstellung."
+        },
+        {
+            "key": "field_project_logo",
+            "label": "Logo",
+            "name": "project_logo",
+            "type": "image",
+            "return_format": "array",
+            "preview_size": "thumbnail"
+        },
+        {
+            "key": "field_project_screenshot",
+            "label": "Website Screenshot",
+            "name": "project_screenshot",
+            "type": "image",
+            "return_format": "array",
+            "preview_size": "medium",
+            "instructions": "Screenshot der Projekt-Website (800×600px)"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "civerse_project"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für CI-Verse Projekte",
+    "show_in_rest": 0
+}

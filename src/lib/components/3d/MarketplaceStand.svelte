@@ -158,7 +158,7 @@
         
         switch (stand.type) {
             case 'institution':
-                worldStore.openChat();
+                worldStore.openChat(stand.chatWebhook);
                 break;
             case 'publications':
                 worldStore.openRssPanel();

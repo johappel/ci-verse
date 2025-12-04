@@ -11,6 +11,8 @@ interface ExtendedAppState extends AppState {
     // Partner Dialog (Nexus Terminal)
     isPartnerDialogOpen: boolean;
     selectedPartner: PartnerConnection | null;
+    // Chat Webhook URL (von Institution-Stand)
+    chatWebhook: string | null;
 }
 
 export class WorldStore {
@@ -42,7 +44,9 @@ export class WorldStore {
         iframeTitle: null,
         // NEU: Partner Dialog (Nexus Terminal)
         isPartnerDialogOpen: false,
-        selectedPartner: null
+        selectedPartner: null,
+        // NEU: Chat Webhook URL
+        chatWebhook: null
     });
 
     // Derived: Theme-Farbe basierend auf aktiver Perspektive
@@ -162,8 +166,9 @@ export class WorldStore {
     }
 
     // NEU: Chat-Modal für ProjectChart
-    openChat() {
+    openChat(webhookUrl?: string) {
         this.state.isChatOpen = true;
+        this.state.chatWebhook = webhookUrl ?? null;
         this.state.selectedId = null; // Schließe Projekt-Modal
         this.state.isRssPanelOpen = false;
         this.state.isEventsPanelOpen = false;
@@ -171,6 +176,7 @@ export class WorldStore {
 
     closeChat() {
         this.state.isChatOpen = false;
+        this.state.chatWebhook = null;
     }
 
     // NEU: RSS-Panel für Publications

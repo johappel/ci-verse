@@ -1,0 +1,295 @@
+{
+    "key": "group_marketplace",
+    "title": "Marktplatz (S-Plattform)",
+    "fields": [
+        {
+            "key": "field_marketplace_tab_general",
+            "label": "Allgemein",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_marketplace_title",
+            "label": "Titel",
+            "name": "marketplace_title",
+            "type": "text",
+            "required": 1,
+            "default_value": "Marktplatz",
+            "wrapper": {
+                "width": "40",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_marketplace_short",
+            "label": "Kurzname",
+            "name": "marketplace_short",
+            "type": "text",
+            "required": 1,
+            "default_value": "Marktplatz",
+            "wrapper": {
+                "width": "30",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_marketplace_description",
+            "label": "Beschreibung",
+            "name": "marketplace_description",
+            "type": "textarea",
+            "rows": 2,
+            "default_value": "Bildungsmarktplatz des Comenius-Instituts."
+        },
+        {
+            "key": "field_marketplace_color",
+            "label": "Primärfarbe",
+            "name": "marketplace_color",
+            "type": "color_picker",
+            "required": 1,
+            "default_value": "#64748b",
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_marketplace_glow_color",
+            "label": "Leuchtfarbe (Glow)",
+            "name": "marketplace_glow_color",
+            "type": "color_picker",
+            "required": 1,
+            "default_value": "#94a3b8",
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            }
+        },
+        {
+            "key": "field_marketplace_tab_stands",
+            "label": "Stände",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_marketplace_stands",
+            "label": "Marktplatz-Stände",
+            "name": "marketplace_stands",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Stand hinzufügen",
+            "sub_fields": [
+                {
+                    "key": "field_stand_title",
+                    "label": "Titel",
+                    "name": "title",
+                    "type": "text",
+                    "required": 1,
+                    "wrapper": {
+                        "width": "40",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_stand_type",
+                    "label": "Typ",
+                    "name": "type",
+                    "type": "select",
+                    "choices": {
+                        "institution": "🏛️ Institution (mit KI-Chat)",
+                        "publications": "📚 Publikationen (RSS)",
+                        "events": "📅 Veranstaltungen (Nostr)",
+                        "info": "ℹ️ Info-Stand"
+                    },
+                    "wrapper": {
+                        "width": "35",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_stand_icon",
+                    "label": "Icon",
+                    "name": "icon",
+                    "type": "text",
+                    "placeholder": "🏛️",
+                    "wrapper": {
+                        "width": "10",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_stand_color",
+                    "label": "Farbe",
+                    "name": "color",
+                    "type": "color_picker",
+                    "wrapper": {
+                        "width": "15",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_stand_description",
+                    "label": "Beschreibung",
+                    "name": "description",
+                    "type": "textarea",
+                    "rows": 2
+                },
+                {
+                    "key": "field_stand_external_url",
+                    "label": "Externe URL",
+                    "name": "external_url",
+                    "type": "url"
+                },
+                {
+                    "key": "field_stand_chat_webhook",
+                    "label": "Chat Webhook (n8n)",
+                    "name": "chat_webhook",
+                    "type": "url",
+                    "instructions": "Nur bei Typ \"Institution\"",
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_stand_type",
+                                "operator": "==",
+                                "value": "institution"
+                            }
+                        ]
+                    ]
+                },
+                {
+                    "key": "field_stand_rss_feeds",
+                    "label": "RSS Feed URLs",
+                    "name": "rss_feeds",
+                    "type": "repeater",
+                    "layout": "table",
+                    "button_label": "Feed hinzufügen",
+                    "sub_fields": [
+                        {
+                            "key": "field_rss_url",
+                            "label": "URL",
+                            "name": "url",
+                            "type": "url"
+                        }
+                    ],
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_stand_type",
+                                "operator": "==",
+                                "value": "publications"
+                            }
+                        ]
+                    ]
+                },
+                {
+                    "key": "field_stand_nostr_filter",
+                    "label": "Nostr Filter (npub/nevent)",
+                    "name": "nostr_filter",
+                    "type": "text",
+                    "instructions": "Nostr NIP-19 Identifier für Events (npub1..., nevent1...)",
+                    "placeholder": "npub1... oder nevent1...",
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_stand_type",
+                                "operator": "==",
+                                "value": "events"
+                            }
+                        ]
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "field_marketplace_tab_posters",
+            "label": "Leitlinien-Poster",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_marketplace_wall_posters",
+            "label": "Wandposter (Leitlinien)",
+            "name": "marketplace_wall_posters",
+            "type": "repeater",
+            "max": 6,
+            "layout": "block",
+            "button_label": "Poster hinzufügen",
+            "sub_fields": [
+                {
+                    "key": "field_poster_title",
+                    "label": "Titel",
+                    "name": "title",
+                    "type": "text",
+                    "required": 1,
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_poster_perspective",
+                    "label": "Leitlinie",
+                    "name": "perspective",
+                    "type": "select",
+                    "choices": {
+                        "education": "📖 Religiöse Bildung",
+                        "justice": "⚖️ Bildungsgerechtigkeit",
+                        "sustainability": "🌱 Nachhaltigkeit",
+                        "diversity": "🌈 Differenzsensibilität",
+                        "digitality": "💻 Digitalität",
+                        "structure": "🏗️ Strukturveränderungen"
+                    },
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    }
+                },
+                {
+                    "key": "field_poster_image",
+                    "label": "Bild (800×1200)",
+                    "name": "image",
+                    "type": "image",
+                    "return_format": "array",
+                    "wrapper": {
+                        "width": "40",
+                        "class": "",
+                        "id": ""
+                    }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "civerse-marketplace-settings"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den CI-Verse Marktplatz (S-Plattform)",
+    "show_in_rest": 0
+}
