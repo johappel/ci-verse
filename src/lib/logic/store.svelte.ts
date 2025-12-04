@@ -13,6 +13,8 @@ interface ExtendedAppState extends AppState {
     selectedPartner: PartnerConnection | null;
     // Chat Webhook URL (von Institution-Stand)
     chatWebhook: string | null;
+    // Pending ViewTarget (nach Transport ausführen)
+    pendingViewTarget: { projectId: string; displayType: 'booth' | 'wall'; platformId: string } | null;
 }
 
 export class WorldStore {
@@ -46,7 +48,9 @@ export class WorldStore {
         isPartnerDialogOpen: false,
         selectedPartner: null,
         // NEU: Chat Webhook URL
-        chatWebhook: null
+        chatWebhook: null,
+        // NEU: Pending ViewTarget (nach Transport)
+        pendingViewTarget: null
     });
 
     // Derived: Theme-Farbe basierend auf aktiver Perspektive
@@ -159,6 +163,22 @@ export class WorldStore {
         }
         this.state.isTransporting = false;
         this.state.transportTarget = null;
+
+        // Pending ViewTarget nach Transport ausführen
+        if (this.state.pendingViewTarget) {
+            const pending = this.state.pendingViewTarget;
+            this.state.pendingViewTarget = null;
+            
+            // Kurze Verzögerung damit Transport-Animation abgeschlossen ist
+            setTimeout(() => {
+                import('./viewpoints').then(({ getViewPoint }) => {
+                    const viewPoint = getViewPoint(pending.projectId, pending.displayType, pending.platformId);
+                    if (viewPoint) {
+                        this.setViewTarget(viewPoint.camera, viewPoint.target);
+                    }
+                });
+            }, 500); // 500ms warten nach Transport
+        }
     }
 
     setCurrentPlatform(platformId: string) {
@@ -272,6 +292,26 @@ export class WorldStore {
 
     clearViewTarget() {
         this.state.viewTarget = null;
+    }
+
+    // NEU: Navigiere direkt zu einem Projekt (auf aktueller oder Ziel-Plattform)
+    // Nutzt getViewPoint() API und setzt viewTarget oder triggert Transport
+    navigateToProject(projectId: string, displayType: 'booth' | 'wall', platformId: string) {
+        // Import getViewPoint dynamisch zur Laufzeit (vermeidet circular dependencies)
+        import('./viewpoints').then(({ getViewPoint }) => {
+            // Wenn auf gleicher Plattform: Direkt viewTarget setzen
+            if (platformId === this.state.currentPlatform) {
+                const viewPoint = getViewPoint(projectId, displayType, platformId);
+                if (viewPoint) {
+                    this.setViewTarget(viewPoint.camera, viewPoint.target);
+                }
+            }
+            // Sonst: Transport zur Plattform starten + pendingViewTarget speichern
+            else {
+                this.state.pendingViewTarget = { projectId, displayType, platformId };
+                this.startTransport(platformId);
+            }
+        });
     }
 
     // Algorithmus: Finde verwandte Projekte

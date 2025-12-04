@@ -36,12 +36,16 @@
         return `→ ${homePlatforms}`;
     }
 
-    // Klick auf Projekt: Zur ersten Heimat-Plattform navigieren
+    // Klick auf Projekt: Direkt zum Projekt navigieren (Booth oder Wall)
     function handleProjectClick(project: ProjectData) {
         const targetPlatform = project.departments[0];
-        if (targetPlatform && targetPlatform !== platformId) {
-            worldStore.startTransport(targetPlatform);
-        }
+        if (!targetPlatform) return;
+
+        // Bestimme displayType: 'both' → bevorzuge 'booth', ansonsten Projekt-Einstellung
+        const displayType = project.displayType === 'wall' ? 'wall' : 'booth';
+        
+        // Nutze Store-Methode für Navigation (handled Transport automatisch)
+        worldStore.navigateToProject(project.id, displayType, targetPlatform);
     }
 
     // Kompakte Maße
