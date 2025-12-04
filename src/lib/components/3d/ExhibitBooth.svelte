@@ -83,12 +83,9 @@
     const availableImageWidth = s.width - s.textWidth - 0.4 - s.gap; // 0.4 = Rahmen links+rechts
     const imageHeight = s.height * 0.92; // Höhe wie Text-Bereich
     
-    // Bildbreite je nach Format
-    const imageWidth = $derived(
-        imageFormat === 'landscape' ? availableImageWidth :
-        imageFormat === 'square' ? Math.min(availableImageWidth, imageHeight) :
-        Math.min(availableImageWidth * 0.7, imageHeight * 0.67) // portrait: schmaler
-    );
+    // NEU: Feste Breite erzwingen (Stretching wie im CSS)
+    // Wir nutzen den vollen verfügbaren Platz, egal welches Format das Bild hat
+    const imageWidth = $derived(availableImageWidth);
     
     // Titel-Schriftgröße
     const titleFontSize = $derived(

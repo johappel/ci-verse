@@ -378,13 +378,13 @@ export const mockProjects: ProjectData[] = [
         externalUrl: 'https://rpi-virtuell.de',
         departments: ['Q3'],
         perspectives: ['structure', 'digitality'],
-        targetGroups: ['employees'],
-        displayType: 'both',
+        targetGroups: ['Religionspädagog*innen', 'Wissenschaftler*innen', 'Praxiserprobte'],
+        displayType: 'wall',
         staff: ['m4'],
         shortTeaser: 'rpi-virtuell ist eine digitale Plattform für Lehr- und Fachkräfte, Wissenschaft und Praxis der religionsbezogenen Bildung, die eine kuratierte Materialiensammlung, die Möglichkeit zum Austausch und zur Vernetzung in Communities sowie regelmäßige Updates bietet.',
         display: {
             slogan: 'Digitalität in der Religionspädagogik',
-            posterImage: 'static/assets/images/rpi-dechow-lohrer-dekt-2023.png',
+            posterImage: '/assets/images/rpi-dechow-lohrer-dekt-2023.png',
 
             color: '#16a34a',
             screenshotUrl: 'https://news.rpi-virtuell.de/wp-content/uploads/2023/06/grafik-2.png'

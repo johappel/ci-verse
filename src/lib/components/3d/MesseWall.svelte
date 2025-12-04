@@ -280,16 +280,9 @@
         {@const gap = 0.35} <!-- Abstand zwischen Text und Bild -->
         
         <!-- Bildgrößen je nach Format (Bild ist dominant!) -->
-        {@const imageWidth = hasImage ? (
-            imageFormat === 'landscape' ? posterHeight * 1.2 :
-            imageFormat === 'square' ? posterHeight * 0.85 :
-            posterHeight * 0.55
-        ) : 0}
-        {@const imageHeight = hasImage ? (
-            imageFormat === 'landscape' ? posterHeight * 0.8 :
-            imageFormat === 'square' ? posterHeight * 0.85 :
-            posterHeight * 0.92
-        ) : 0}
+        <!-- NEU: Feste Größe erzwingen (Stretching wie im CSS) -->
+        {@const imageWidth = hasImage ? posterHeight * 1.0 : 0}
+        {@const imageHeight = hasImage ? posterHeight * 0.92 : 0}
         
         <!-- Text-Bereich: schmaler als Bild -->
         {@const textWidth = hasImage ? Math.min(posterHeight * 0.5, imageWidth * 0.6) : posterHeight * 0.8}
