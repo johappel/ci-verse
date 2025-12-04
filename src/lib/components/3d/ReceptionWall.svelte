@@ -11,7 +11,7 @@
      * um "Durchbluten" durch andere Plattformen zu verhindern.
      */
     import { T, useTask } from '@threlte/core';
-    import { HTML, useCursor, useTexture } from '@threlte/extras';
+    import { HTML, useCursor, useTexture, Text, Billboard } from '@threlte/extras';
     import { SRGBColorSpace } from 'three';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
@@ -86,7 +86,8 @@
     const chatbotX = panels.institution.width / 2 + panels.gap + panels.chatbot.width / 2;
     const teamX = -(panels.institution.width / 2 + panels.gap + panels.team.width / 2);
 
-    function handleChatClick() {
+    function handleChatClick(e?: Event) {
+        e?.stopPropagation(); // Verhindert dass Klick zur Mesh durchdringt
         console.log('handleChatClick aufgerufen!');
         console.log('isChatOpen vorher:', worldStore.state.isChatOpen);
         worldStore.openChat();
@@ -214,23 +215,23 @@
     </T.Group>
     
     <!-- ========== INSTITUTIONS-PANEL (Mitte) mit Bild ========== -->
-    <T.Group position={[0, wall.height / 2 + 1.5, wall.depth / 2 + 0.1]} onclick={handleWallClick}>
+    <T.Group position={[0, wall.height / 2 + 1.5, wall.depth / 2 + 0.1]}>
         
         <!-- Goldener Rahmen -->
-        <T.Mesh position.z={0.01}>
+        <T.Mesh position.z={0.01} onclick={handleWallClick}>
             <T.PlaneGeometry args={[panels.institution.width + 0.3, panels.institution.height + 0.3]} />
             <T.MeshBasicMaterial color={accentColor} />
         </T.Mesh>
 
         <!-- CI-Blau Hintergrund -->
-        <T.Mesh position.z={0.03}>
+        <T.Mesh position.z={0.03} onclick={handleWallClick}>
             <T.PlaneGeometry args={[panels.institution.width, panels.institution.height]} />
             <T.MeshBasicMaterial color="#023b88" toneMapped={false} />
         </T.Mesh>
 
         <!-- Institutions-Bild (about-ci.jpg) mit korrektem Farbmanagement -->
         {#await institutionTexture then texture}
-            <T.Mesh position.z={0.05}>
+            <T.Mesh position.z={0.05} onclick={handleWallClick}>
                 <T.PlaneGeometry args={[panels.institution.width, panels.institution.height]} />
                 <T.MeshBasicMaterial map={texture} toneMapped={false} />
             </T.Mesh>
@@ -294,33 +295,35 @@
                 </div>
             </HTML>
         </T.Group>
-        {/if}
+
+        <!-- 3D-Mesh Button - fängt ALLE Klicks ab -->
+        <T.Mesh 
+            position={[0, -2, 0.1]} 
+            onclick={(e: Event) => { e.stopPropagation(); handleChatClick(e); }}
+            onpointerenter={() => isChatHovered = true}
+            onpointerleave={() => isChatHovered = false}
+        >
+            <T.PlaneGeometry args={[3, 1]} />
+            <T.MeshBasicMaterial 
+                color={neonCyan}
+                transparent 
+                opacity={isChatHovered ? 0.3 : 0.01}
+                depthWrite={false}
+            />
+        </T.Mesh>
         
-        <!-- "Frag mich!" Button unter dem Video - NUR auf Marktplatz -->
-        {#if isOnMarketplace}
-        <HTML center transform scale={0.3} position={[0, -2, 0.1]}>
-            <button 
-                onclick={handleChatClick}
-                onmouseenter={() => isChatHovered = true}
-                onmouseleave={() => isChatHovered = false}
-                style="
-                    background: linear-gradient(135deg, #0891b2 0%, #22d3d3 100%);
-                    border: 2px solid #22d3d3;
-                    border-radius: 12px;
-                    padding: 12px 32px;
-                    color: white;
-                    font-size: 24px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    box-shadow: 0 0 20px rgba(34, 211, 211, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
-                    transition: all 0.2s ease;
-                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-                "
-                class="hover:scale-105"
-            >
-                Frag mich!
-            </button>
-        </HTML>
+        <!-- "Frag mich!" Text über dem Button -->
+        <Billboard position={[0, -2, 0.15]}>
+            <Text
+                text="Frag mich!"
+                color="#ffffff"
+                fontSize={0.35}
+                anchorX="center"
+                anchorY="middle"
+                outlineWidth={0.02}
+                outlineColor={neonCyan}
+            />
+        </Billboard>
         {/if}
 
         {#if isChatHovered}

@@ -179,6 +179,61 @@ let store = writable({});     // Verwende $state stattdessen
 const mesh = new THREE.Mesh(); // Nur in Utilities!
 ```
 
+### ⚠️ HTML-Raycasting Problem & Lösung
+
+**Problem:** `<HTML>` Elemente blockieren 3D-Raycasts zu darunterliegenden Meshes. Auch mit `pointer-events: none` oder unterschiedlichen Z-Positionen funktioniert Raycasting durch HTML nicht zuverlässig.
+
+**❌ Funktioniert NICHT:**
+```svelte
+<!-- HTML-Button blockiert Raycasts, Klicks inkonsistent -->
+<HTML center position={[0, 0, 0.1]}>
+  <button onclick={handleClick}>Klick mich!</button>
+</HTML>
+
+<!-- Mesh dahinter wird NICHT getroffen -->
+<T.Mesh position={[0, 0, 0]} onclick={handleWallClick}>
+  <T.PlaneGeometry />
+</T.Mesh>
+```
+
+**✅ LÖSUNG: Verwende 3D-Text + Unsichtbare Mesh**
+```svelte
+<!-- Unsichtbare Mesh fängt Klicks ab -->
+<T.Mesh 
+  position={[0, -2, 0.1]} 
+  onclick={(e) => { e.stopPropagation(); handleClick(e); }}
+  onpointerenter={() => isHovered = true}
+  onpointerleave={() => isHovered = false}
+>
+  <T.PlaneGeometry args={[3, 1]} />
+  <T.MeshBasicMaterial 
+    transparent 
+    opacity={isHovered ? 0.3 : 0.01}  // 0.01 = unsichtbar aber raycast-fähig!
+    depthWrite={false}
+  />
+</T.Mesh>
+
+<!-- 3D-Text darüber (blockiert Raycasts NICHT) -->
+<Billboard position={[0, -2, 0.15]}>
+  <Text
+    text="Klick mich!"
+    color="#ffffff"
+    fontSize={0.35}
+    anchorX="center"
+    anchorY="middle"
+    outlineWidth={0.02}
+    outlineColor="#00ffff"
+  />
+</Billboard>
+```
+
+**Wichtige Erkenntnisse:**
+- `opacity={0}` macht Mesh raycast-unsichtbar → mindestens `0.01` verwenden
+- `<HTML>` blockiert Raycasts IMMER, egal welche Z-Position oder `pointer-events`
+- `<Text>` + `<Billboard>` sind echte 3D-Objekte, blockieren Raycasts nicht
+- `depthWrite={false}` verhindert Rendering-Artefakte bei transparenten Meshes
+- `stopPropagation()` verhindert Weiterleitung zu dahinterliegenden Objekten
+
 ### Store-Interaktion
 ```typescript
 // ✅ Immer durch Store-Methoden
