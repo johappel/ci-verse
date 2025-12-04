@@ -37,9 +37,8 @@ export function getCameraY(platformY: number): number {
 
 export interface Platform {
     id: string;
-    name: string;
-    shortName: string;
-    description: string;
+    // name und description sind in mockPlatformContents definiert!
+    // Verwende getPlatformContent() um Title und Beschreibung zu laden
     y: number;
     x: number;
     z: number;
@@ -69,9 +68,6 @@ export const platforms: Record<string, Platform> = {
     // S - Marktplatz (Zentrum) - größte Plattform
     S: {
         id: 'S',
-        name: 'Marktplatz',
-        shortName: 'Markt',
-        description: 'Zentraler Ausgangspunkt mit Bibliothek und ProjectChart',
         y: 0,
         x: 0,
         z: 0,
@@ -87,9 +83,6 @@ export const platforms: Record<string, Platform> = {
     // B-Plattformen (Bildung) - gleiche Höhe wie S, im Kreis angeordnet
     B1: {
         id: 'B1',
-        name: 'Frühkindliche Bildung',
-        shortName: 'Kita',
-        description: 'Religiöse Bildung für Kinder von 0-6 Jahren',
         y: 0,
         x: -180,
         z: 0,
@@ -103,9 +96,6 @@ export const platforms: Record<string, Platform> = {
     },
     B2: {
         id: 'B2',
-        name: 'Schule & Jugend',
-        shortName: 'Schule',
-        description: 'Bildungsangebote für Schule und Jugendarbeit',
         y: 0,
         x: 0,
         z: 180,
@@ -119,9 +109,6 @@ export const platforms: Record<string, Platform> = {
     },
     B3: {
         id: 'B3',
-        name: 'Erwachsenenbildung',
-        shortName: 'Erwachsene',
-        description: 'Fortbildung und Lebenslanges Lernen',
         y: 0,
         x: 180,
         z: 0,
@@ -137,9 +124,6 @@ export const platforms: Record<string, Platform> = {
     // Q-Plattformen (Querschnitt) - höher schwebend
     Q1: {
         id: 'Q1',
-        name: 'Forschung',
-        shortName: 'Forschung',
-        description: 'Wissenschaftliche Studien und Publikationen',
         y: 80,
         x: -140,
         z: -140,
@@ -153,9 +137,6 @@ export const platforms: Record<string, Platform> = {
     },
     Q2: {
         id: 'Q2',
-        name: 'Europa',
-        shortName: 'Europa',
-        description: 'Internationale Kooperationen und EU-Projekte',
         y: 120,
         x: 0,
         z: -200,
@@ -169,9 +150,6 @@ export const platforms: Record<string, Platform> = {
     },
     Q3: {
         id: 'Q3',
-        name: 'Digitalisierung',
-        shortName: 'Digital',
-        description: 'Digitale Transformation und E-Learning',
         y: 80,
         x: 140,
         z: -140,

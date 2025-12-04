@@ -372,7 +372,7 @@
 		<T.Color attach="background" args={[currentFogColor]} />
 
 		<!-- Distanz-Nebel für weit entfernte Objekte -->
-		<T.FogExp2 attach="fog" args={[currentFogColor, 0.0015]} />
+		<T.FogExp2 attach="fog" args={[currentFogColor, 0.007]} />
 
 		<!-- Beleuchtung -->
 		<T.AmbientLight intensity={ambientIntensity} color="#e0e7ff" />

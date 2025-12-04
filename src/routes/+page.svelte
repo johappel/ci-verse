@@ -11,7 +11,7 @@
     import IframeDialog from "$lib/components/ui/IframeDialog.svelte";
     import PartnerDialog from "$lib/components/ui/PartnerDialog.svelte";
     import { initWorldStore, worldStore } from "$lib/logic/store.svelte";
-    import { mockProjects } from "$lib/data/mockProjects";
+    import { mockProjects, getPlatformContent, getMarketplaceContent } from "$lib/data/mockProjects";
     import { platforms } from "$lib/logic/platforms";
     import { onMount } from "svelte";
     import { fade, fly } from "svelte/transition";
@@ -39,12 +39,22 @@
         cameraControls = controls;
     }
 
-    // Transport-Info: Zielplattform-Name
+    // Transport-Info: Zielplattform-Name (Kurzname aus mockProjects)
     let transportTargetName = $derived(
         worldStore.state.transportTarget 
-            ? platforms[worldStore.state.transportTarget]?.name || worldStore.state.transportTarget
+            ? getPlatformName(worldStore.state.transportTarget)
             : ''
     );
+
+    // Helper: Plattform-Kurzname holen
+    function getPlatformName(platformId: string): string {
+        if (platformId === 'S') {
+            const marketplace = getMarketplaceContent();
+            return marketplace?.short ?? 'Marktplatz';
+        }
+        const content = getPlatformContent(platformId);
+        return content?.short ?? platformId;
+    }
 
     // URL-Parameter beim Mount lesen
     onMount(() => {

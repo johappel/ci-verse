@@ -23,6 +23,26 @@
         };
     }
 
+    // Helper: Plattform-Name holen
+    function getPlatformName(platformId: string): string {
+        if (platformId === 'S') {
+            const marketplace = getMarketplaceContent();
+            return marketplace?.title ?? 'Marktplatz';
+        }
+        const content = getPlatformContent(platformId);
+        return content?.title ?? platformId;
+    }
+
+    // Helper: Plattform-Kurzname holen
+    function getPlatformShortName(platformId: string): string {
+        if (platformId === 'S') {
+            const marketplace = getMarketplaceContent();
+            return marketplace?.short ?? 'Markt';
+        }
+        const content = getPlatformContent(platformId);
+        return content?.short ?? platformId;
+    }
+
     // Zeit-basierte Animation (unabhängig von Frame-Rate)
     let animationStartTime = $state(0);
     let rotationY = $state(0);
@@ -197,7 +217,7 @@
                     <!-- Label über Button -->
                     <Billboard position={[0, 1, 0]}>
                         <Text
-                            text={platform.shortName}
+                            text={getPlatformShortName(platform.id)}
                             color={isHovered ? '#ffffff' : '#cccccc'}
                             fontSize={isHovered ? 0.5 : 0.4}
                             anchorX="center"
@@ -238,7 +258,7 @@
                     <!-- Label über Button -->
                     <Billboard position={[0, 1, 0]}>
                         <Text
-                            text={platform.shortName}
+                            text={getPlatformShortName(platform.id)}
                             color={isHovered ? '#ffffff' : '#cccccc'}
                             fontSize={isHovered ? 0.5 : 0.4}
                             anchorX="center"
@@ -255,7 +275,7 @@
         <Billboard position={[0, 5, 0]}>
             {#if isTransporting && targetPlatform}
                 <Text
-                    text={`→ ${targetPlatform.name}`}
+                    text={`→ ${getPlatformName(targetPlatform.id)}`}
                     color={getPlatformColors(targetPlatform.id).glowColor}
                     fontSize={0.9}
                     anchorX="center"

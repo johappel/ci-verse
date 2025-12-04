@@ -28,10 +28,14 @@
     import { mockProjects } from '$lib/data/mockProjects';
     import type { ProjectData, Department, Perspective, TargetGroup } from '$lib/types/project';
 
-    let { platform }: { platform: PlatformType } = $props();
+    interface Props {
+        platform: PlatformType;
+    }
 
-    // Marketplace-Daten laden
-    let marketplace = $derived(getMarketplaceContent());
+    let { platform }: Props = $props();
+
+    // Marketplace-Content laden
+    const marketplace = $derived(getMarketplaceContent());
 
     // Farben aus Content-Daten (Fallback auf platforms.ts)
     let platformColor = $derived(marketplace?.color ?? platform.color);
@@ -470,7 +474,7 @@
             />
         </T.Mesh>
         <Text
-            text={platform.name}
+            text={marketplace?.title ?? 'Marktplatz'}
             color={isCurrentPlatform ? '#1e293b' : '#ffffff'}
             fontSize={0.7}
             position={[0, 0, 0.2]}

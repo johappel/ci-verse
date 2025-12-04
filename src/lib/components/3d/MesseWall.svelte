@@ -53,6 +53,9 @@
     
     let hoveredButtonId = $state<string | null>(null);
     
+    // Auf der gleichen Plattform? (für Poster-Sichtbarkeit)
+    let isOnPlatform = $derived(worldStore.state.currentPlatform === platformId);
+    
     // Distanz-Check: Wie nah ist die Kamera an den Wänden?
     // Aktivierung nur wenn Kamera nahe genug an einer Wand ist
     const WALL_ACTIVATION_DISTANCE = 12; // Distanz zur Wand für Aktivierung
@@ -311,7 +314,7 @@
                 
                 {#if imageOnly}
                     <!-- === NUR BILD MODUS (Leitlinien) === -->
-                    {#if project.display?.posterImage}
+                    {#if project.display?.posterImage && isOnPlatform}
                         <!-- Großes Landscape-Bild zentriert -->
                         <T.Group>
                             <!-- Rahmen für Poster-Bild -->
@@ -471,7 +474,7 @@
                     </T.Group>
                     
                     <!-- Vertikale Trennlinie zwischen Text und Bild -->
-                    {#if hasImage}
+                    {#if hasImage && isOnPlatform}
                         {@const dividerX = textOffsetX + textWidth / 2 + gap / 2}
                         <T.Mesh position={[dividerX, 0, 0.22]}>
                             <T.PlaneGeometry args={[0.04, contentHeight * 0.9]} />
@@ -480,7 +483,7 @@
                     {/if}
 
                     <!-- === POSTER-BILD (rechts) === -->
-                    {#if hasImage}
+                    {#if hasImage && isOnPlatform}
                         {@const imageOffsetX = textOffsetX + textWidth / 2 + gap + imageWidth / 2}
                         <T.Mesh 
                             position={[imageOffsetX, 0, 0.22]}

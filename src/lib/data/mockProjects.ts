@@ -609,8 +609,8 @@ export const mockPlatformContents: Record<string, PlatformContent> = {
     B2: {
         id: 'B2',
         title: 'Bildung im Kontext von Gemeinde',
-        short: 'Kirche',
-        description: 'Bildungsangebote im Kontext von Gemeinde und Jugendarbeit',
+        short: 'Gemeinde',
+        description: 'Bildung im Kontext von Gemeinde und Jugendarbeit',
         color: '#fb923c',      // Orange
         glowColor: '#fdba74',
         aspects: [

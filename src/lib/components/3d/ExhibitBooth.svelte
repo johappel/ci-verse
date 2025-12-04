@@ -22,6 +22,7 @@
         rotation?: number; // Y-Rotation in Radians
         size?: 'small' | 'medium' | 'large';
         platformPosition?: [number, number, number]; // Welt-Position der Plattform
+        platformId?: string; // ID der Plattform für Sichtbarkeits-Check
     }
 
     let { 
@@ -29,7 +30,8 @@
         position = [0, 0, 0], 
         rotation = 0,
         size = 'medium',
-        platformPosition = [0, 0, 0]
+        platformPosition = [0, 0, 0],
+        platformId = ''
     }: Props = $props();
 
     const { camera } = useThrelte();
@@ -38,9 +40,13 @@
     let isHovered = $state(false);
     let isButtonHovered = $state(false);
     
-    // Entfernungs-basierte Aktivierung
+    // Entfernungs-basierte Aktivierung für Buttons
     const ACTIVATION_DISTANCE = 12;
     let isNearby = $state(false);
+    
+    // Auf der gleichen Plattform? (für Poster-Sichtbarkeit)
+    let isOnPlatform = $derived(worldStore.state.currentPlatform === platformId);
+    
     let frameCounter = 0;
     
     // Berechne Welt-Position des Booths
@@ -351,7 +357,7 @@
             </T.Group>
 
             <!-- Vertikale Trennlinie zwischen Text und Bild -->
-            {#if posterImage}
+            {#if posterImage && isOnPlatform}
                 {@const dividerX = textOffsetX + s.textWidth / 2 + s.gap / 2}
                 <T.Mesh position={[dividerX, 0, 0.015]}>
                     <T.PlaneGeometry args={[0.02, s.height * 0.85]} />
@@ -360,7 +366,7 @@
             {/if}
 
             <!-- === POSTER-BILD (rechts, großflächig, klickbar) === -->
-            {#if posterImage}
+            {#if posterImage && isOnPlatform}
                 {@const imageOffsetX = textOffsetX + s.textWidth / 2 + s.gap + imageWidth / 2}
                 <T.Mesh 
                     position={[imageOffsetX, 0, 0.02]}
@@ -507,7 +513,7 @@
             </T.Group>
 
             <!-- Vertikale Trennlinie zwischen Text und Bild -->
-            {#if posterImage}
+            {#if posterImage && isOnPlatform}
                 {@const dividerX = textOffsetX + s.textWidth / 2 + s.gap / 2}
                 <T.Mesh position={[dividerX, 0, 0.015]}>
                     <T.PlaneGeometry args={[0.02, s.height * 0.85]} />
@@ -516,7 +522,7 @@
             {/if}
 
             <!-- === POSTER-BILD (rechts auf Rückseite, großflächig, klickbar) === -->
-            {#if posterImage}
+            {#if posterImage && isOnPlatform}
                 {@const imageOffsetX = textOffsetX + s.textWidth / 2 + s.gap + imageWidth / 2}
                 <T.Mesh 
                     position={[imageOffsetX, 0, 0.02]}

@@ -232,7 +232,7 @@
 
     <!-- 3D Namensschild - unter dem Oktaeder -->
     <Billboard position={[0, 12, 0]}>
-        {@const displayName = platformContent?.short ?? platform.name}
+        {@const displayName = platformContent?.short ?? platform.id}
         <!-- Halbtransparente Glasscheibe mit mehr Tiefe -->
         <T.Mesh>
             <T.BoxGeometry args={[displayName.length * 0.5 + 1.5, 1.8, 0.3]} />
@@ -381,6 +381,7 @@
                 rotation={boothRotation}
                 size={boothSize}
                 platformPosition={[platform.x, platform.y, platform.z]}
+                platformId={platform.id}
             />
         {/each}
     {:else if shouldRenderContent}
