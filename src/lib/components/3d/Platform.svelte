@@ -300,14 +300,17 @@
             />
         {/if}
 
-        <!-- Messe-Wand am hinteren Rand (3 Hexagon-Kanten) -->
+        <!-- Messe-Wand am hinteren Rand (dynamische Anzahl Hexagon-Kanten) -->
         {#if wallPosters.length > 0}
+            {@const postersPerWall = 2} <!-- Max. 2 Poster pro Wand -->
+            {@const neededWalls = Math.ceil(wallPosters.length / postersPerWall)}
+            {@const wallCount = Math.min(neededWalls, 6)} <!-- Max. 6 Wände (komplettes Hexagon) -->
             <MesseWall
                 posters={wallPosters}
                 platformSize={platform.size}
                 platformColor={platformColor}
                 wallHeight={10}
-                wallCount={Math.min(wallPosters.length, 3)}
+                {wallCount}
                 startEdge={3}
                 platformPosition={[platform.x, platform.y, platform.z]}
                 platformId={platform.id}
