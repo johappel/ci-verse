@@ -303,7 +303,7 @@
                         fontSize={0.13}
                         anchorX="center"
                         anchorY="top"
-                        position={[0, descY, 0.02]}
+                        position={[0, descY+0.3, 0.02]}
                         color="#94a3b8"
                         maxWidth={s.textWidth * 0.95}
                         textAlign="center"

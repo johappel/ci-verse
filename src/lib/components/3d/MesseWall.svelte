@@ -303,9 +303,12 @@
         <!-- Schriftgrößen: Titel MUSS in textWidth passen! -->
         <!-- Lange Wörter wie "Religionspädagogik" brauchen kleine Schrift -->
         <!-- Faustregel: ~12-14 Zeichen pro textWidth bei dieser Schriftgröße -->
-        {@const titleFontSize = Math.min(textWidth * 0.085, 0.26)}
-        {@const sloganFontSize = titleFontSize * 0.65}
-        {@const descFontSize = titleFontSize * 0.52}
+        {@const maxWordLength = Math.max(...project.title.split(' ').map(w => w.length))}
+        {@const lengthFactor = maxWordLength > 15 ? (15 / maxWordLength) : 1.3}
+        {@const titleFontSize = Math.min(textWidth * 0.090 * lengthFactor, 0.40)}
+        {@const fontSize = Math.min(textWidth * 0.095, 0.30)}
+        {@const sloganFontSize = fontSize * 0.85}
+        {@const descFontSize = fontSize * 0.65}
         {@const buttonSize = Math.min(textWidth * 0.18, 0.45)}
         
         <T.Group position={[x, wallHeight / 2 + 1.5, z]} rotation.y={rotY}>
@@ -430,7 +433,7 @@
                                 color="#94a3b8"
                                 maxWidth={textWidth * 0.88}
                                 textAlign="center"
-                                lineHeight={1.3}
+                                lineHeight={1.5}
                             />
                         {/if}
 

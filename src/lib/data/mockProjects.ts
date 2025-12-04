@@ -385,6 +385,25 @@ export const mockProjects: ProjectData[] = [
             color: '#dc2626',
             screenshotUrl: 'https://picsum.photos/seed/dsgvo/800/600'
         }
+    },
+    {
+        id: 'p16',
+        title: 'rpi-virtuell.de',
+        slug: 'rpi-virtuell',
+        externalUrl: 'https://rpi-virtuell.de',
+        departments: ['Q3'],
+        perspectives: ['structure', 'digitality'],
+        targetGroups: ['employees'],
+        displayType: 'both',
+        staff: ['m4'],
+        shortTeaser: 'rpi-virtuell ist eine digitale Plattform für Lehr- und Fachkräfte, Wissenschaft und Praxis der religionsbezogenen Bildung, die eine kuratierte Materialiensammlung, die Möglichkeit zum Austausch und zur Vernetzung in Communities sowie regelmäßige Updates bietet.',
+        display: {
+            slogan: 'Digitalität in der Religionspädagogik',
+            posterImage: 'static/assets/images/rpi-dechow-lohrer-dekt-2023.png',
+            logoUrl: 'https://comenius.de/wp-content/uploads/rpi-virtuell-logo-1.png',
+            color: '#16a34a',
+            screenshotUrl: 'https://news.rpi-virtuell.de/wp-content/uploads/2023/06/grafik-2.png'
+        }
     }
 ];
 
