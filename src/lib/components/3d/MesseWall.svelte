@@ -14,6 +14,7 @@
      */
     import { T, useThrelte, useTask } from '@threlte/core';
     import { Text, useCursor, HTML, ImageMaterial } from '@threlte/extras';
+    import { base } from '$app/paths';
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
@@ -330,7 +331,7 @@
                             >
                                 <T.PlaneGeometry args={[imageOnlyWidth, imageOnlyHeight]} />
                                 <ImageMaterial 
-                                    url={project.display.posterImage}
+                                    url={project.display.posterImage?.startsWith('/') ? base + project.display.posterImage : project.display.posterImage}
                                     transparent
                                     opacity={0.98}
                                 />
@@ -487,7 +488,7 @@
                         >
                             <T.PlaneGeometry args={[imageWidth, imageHeight]} />
                             <ImageMaterial 
-                                url={project.display?.posterImage || ''}
+                                url={project.display?.posterImage?.startsWith('/') ? base + project.display.posterImage : project.display?.posterImage || ''}
                                 transparent
                                 opacity={1}
                             />

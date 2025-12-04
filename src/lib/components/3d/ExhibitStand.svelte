@@ -1,6 +1,7 @@
 <script lang="ts">
     import { T, useThrelte, useTask } from "@threlte/core";
     import { HTML, ImageMaterial, Text, useCursor } from "@threlte/extras";
+    import { base } from '$app/paths';
     import { BadgeInfo } from 'lucide-svelte';
     import type { ProjectData } from "$lib/types/project";
     import { worldStore } from "$lib/logic/store.svelte";
@@ -15,8 +16,8 @@
     let { project, position, platformPosition = [0, 0, 0] }: Props = $props();
 
     // Display-Daten
-    const posterUrl = project.display?.posterImage;
-    const screenshotUrl = project.display?.screenshotUrl;
+    const posterUrl = project.display?.posterImage?.startsWith('/') ? base + project.display.posterImage : project.display?.posterImage;
+    const screenshotUrl = project.display?.screenshotUrl?.startsWith('/') ? base + project.display.screenshotUrl : project.display?.screenshotUrl;
     const displayColor = project.display?.color || project.color || '#3b82f6';
     const slogan = project.display?.slogan;
     const shortTeaser = project.shortTeaser;

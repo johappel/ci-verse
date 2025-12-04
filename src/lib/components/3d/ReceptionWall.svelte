@@ -13,13 +13,14 @@
     import { T, useTask } from '@threlte/core';
     import { HTML, useCursor, useTexture, Text, Billboard } from '@threlte/extras';
     import { SRGBColorSpace } from 'three';
+    import { base } from '$app/paths';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
     import InteractionPillar from './InteractionPillar.svelte';
     import type { ProjectData } from '$lib/types/project';
     
-    // Institutions-Bild laden mit korrektem Farbmanagement
-    const institutionTexture = useTexture('/assets/about-ci.jpg', {
+    // Institutions-Bild laden mit korrektem Farbmanagement und Base Path
+    const institutionTexture = useTexture(`${base}/assets/about-ci.jpg`, {
         transform: (texture) => {
             texture.colorSpace = SRGBColorSpace;
             return texture;
@@ -284,7 +285,7 @@
             <HTML center transform scale={0.12}>
                 <div class="flex flex-col items-center">
                     <video 
-                        src="/assets/bot.mp4" 
+                        src="{base}/assets/bot.mp4" 
                         autoplay 
                         loop 
                         muted 

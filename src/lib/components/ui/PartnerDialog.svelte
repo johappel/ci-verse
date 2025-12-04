@@ -5,6 +5,7 @@
      * Zeigt Informationen über die Vernetzung mit Partner-Einrichtungen
      * bevor der externe Link geöffnet wird.
      */
+    import { base } from '$app/paths';
     import { worldStore } from '$lib/logic/store.svelte';
     import { partnerConnections } from '$lib/data/mockProjects';
     import GlassDialog from './GlassDialog.svelte';
@@ -128,7 +129,7 @@
                 ">
                     {#if partner.logoUrl}
                         <img 
-                            src={partner.logoUrl} 
+                            src={partner.logoUrl?.startsWith('/') ? base + partner.logoUrl : partner.logoUrl} 
                             alt={partner.name}
                             style="
                                 max-width: 70px;

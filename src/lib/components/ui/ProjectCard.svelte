@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { base } from '$app/paths';
     import { worldStore } from "$lib/logic/store.svelte";
     import { mockStaff } from "$lib/data/mockProjects";
     import GlassDialog from "./GlassDialog.svelte";
@@ -15,7 +16,7 @@
 
     // Display-Daten
     let displayData = $derived(project?.display);
-    let screenshotUrl = $derived(displayData?.screenshotUrl);
+    let screenshotUrl = $derived(displayData?.screenshotUrl?.startsWith('/') ? base + displayData.screenshotUrl : displayData?.screenshotUrl);
     let projectColor = $derived(displayData?.color || project?.color || '#3b82f6');
     let slogan = $derived(displayData?.slogan);
 
