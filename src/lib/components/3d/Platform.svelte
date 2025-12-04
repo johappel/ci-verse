@@ -318,32 +318,40 @@
         {/if}
 
         <!-- Freistehende Exhibit-Booths für Booth-Projekte -->
-        <!-- Im inneren Ring der Plattform verteilt, mit Durchgang vorne -->
+        <!-- Gestaffelt in 4 "Reihen" hintereinander für Tiefenwirkung -->
         {#each boothProjects as project, i}
             {@const boothCount = boothProjects.length}
             <!-- Booth-Größen basierend auf Anzahl -->
             {@const boothSize = boothCount > 6 ? 'small' : (boothCount > 3 ? 'medium' : 'medium')}
             
-            <!-- Booths in einem Ring INNERHALB der Plattform verteilen -->
-            <!-- Radius: ca. 50-60% des Plattform-Radius (genug Platz zur Mitte und zum Rand) -->
-            {@const boothRadius = platform.size * 0.55}
+            <!-- Staffelung: Max 4 Booths pro "Reihe", dann nächste Reihe weiter hinten -->
+            {@const boothsPerRow = Math.min(4, boothCount)}
+            {@const rowIndex = Math.floor(i / boothsPerRow)} <!-- Welche Reihe (0, 1, 2...) -->
+            {@const posInRow = i % boothsPerRow} <!-- Position in der Reihe (0-3) -->
             
-            <!-- Verteile auf 4 von 6 Sektoren (hinten + Seiten, vorne frei für Durchgang) -->
-            <!-- Sektoren 2, 3, 4, 5 nutzen (Sektor 0, 1 = vorne frei) -->
+            <!-- Radius-Staffelung: Stärker gestaffelt, näher zu den Wänden (50% bis 80%) -->
+            {@const baseRadius = platform.size * 0.50} <!-- Startet weiter außen -->
+            {@const radiusStep = platform.size * 0.12} <!-- 12% pro Reihe (stärkerer Versatz) -->
+            {@const boothRadius = baseRadius + rowIndex * radiusStep}
+            
+            <!-- Winkel-Bereich: 4 Sektoren (hinten + Seiten), vorne frei -->
             {@const usedSectors = 4}
             {@const startSector = 2}
-            
-            <!-- Berechne Winkel für diesen Booth -->
             {@const sectorSize = (2 * Math.PI) / 6} <!-- 60° pro Sektor -->
             {@const usedArcSize = usedSectors * sectorSize} <!-- 240° für 4 Sektoren -->
-            {@const angleStep = usedArcSize / Math.max(boothCount - 1, 1)}
-            {@const startAngle = startSector * sectorSize + Math.PI / 6} <!-- Plattform-Rotation berücksichtigen -->
-            {@const angle = startAngle + i * angleStep}
             
-            <!-- Position im Ring berechnen -->
+            <!-- Verteilung innerhalb der Reihe -->
+            {@const angleSpread = usedArcSize * 0.85} <!-- Nutze 85% des verfügbaren Bogens -->
+            {@const angleStep = posInRow === 0 && boothsPerRow === 1 ? 0 : angleSpread / (boothsPerRow - 1)}
+            {@const startAngle = startSector * sectorSize + Math.PI / 6 + (usedArcSize - angleSpread) / 2}
+            {@const angleOffset = rowIndex * 0.20} <!-- Horizontal-Versatz: +0.20 rad (≈11.5°) pro Reihe -->
+            {@const angle = startAngle + posInRow * angleStep + angleOffset}
+            
+            <!-- Position berechnen -->
             {@const boothX = Math.cos(angle) * boothRadius}
             {@const boothZ = Math.sin(angle) * boothRadius}
-            {@const boothRotation = -angle + Math.PI / 2} <!-- Booth zeigt zur Mitte -->
+            <!-- Booth-Rotation: Leicht nach außen gedreht (+20°) für natürlichen Fluss -->
+            {@const boothRotation = -angle + Math.PI / 2 + 0.35}
             
             <ExhibitBooth
                 {project}
