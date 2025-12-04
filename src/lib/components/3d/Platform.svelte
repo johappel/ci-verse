@@ -317,41 +317,61 @@
             />
         {/if}
 
-        <!-- Freistehende Exhibit-Booths für Booth-Projekte -->
-        <!-- Gestaffelt in 4 "Reihen" hintereinander für Tiefenwirkung -->
+        <!-- Freistehende Exhibit-Booths: Innerer Kreis (max 7) + Dreiecks-Ecken (je 3) -->
         {#each boothProjects as project, i}
             {@const boothCount = boothProjects.length}
-            <!-- Booth-Größen basierend auf Anzahl -->
             {@const boothSize = boothCount > 6 ? 'small' : (boothCount > 3 ? 'medium' : 'medium')}
             
-            <!-- Staffelung: Max 4 Booths pro "Reihe", dann nächste Reihe weiter hinten -->
-            {@const boothsPerRow = Math.min(4, boothCount)}
-            {@const rowIndex = Math.floor(i / boothsPerRow)} <!-- Welche Reihe (0, 1, 2...) -->
-            {@const posInRow = i % boothsPerRow} <!-- Position in der Reihe (0-3) -->
-            
-            <!-- Radius-Staffelung: Mittig positioniert mit genug Abstand zu Wänden -->
-            {@const baseRadius = platform.size * 0.35} <!-- Startet näher zur Mitte -->
-            {@const radiusStep = platform.size * 0.12} <!-- 12% pro Reihe (stärkerer Versatz) -->
-            {@const boothRadius = baseRadius + rowIndex * radiusStep}
-            
-            <!-- Winkel-Bereich: 4 Sektoren (hinten + Seiten), vorne frei -->
+            <!-- Layout-System: Einzeln (≤5) oder in Dreiergruppen (≥6) -->
+            {@const sectorSize = (2 * Math.PI) / 6}
+            {@const hexRotation = Math.PI / 6}
             {@const usedSectors = 4}
             {@const startSector = 2}
-            {@const sectorSize = (2 * Math.PI) / 6} <!-- 60° pro Sektor -->
-            {@const usedArcSize = usedSectors * sectorSize} <!-- 240° für 4 Sektoren -->
+            {@const usedArcSize = usedSectors * sectorSize}
+            {@const startAngle = startSector * sectorSize + hexRotation}
+            {@const angleSpread = usedArcSize * 0.85}
             
-            <!-- Verteilung innerhalb der Reihe -->
-            {@const angleSpread = usedArcSize * 0.85} <!-- Nutze 85% des verfügbaren Bogens -->
-            {@const angleStep = posInRow === 0 && boothsPerRow === 1 ? 0 : angleSpread / (boothsPerRow - 1)}
-            {@const startAngle = startSector * sectorSize + Math.PI / 6 + (usedArcSize - angleSpread) / 2}
-            {@const angleOffset = rowIndex * 0.20} <!-- Horizontal-Versatz: +0.20 rad (≈11.5°) pro Reihe -->
-            {@const angle = startAngle + posInRow * angleStep + angleOffset}
+            {@const useTriangleGroups = boothCount >= 6}
             
-            <!-- Position berechnen -->
-            {@const boothX = Math.cos(angle) * boothRadius}
-            {@const boothZ = Math.sin(angle) * boothRadius}
-            <!-- Booth-Rotation: Leicht nach außen gedreht (+20°) für natürlichen Fluss -->
-            {@const boothRotation = -angle + Math.PI / 2 + 0.35}
+            {@const groupIndex = useTriangleGroups ? Math.floor(i / 3) : 0}
+            {@const posInGroup = useTriangleGroups ? i % 3 : 0}
+            {@const totalGroups = useTriangleGroups ? Math.ceil(boothCount / 3) : 1}
+            
+            <!-- Zentrum der Gruppe berechnen -->
+            {@const groupAngle = useTriangleGroups
+                ? (totalGroups === 1
+                    ? startAngle + angleSpread / 2
+                    : startAngle + (groupIndex / (totalGroups - 1)) * angleSpread)
+                : (boothCount === 1 
+                    ? startAngle + angleSpread / 2
+                    : startAngle + (i / (boothCount - 1)) * angleSpread)
+            }
+            
+            <!-- Dreieck-Formation: 3 Ecken um gemeinsamen Mittelpunkt, jede Booth schaut nach außen -->
+            {@const triangleRadius = useTriangleGroups ? 2.5 : 0}
+            {@const triangleAngles = [
+                0,           // Position 0: oben
+                2.0944,      // Position 1: unten-rechts (120°)
+                4.1888       // Position 2: unten-links (240°)
+            ]}
+            
+            {@const localAngle = useTriangleGroups ? triangleAngles[posInGroup] : 0}
+            {@const localX = useTriangleGroups ? Math.cos(groupAngle + localAngle) * triangleRadius : 0}
+            {@const localZ = useTriangleGroups ? Math.sin(groupAngle + localAngle) * triangleRadius : 0}
+            
+            <!-- Welt-Position: Gruppen-Zentrum + lokale Dreieck-Position -->
+            {@const baseRadius = useTriangleGroups ? platform.size * 0.48 : platform.size * 0.45}
+            {@const centerX = Math.cos(groupAngle) * baseRadius}
+            {@const centerZ = Math.sin(groupAngle) * baseRadius}
+            
+            {@const boothX = centerX + localX}
+            {@const boothZ = centerZ + localZ}
+            
+            <!-- Rotation: Jede Booth zeigt nach INNEN zum Dreieck-Zentrum (Kamera schaut von außen) -->
+            {@const boothRotation = useTriangleGroups
+                ? -(groupAngle + localAngle) + Math.PI / 2 + Math.PI
+                : -groupAngle + Math.PI / 2
+            }
             
             <ExhibitBooth
                 {project}

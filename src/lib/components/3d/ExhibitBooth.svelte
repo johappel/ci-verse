@@ -94,7 +94,9 @@
     );
 
     // Klick auf Banner: Kamera positioniert sich davor
-    function handleBannerClick() {
+    function handleBannerClick(e: Event) {
+        e.stopPropagation(); // Verhindert Durchschuss zu dahinterliegenden Objekten
+        
         const worldBoothX = platformPosition[0] + position[0];
         const worldBoothY = platformPosition[1] + position[1];
         const worldBoothZ = platformPosition[2] + position[2];
@@ -103,8 +105,9 @@
         
         const cos = Math.cos(rotation);
         const sin = Math.sin(rotation);
-        const worldOffsetX = viewDistance * sin;
-        const worldOffsetZ = viewDistance * cos;
+        // Kamera-Offset INVERTIERT: nach außen statt nach innen (für Dreiecks-Formation)
+        const worldOffsetX = -viewDistance * sin;
+        const worldOffsetZ = -viewDistance * cos;
         
         // Kamera auf Augenhöhe relativ zur Banner-Mitte
         const bannerCenterY = worldBoothY + s.height / 2 + 0.3;
