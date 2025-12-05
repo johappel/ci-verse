@@ -31,6 +31,9 @@ export interface PerformanceSettings {
     enableFog: boolean;              // Volumetrischer Nebel
     enableParticles: boolean;        // Partikel-Effekte
     enableAnimations: boolean;       // Kamera/Objekt-Animationen
+    enableGlowRings: boolean;        // Plattform-Leucht-Ringe
+    enableEnergyEffects: boolean;    // EnergyFloor + EnergyBeam auf Marktplatz
+    lightBridgeQuality: 'high' | 'medium' | 'low';  // Lichtlinien-Qualität
     
     // Rendern
     pixelRatio: number;              // Canvas Auflösung (1.0 = native, 0.5 = halbe)
@@ -61,6 +64,9 @@ function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
             enableFog: true,
             enableParticles: true,
             enableAnimations: true,
+            enableGlowRings: true,
+            enableEnergyEffects: true,
+            lightBridgeQuality: 'high',
             pixelRatio: getDevicePixelRatio(),
             antialias: true,
             skipPreloadFlight: false
@@ -75,6 +81,9 @@ function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
             enableFog: true,
             enableParticles: false,      // Keine Partikel
             enableAnimations: true,
+            enableGlowRings: true,       // Glow-Ringe behalten
+            enableEnergyEffects: true,   // Energie-Effekte behalten
+            lightBridgeQuality: 'medium', // Einfachere Lichtlinien
             pixelRatio: 1.0,             // Feste Auflösung
             antialias: true,
             skipPreloadFlight: false
@@ -89,6 +98,9 @@ function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
             enableFog: false,            // Kein Nebel
             enableParticles: false,      // Keine Partikel
             enableAnimations: true,      // Animationen behalten (UX)
+            enableGlowRings: false,      // KEINE Glow-Ringe
+            enableEnergyEffects: false,  // KEINE Energie-Effekte (Shader!)
+            lightBridgeQuality: 'low',   // Einfachste Lichtlinien (nur Kern)
             pixelRatio: 0.75,            // Reduzierte Auflösung
             antialias: false,            // Keine Kantenglättung
             skipPreloadFlight: true      // Überspringe Rundflug

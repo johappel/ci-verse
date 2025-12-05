@@ -24,6 +24,7 @@
     import EnergyBeam from './EnergyBeam.svelte';
     import NexusTerminal from './NexusTerminal.svelte';
     import { worldStore } from '$lib/logic/store.svelte';
+    import { performanceStore } from '$lib/logic/performanceStore.svelte';
     import { getMarketplaceContent } from '$lib/data/mockProjects';
     import { mockProjects } from '$lib/data/mockProjects';
     import type { ProjectData, Department, Perspective, TargetGroup } from '$lib/types/project';
@@ -33,6 +34,10 @@
     }
 
     let { platform }: Props = $props();
+
+    // Performance-Einstellungen
+    let enableEnergyEffects = $derived(performanceStore.settings.enableEnergyEffects);
+    let enableGlowRings = $derived(performanceStore.settings.enableGlowRings);
 
     // Marketplace-Content laden
     const marketplace = $derived(getMarketplaceContent());
@@ -245,7 +250,8 @@
         />
     </T.Mesh>
 
-    <!-- Leuchtender Ring -->
+    <!-- Leuchtender Ring (nur bei aktiviertem Glow) -->
+    {#if enableGlowRings}
     <T.Mesh position.y={-2} rotation.x={-Math.PI / 2}>
         <T.RingGeometry args={[platform.size * 0.98, platform.size * 1.02, 6]} />
         <T.MeshBasicMaterial
@@ -255,10 +261,12 @@
             side={2}
         />
     </T.Mesh>
+    {/if}
 
     <!-- ========== ENERGIE-BODEN (Leitlinien fliessen zur Mitte) ========== -->
     <!-- 6 Stroeme fuer alle 6 Poster-Positionen an den Hexagon-Waenden -->
     <!-- Hexagon-Edge-Winkel = edgeIndex * 60 Grad + 30 Grad (Plattform-Rotation) -->
+    {#if enableEnergyEffects}
     <EnergyFloor 
         radius={platform.size * 0.85}
         intensity={0.2}
@@ -279,6 +287,7 @@
             '#a78bfa'   // Edge 5: Violett (structure)
         ]}
     />
+    {/if}
 
     <!-- ========== WANDSEGMENTE FÜR LEITLINIEN ========== -->
     <!-- Zwei MesseWall-Gruppen: Links und Rechts vom Turm, Wand dahinter frei -->
@@ -363,12 +372,14 @@
     {/each}
 
     <!-- ========== ENERGIE-SÄULE (vom Boden zum Oktaeder) ========== -->
+    {#if enableEnergyEffects}
     <EnergyBeam 
         height={13}
         baseY={2.1}
         radius={0.6}
         colors={['#facc15', '#4ade80', '#22d3ee', '#a78bfa']}
     />
+    {/if}
 
     <!-- ========== OKTAEDER (Navigation Hub) - jetzt mit Energie-Puls ========== -->
     <T.Group position.y={15} scale={oktaederScale}>

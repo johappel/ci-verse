@@ -82,6 +82,9 @@
     // Materialien: PBR oder Basic
     let usePBRMaterials = $derived(performanceStore.settings.usePBRMaterials);
     let useEmissive = $derived(performanceStore.settings.useEmissive);
+    
+    // Glow-Ringe (deaktiviert bei Low-Qualität)
+    let enableGlowRings = $derived(performanceStore.settings.enableGlowRings);
 
     // Drag-Detection: Unterscheide zwischen Klick und Kamera-Drehen
     let pointerDownPos = $state<{ x: number; y: number } | null>(null);
@@ -154,7 +157,8 @@
         />
     </T.Mesh>
 
-    <!-- Dezenter Ring am Rand - leuchtet bei Hover -->
+    <!-- Dezenter Ring am Rand - leuchtet bei Hover (nur bei aktiviertem Glow) -->
+    {#if enableGlowRings}
     <T.Mesh position.y={-2} rotation.x={-Math.PI / 2}>
         <T.RingGeometry args={[platform.size * 0.98, platform.size * 1.02, 6]} />
         <T.MeshBasicMaterial
@@ -164,6 +168,7 @@
             side={2}
         />
     </T.Mesh>
+    {/if}
 
     <!-- Rotierender Oktaeder über dem Schild - Ankerpunkt für Lichtlinien -->
     <!-- Klick auf Oktaeder = Zurück zum Marktplatz (S) -->

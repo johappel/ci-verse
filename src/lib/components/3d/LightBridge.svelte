@@ -3,6 +3,7 @@
     import { MeshLineGeometry, MeshLineMaterial, Text, Billboard } from '@threlte/extras';
     import type { Platform } from '$lib/logic/platforms';
     import { worldStore } from '$lib/logic/store.svelte';
+    import { performanceStore } from '$lib/logic/performanceStore.svelte';
     import { getPlatformContent } from '$lib/data/mockProjects';
     import { Vector3, QuadraticBezierCurve3 } from 'three';
 
@@ -108,6 +109,13 @@
         isDestinationHovered ? 1.2 : (isActive ? 0.8 : 0)
     );
 
+    // Performance-Einstellungen
+    let bridgeQuality = $derived(performanceStore.settings.lightBridgeQuality);
+    
+    // Bei Low-Qualität: Nur Kern, kein Glow, weniger Punkte
+    let showGlow = $derived(bridgeQuality !== 'low');
+    let showOuterGlow = $derived(bridgeQuality === 'high');
+
     function handleClick() {
         worldStore.startTransport(destination.id);
     }
@@ -115,8 +123,8 @@
 
 <!-- Lichtstrahl - IMMER sichtbar wenn relevant (von aktueller Plattform) -->
 {#if isRelevant}
-    <!-- Äußerster diffuser Glow (nur aktiv) -->
-    {#if isActive}
+    <!-- Äußerster diffuser Glow (nur aktiv + nur bei High-Qualität) -->
+    {#if isActive && showOuterGlow}
         <T.Mesh>
             <MeshLineGeometry points={linePoints} />
             <MeshLineMaterial
@@ -129,7 +137,8 @@
         </T.Mesh>
     {/if}
 
-    <!-- Mittlerer Glow-Layer -->
+    <!-- Mittlerer Glow-Layer (nur bei Medium/High) -->
+    {#if showGlow}
     <T.Mesh>
         <MeshLineGeometry points={linePoints} />
         <MeshLineMaterial
@@ -140,6 +149,7 @@
             depthWrite={false}
         />
     </T.Mesh>
+    {/if}
 
     <!-- Heller Kern - interaktiv -->
     <T.Mesh
