@@ -3,6 +3,7 @@
     import { MeshLineGeometry, MeshLineMaterial, Text, Billboard } from '@threlte/extras';
     import type { Platform } from '$lib/logic/platforms';
     import { worldStore } from '$lib/logic/store.svelte';
+    import { getPlatformContent } from '$lib/data/mockProjects';
     import { Vector3, QuadraticBezierCurve3 } from 'three';
 
     let {
@@ -27,6 +28,9 @@
     // "origin" = wo der User steht, "destination" = wohin die Linie führt
     let origin = $derived(currentPlatformId === from.id ? from : to);
     let destination = $derived(currentPlatformId === from.id ? to : from);
+    
+    // Lade den Namen der Zielplattform aus PlatformContent
+    let destinationName = $derived(getPlatformContent(destination.id)?.title ?? destination.id);
 
     // Punkte für die Lichtlinie - enden am Oktaeder (Y+15)
     const OKTAEDER_HEIGHT = 15;
@@ -159,7 +163,7 @@
         <Billboard>
             <!-- Glasscheibe -->
             <T.Mesh>
-                <T.PlaneGeometry args={[destination.name.length * 0.5 + 3, 2]} />
+                <T.PlaneGeometry args={[destinationName.length * 0.5 + 3, 2]} />
                 <T.MeshStandardMaterial 
                     color="#0f172a"
                     transparent
@@ -170,12 +174,12 @@
             </T.Mesh>
             <!-- Leuchtender Rahmen -->
             <T.Mesh position.z={-0.03}>
-                <T.PlaneGeometry args={[destination.name.length * 0.5 + 3.3, 2.3]} />
+                <T.PlaneGeometry args={[destinationName.length * 0.5 + 3.3, 2.3]} />
                 <T.MeshBasicMaterial color="#ffffff" transparent opacity={0.5} />
             </T.Mesh>
             <!-- Pfeil + Text -->
             <Text
-                text={`→ ${destination.name}`}
+                text={`→ ${destinationName}`}
                 color="#ffffff"
                 fontSize={0.7}
                 anchorX="center"

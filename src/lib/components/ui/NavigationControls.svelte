@@ -2,7 +2,7 @@
 	import { worldStore } from '$lib/logic/store.svelte';
 	import { platforms } from '$lib/logic/platforms';
 	import { getViewPoint, getMarketplaceViewPoint, getCenterViewPoint } from '$lib/logic/viewpoints';
-	import { getBoothProjectsForPlatform, getWallPostersForPlatform, getMarketplaceContent } from '$lib/data/mockProjects';
+	import { getBoothProjectsForPlatform, getWallPostersForPlatform, getMarketplaceContent, getPlatformContent } from '$lib/data/mockProjects';
 	import type { ProjectData } from '$lib/types/project';
 	
 	// Kamera-Referenz wird von außen gesetzt
@@ -176,7 +176,7 @@
 		return platformTourOrder[nextIndex];
 	});
 	
-	let nextPlatformName = $derived(platforms[nextPlatformId]?.shortName || nextPlatformId);
+	let nextPlatformName = $derived(getPlatformContent(nextPlatformId)?.short || nextPlatformId);
 	
 	// Zur nächsten Plattform in der Tour navigieren
 	function goToNextPlatform() {
@@ -327,7 +327,7 @@
 	}
 	
 	// Aktuelle Plattform-Info
-	let currentPlatformName = $derived(platforms[worldStore.state.currentPlatform]?.name || 'Unbekannt');
+	let currentPlatformName = $derived(getPlatformContent(worldStore.state.currentPlatform)?.title || 'Unbekannt');
 	let isOnMarktplatz = $derived(worldStore.state.currentPlatform === 'S');
 	let isTransporting = $derived(worldStore.state.isTransporting);
 	
