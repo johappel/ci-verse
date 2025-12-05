@@ -70,7 +70,7 @@
 		
 		
 		// Progress animieren während Flug
-		for (let i = 0; i <= 10; i++) {
+		for (let i = 0; i <= 25; i++) {
 			tourProgress = i / 50;
 			updateLoading(20 + (i * 2), 'Bereite die Plattformen vor...');
 			await new Promise(resolve => setTimeout(resolve, 100));
