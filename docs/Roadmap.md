@@ -4,6 +4,47 @@
 
 ---
 
+## 2025-12-05: v2.1.1 – 3D Performance Optimierungen
+
+### ✅ Status: Implementiert
+
+**Problem**: Lags bei Kamera-Flügen und Zoom-Aktionen beim ersten Ausführen
+
+**Ursache**: WebGL kompiliert Shader "lazy" - erst beim ersten Rendern eines Materials
+
+**Implementierte Lösungen:**
+
+#### 🚀 ShaderWarmup-Komponente
+- Neue Komponente `ShaderWarmup.svelte` kompiliert alle Shader beim Start
+- Ruft `renderer.compile()` auf um GPU zur Vorkompilierung zu zwingen
+- Rendert alle verwendeten Material-Typen versteckt (MeshStandard, MeshPhysical, MeshBasic, MeshLine, Text)
+
+#### ⚡ Task-Optimierung für entfernte Plattformen
+- `useTask`-Callbacks laufen nur noch wenn User auf der Plattform ist
+- Neue `platformId`-Props in betroffenen Komponenten
+- Early-exit für nicht-relevante Plattformen
+
+#### 📦 Geometry-Caching-Bibliothek (Vorbereitet)
+- Neue Datei `src/lib/logic/sharedGeometries.ts`
+- Zentrale Geometrie-Bibliothek verhindert GPU-Duplikate
+
+**Optimierte Komponenten:**
+- `ExhibitBooth.svelte` ✅
+- `ExhibitStand.svelte` ✅
+- `MesseWall.svelte` ✅
+- `InteractionPillar.svelte` ✅
+- `LightBridge.svelte` ✅
+
+**Neue Dateien:**
+```
+src/lib/components/3d/ShaderWarmup.svelte   # Shader-Vorkompilierung
+src/lib/logic/sharedGeometries.ts           # Geometry-Caching
+```
+
+**Dokumentation:** [3D-Improvements.md](./3D-Improvements.md)
+
+---
+
 ## 2025-12-02: v2.1.0 – Marktplatz & Partner-Vernetzung
 
 ### ✅ Status: Feature Complete
@@ -166,8 +207,12 @@ src/lib/components/3d/
 - [ ] iCal-Import für Termine
 
 ### Phase 5: Polish & Performance
+- [x] **Shader-Warmup** - Vorkompilierung aller WebGL-Shader ✅
+- [x] **Task-Optimierung** - useTask nur auf aktiver Plattform ✅
+- [x] **Geometry-Caching** - Bibliothek vorbereitet ✅
 - [ ] Bloom Post-Processing (UnrealBloomPass)
 - [ ] LOD für entfernte Plattformen
+- [ ] Frustum Culling für unsichtbare Objekte
 - [ ] Lazy Loading für Plattform-Inhalte
 - [ ] Mobile Touch-Controls
 - [ ] Loading-Screen mit Progress
@@ -216,5 +261,5 @@ pnpm check     # TypeScript Check
 
 ---
 
-**Letztes Update**: 2025-12-02  
-**Aktuelle Version**: 2.1.0
+**Letztes Update**: 2025-12-05  
+**Aktuelle Version**: 2.1.1

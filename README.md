@@ -1,5 +1,5 @@
 # CI-Verse: Das Comenius-Orbital
-**Status: 🚀 Feature Complete (v2.1)**
+**Status: 🚀 Feature Complete (v2.1.1)**
 
 ## 🎯 Übersicht
 
@@ -60,6 +60,11 @@ pnpm preview      # → http://localhost:4173
 - ✅ **NIP52 Nostr Events** vorbereitet (kind 31923)
 - ✅ **example-data.json** als Referenz für WordPress-Export
 
+### 🚀 Performance-Optimierungen (v2.1.1)
+- ✅ **Shader-Warmup** - Alle WebGL-Shader werden beim Start vorkompiliert
+- ✅ **Task-Optimierung** - Frame-Updates nur auf aktiver Plattform
+- ✅ **Geometry-Caching** - Bibliothek für wiederverwendbare Geometrien
+
 ## 📚 Dokumentation
 
 | Dokument | Beschreibung |
@@ -72,6 +77,7 @@ pnpm preview      # → http://localhost:4173
 | [svelte-stores.md](./docs/svelte-stores.md) | State Management |
 | [wp-setup.md](./docs/wp-setup.md) | WordPress Integration |
 | [Roadmap.md](./docs/Roadmap.md) | Entwicklungs-History & Nächste Schritte |
+| [3D-Improvements.md](./docs/3D-Improvements.md) | Performance-Optimierungen & Shader-Warmup |
 
 ## 🛠️ Tech-Stack
 
@@ -194,5 +200,5 @@ pnpm check         # TypeScript Check
 
 ---
 
-**Letztes Update**: 2025-12-02  
-**Version**: 2.1.0
+**Letztes Update**: 2025-12-05  
+**Version**: 2.1.1

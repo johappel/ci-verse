@@ -64,12 +64,13 @@
 		
 		// === PHASE 2: Tour zu Q2 ===
 		updateLoading(20, 'Fliege zu Europa...');
+		cameraControls.smoothTime = 5.0;
 		
-		cameraControls.smoothTime = 1.5;
-		worldStore.startTransport('Q2');
+		worldStore.startTransport('B1');
+		
 		
 		// Progress animieren während Flug
-		for (let i = 0; i <= 25; i++) {
+		for (let i = 0; i <= 10; i++) {
 			tourProgress = i / 50;
 			updateLoading(20 + (i * 2), 'Bereite die Plattformen vor...');
 			await new Promise(resolve => setTimeout(resolve, 100));
