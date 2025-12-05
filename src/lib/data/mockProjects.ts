@@ -812,8 +812,20 @@ export function getProjectsForPlatform(platformId: string): ProjectData[] {
     return mockProjects.filter(p => p.departments.includes(platformId as Department));
 }
 
-/** Plattform-Content nach ID */
+/** Plattform-Content nach ID (inkl. Marktplatz S) */
 export function getPlatformContent(platformId: string): PlatformContent | undefined {
+    if (platformId === 'S') {
+        // Marktplatz ist separat definiert, aber hat die gleichen Basis-Felder
+        return {
+            id: mockMarketplace.id,
+            title: mockMarketplace.title,
+            short: mockMarketplace.short,
+            description: mockMarketplace.description,
+            color: mockMarketplace.color,
+            glowColor: mockMarketplace.glowColor,
+            aspects: [] // Marktplatz hat keine Aspekte, sondern Stände
+        };
+    }
     return mockPlatformContents[platformId];
 }
 

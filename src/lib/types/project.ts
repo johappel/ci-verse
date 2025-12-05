@@ -1,4 +1,4 @@
-export type Department = 'B1' | 'B2' | 'B3' | 'Q1' | 'Q2' | 'Q3' | 'S1' | 'S2' | 'S3';
+export type Department = 'S' | 'B1' | 'B2' | 'B3' | 'Q1' | 'Q2' | 'Q3' | 'S1' | 'S2' | 'S3';
 
 export type Perspective = 'default' | 'education' | 'justice' | 'sustainability' | 'diversity' | 'digitality' | 'structure';
 
