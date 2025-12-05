@@ -7,6 +7,7 @@
 	import WorldLayout from './WorldLayout.svelte';
 	import BottomFog from './BottomFog.svelte';
 	import { worldStore } from '$lib/logic/store.svelte';
+	import { performanceStore } from '$lib/logic/performanceStore.svelte';
 	import { platforms, getCameraY } from '$lib/logic/platforms';
 
 	// Props: Callback für Loading-Updates und CameraControls
@@ -54,9 +55,33 @@
 		updateLoading(5, 'Initialisiere 3D-Szene...');
 	});
 
-	// Preload-Rundflug
+	// Preload-Rundflug (wird im Turbo-Modus übersprungen)
 	async function runPreloadFlight() {
 		if (!cameraControls) return;
+		
+		// TURBO-MODUS: Überspringe Rundflug komplett
+		if (performanceStore.settings.skipPreloadFlight) {
+			updateLoading(50, 'Turbo-Modus aktiviert...');
+			
+			// Setze Kamera direkt auf Startposition
+			const landing = startPlatform.landing || { offset: [0, 12, -35], lookAtOffset: [0, 3, 0] };
+			cameraControls.setLookAt(
+				startPlatform.x + landing.offset[0],
+				startPlatform.y + landing.offset[1],
+				startPlatform.z + landing.offset[2],
+				startPlatform.x + landing.lookAtOffset[0],
+				startPlatform.y + landing.lookAtOffset[1],
+				startPlatform.z + landing.lookAtOffset[2],
+				false // Keine Animation
+			);
+			
+			// Kurze Verzögerung für Shader-Kompilierung
+			await new Promise(resolve => setTimeout(resolve, 500));
+			
+			updateLoading(100, 'Bereit!', true);
+			isPreloading = false;
+			return;
+		}
 		
 		// === PHASE 1: Start ===
 		updateLoading(10, 'Starte...');
@@ -342,10 +367,16 @@
 	// Reaktive Nebel-Farbe
 	let currentFogColor = $derived(fogColors[worldStore.state.activePerspective] || '#0d1117');
 
-	// Reaktive Atmosphäre
+	// Reaktive Atmosphäre (Performance-abhängig)
 	let ambientIntensity = $derived(
 		worldStore.state.activePerspective === 'digitality' ? 0.3 : 0.5
 	);
+	
+	// Performance-abhängige Einstellungen
+	let enableShadows = $derived(performanceStore.settings.enableShadows);
+	let enableFog = $derived(performanceStore.settings.enableFog);
+	let useHemisphereLight = $derived(performanceStore.settings.useHemisphereLight);
+	let pixelRatio = $derived(performanceStore.settings.pixelRatio);
 </script>
 
 <!-- Container mit festen viewport-Einheiten -->
@@ -372,32 +403,45 @@
 		<!-- Hintergrund -->
 		<T.Color attach="background" args={[currentFogColor]} />
 
-		<!-- Distanz-Nebel für weit entfernte Objekte -->
-		<T.FogExp2 attach="fog" args={[currentFogColor, 0.007]} />
+		<!-- Distanz-Nebel für weit entfernte Objekte (Performance-abhängig) -->
+		{#if enableFog}
+			<T.FogExp2 attach="fog" args={[currentFogColor, 0.007]} />
+		{/if}
 
 		<!-- Beleuchtung -->
 		<T.AmbientLight intensity={ambientIntensity} color="#e0e7ff" />
 
-		<!-- Hauptlicht von oben -->
-		<T.DirectionalLight position={[100, 300, 150]} intensity={1.0} castShadow color="#ffffff" />
+		<!-- Hauptlicht von oben (Schatten nur bei High-Quality) -->
+		<T.DirectionalLight 
+			position={[100, 300, 150]} 
+			intensity={1.0} 
+			castShadow={enableShadows} 
+			color="#ffffff" 
+		/>
 
 		<!-- Gegenlicht -->
 		<T.DirectionalLight position={[-150, 200, -100]} intensity={0.4} color="#93c5fd" />
 
-		<!-- Bodenlicht von unten -->
-		<T.DirectionalLight position={[0, -80, 0]} intensity={0.2} color="#4f46e5" />
+		<!-- Bodenlicht von unten (nur bei Medium/High) -->
+		{#if performanceStore.qualityLevel !== 'low'}
+			<T.DirectionalLight position={[0, -80, 0]} intensity={0.2} color="#4f46e5" />
+		{/if}
 
-		<!-- Hemisphären-Licht -->
-		<T.HemisphereLight args={['#87ceeb', '#1a1a2e', 0.4]} />
+		<!-- Hemisphären-Licht (Performance-abhängig) -->
+		{#if useHemisphereLight}
+			<T.HemisphereLight args={['#87ceeb', '#1a1a2e', 0.4]} />
+		{/if}
 
-		<!-- Volumetrischer Boden-Nebel -->
-		<BottomFog 
-			cutoffY={-10} 
-			thickness={40} 
-			fogColor={currentFogColor}
-			maxAlpha={0.85}
-			size={800}
-		/>
+		<!-- Volumetrischer Boden-Nebel (Performance-abhängig) -->
+		{#if enableFog}
+			<BottomFog 
+				cutoffY={-10} 
+				thickness={40} 
+				fogColor={currentFogColor}
+				maxAlpha={0.85}
+				size={800}
+			/>
+		{/if}
 
 		<!-- Projekt-Layout mit Plattformen -->
 		<WorldLayout />

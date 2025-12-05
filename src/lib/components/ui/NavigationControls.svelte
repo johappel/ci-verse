@@ -3,6 +3,8 @@
 	import { platforms } from '$lib/logic/platforms';
 	import { getViewPoint, getMarketplaceViewPoint, getCenterViewPoint } from '$lib/logic/viewpoints';
 	import { getBoothProjectsForPlatform, getWallPostersForPlatform, getMarketplaceContent, getPlatformContent } from '$lib/data/mockProjects';
+	import { performanceStore } from '$lib/logic/performanceStore.svelte';
+	import QualityDialog from './QualityDialog.svelte';
 	import type { ProjectData } from '$lib/types/project';
 	
 	// Kamera-Referenz wird von außen gesetzt
@@ -20,6 +22,9 @@
 	// Plattform-Tour State
 	const platformTourOrder = ['S', 'B1', 'B2', 'B3', 'Q1', 'Q2', 'Q3'] as const;
 	let currentPlatformTourIndex = $state(-1); // -1 = noch nicht gestartet
+	
+	// Quality-Dialog State
+	let isQualityDialogOpen = $state(false);
 	
 	// Draggable Panel Position
 	let panelX = $state(0);  // Offset von Mitte
@@ -600,11 +605,23 @@
 			</button>
 		</div>
 		
-		
+		<!-- Rocket-Button für Grafik-Einstellungen -->
+		<div style="display: flex; justify-content: center; margin-top: 4px;">
+			<button
+				onclick={() => isQualityDialogOpen = true}
+				class="nav-key nav-key-rocket"
+				title="Grafik-Einstellungen ({performanceStore.qualityLevel === 'high' ? 'Hoch' : performanceStore.qualityLevel === 'medium' ? 'Mittel' : 'Niedrig'})"
+			>
+				<span style="font-size: 1.1rem;">🚀</span>
+			</button>
+		</div>
 		
 		
 	</div>
 </div>
+
+<!-- Quality Dialog -->
+<QualityDialog bind:isOpen={isQualityDialogOpen} />
 
 <style>
 	/* Schicke gläserne Navigations-Tasten */
@@ -711,6 +728,31 @@
 		border-color: rgba(74, 222, 128, 0.7);
 		box-shadow: 
 			0 0 15px rgba(74, 222, 128, 0.4),
+			0 4px 12px rgba(0, 0, 0, 0.4),
+			inset 0 1px 0 rgba(255, 255, 255, 0.4);
+	}
+	
+	/* Rocket-Button für Grafik-Einstellungen (orange Akzent) */
+	.nav-key-rocket {
+		background: linear-gradient(
+			145deg,
+			rgba(251, 146, 60, 0.25) 0%,
+			rgba(234, 88, 12, 0.15) 50%,
+			rgba(194, 65, 12, 0.2) 100%
+		);
+		border-color: rgba(251, 146, 60, 0.5);
+	}
+	
+	.nav-key-rocket:hover {
+		background: linear-gradient(
+			145deg,
+			rgba(251, 146, 60, 0.4) 0%,
+			rgba(234, 88, 12, 0.25) 50%,
+			rgba(194, 65, 12, 0.3) 100%
+		);
+		border-color: rgba(251, 146, 60, 0.7);
+		box-shadow: 
+			0 0 15px rgba(251, 146, 60, 0.4),
 			0 4px 12px rgba(0, 0, 0, 0.4),
 			inset 0 1px 0 rgba(255, 255, 255, 0.4);
 	}

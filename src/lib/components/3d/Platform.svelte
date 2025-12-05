@@ -11,6 +11,7 @@
     import Signpost from './Signpost.svelte';
     import { getHexagonalLayout } from '$lib/logic/layout';
     import { worldStore } from '$lib/logic/store.svelte';
+    import { performanceStore } from '$lib/logic/performanceStore.svelte';
     import { 
         getPlatformContent, 
         getBoothProjectsForPlatform, 
@@ -68,8 +69,19 @@
     // ALLE Plattformen rendern immer ihre Inhalte (für flüssige Übergänge)
     let shouldRenderContent = true;
     
-    // Spotlights nur auf aktueller ODER Ziel-Plattform (WebGL-Limit: max 2×6=12 Spots)
-    let shouldRenderSpotlights = $derived(isCurrentPlatform || isTransportTarget);
+    // Spotlights basierend auf Performance-Einstellungen
+    // Low = keine Spotlights, Medium = 3 Spots (nur aktuelle), High = 6 Spots (aktuelle + Ziel)
+    let maxSpotlights = $derived(performanceStore.settings.maxSpotlights);
+    let shouldRenderSpotlights = $derived(
+        maxSpotlights > 0 && (isCurrentPlatform || (maxSpotlights >= 6 && isTransportTarget))
+    );
+    let spotlightCount = $derived(
+        maxSpotlights >= 6 ? 6 : Math.min(maxSpotlights, 3)
+    );
+    
+    // Materialien: PBR oder Basic
+    let usePBRMaterials = $derived(performanceStore.settings.usePBRMaterials);
+    let useEmissive = $derived(performanceStore.settings.useEmissive);
 
     // Drag-Detection: Unterscheide zwischen Klick und Kamera-Drehen
     let pointerDownPos = $state<{ x: number; y: number } | null>(null);
@@ -397,9 +409,9 @@
         {/each}
     {/if}
 
-    <!-- 6 Spotlights wie in einer Messehalle (aktuelle + Ziel-Plattform) -->
+    <!-- 6 Spotlights wie in einer Messehalle (Performance-abhängig) -->
     {#if shouldRenderSpotlights}
-        {#each spotlightPositions as spot, i}
+        {#each spotlightPositions.slice(0, spotlightCount) as spot, i}
             <!-- Target-Objekt direkt unter dem Spot (leicht zur Mitte versetzt) -->
             <T.Object3D 
                 position={[spot.x * platform.size * 0.85, 0, spot.z * platform.size * 0.85]} 
@@ -416,17 +428,25 @@
                 angle={0.7}
                 penumbra={0.6}
                 decay={1.2}
-                castShadow
+                castShadow={performanceStore.settings.enableShadows}
             />
             <!-- Aufhängung (kurze Stange) -->
             <T.Mesh position={[spot.x * platform.size, spotlightHeight - 0.5, spot.z * platform.size]}>
                 <T.CylinderGeometry args={[0.08, 0.08, 1, 8]} />
-                <T.MeshStandardMaterial color="#374151" metalness={0.8} roughness={0.3} />
+                {#if usePBRMaterials}
+                    <T.MeshStandardMaterial color="#374151" metalness={0.8} roughness={0.3} />
+                {:else}
+                    <T.MeshBasicMaterial color="#374151" />
+                {/if}
             </T.Mesh>
             <!-- Spot-Gehäuse (hängt unter der Traverse) -->
             <T.Mesh position={[spot.x * platform.size, spotlightHeight - 1.3, spot.z * platform.size]}>
                 <T.CylinderGeometry args={[0.5, 0.3, 0.6, 8]} />
-                <T.MeshStandardMaterial color="#1f2937" metalness={0.7} roughness={0.3} />
+                {#if usePBRMaterials}
+                    <T.MeshStandardMaterial color="#1f2937" metalness={0.7} roughness={0.3} />
+                {:else}
+                    <T.MeshBasicMaterial color="#1f2937" />
+                {/if}
             </T.Mesh>
             <!-- Leuchtende Linse -->
             <T.Mesh position={[spot.x * platform.size, spotlightHeight - 1.7, spot.z * platform.size]}>
@@ -438,7 +458,11 @@
         <!-- Dünne Traversen-Struktur die die Lampen verbindet (horizontal liegend) -->
         <T.Mesh position.y={spotlightHeight} rotation.x={Math.PI / 2}>
             <T.TorusGeometry args={[platform.size * spotlightRadius, 0.15, 6, 6]} />
-            <T.MeshStandardMaterial color="#374151" metalness={0.8} roughness={0.3} />
+            {#if usePBRMaterials}
+                <T.MeshStandardMaterial color="#374151" metalness={0.8} roughness={0.3} />
+            {:else}
+                <T.MeshBasicMaterial color="#374151" />
+            {/if}
         </T.Mesh>
     {/if}
 
