@@ -68,7 +68,10 @@
     });
     
     function selectQuality(level: QualityLevel) {
+        console.log('[QualityDialog] Setting quality to:', level);
         performanceStore.setQuality(level);
+        console.log('[QualityDialog] After set - qualityLevel:', performanceStore.qualityLevel);
+        console.log('[QualityDialog] After set - enableGlowRings:', performanceStore.settings.enableGlowRings);
     }
     
     function toggleTurboMode() {

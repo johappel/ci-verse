@@ -35,10 +35,12 @@
     // Referenzen für Spotlight-Targets (je Spot ein eigenes Target)
     let spotTargets: (Object3D | undefined)[] = $state(Array(6).fill(undefined));
 
-    // Oktaeder-Rotation (animiert) - nur auf aktueller Plattform für Performance
+    // Oktaeder-Rotation (animiert) - nur auf aktueller Plattform UND wenn Animationen erlaubt
     let octaederRotation = $state(0);
+    const enableAnimations = $derived(performanceStore.settings.enableAnimations);
+    
     useTask((delta) => {
-        if (isCurrentPlatform) {
+        if (isCurrentPlatform && enableAnimations) {
             octaederRotation += delta * 0.5; // Langsame Rotation
         }
     });
@@ -172,6 +174,10 @@
 
     <!-- Rotierender Oktaeder über dem Schild - Ankerpunkt für Lichtlinien -->
     <!-- Klick auf Oktaeder = Zurück zum Marktplatz (S) -->
+    {@const usePBR = performanceStore.settings.usePBRMaterials}
+    {@const sphereSegments = performanceStore.qualityLevel === 'low' ? 8 : 16}
+    {@const showPointLight = performanceStore.qualityLevel !== 'low'}
+    
     <T.Group position.y={15}>
         <!-- Oktaeder (halbtransparent, klickbar) -->
         <T.Mesh 
@@ -200,6 +206,7 @@
             }}
         >
             <T.OctahedronGeometry args={[1.2, 0]} />
+            {#if usePBR}
             <T.MeshPhysicalMaterial 
                 color={platformGlowColor}
                 emissive={platformGlowColor}
@@ -210,10 +217,16 @@
                 opacity={0.6}
                 transmission={0.3}
             />
+            {:else}
+            <!-- Low-Mode: Einfaches Material ohne Transmission -->
+            <T.MeshBasicMaterial 
+                color={platformGlowColor}
+            />
+            {/if}
         </T.Mesh>
         <!-- Innere leuchtende Kugel (der "Kern", auch klickbar) -->
         <T.Mesh 
-            rotation.y={octaederRotation * -1.5}
+            rotation.y={enableAnimations ? octaederRotation * -1.5 : 0}
             onclick={(e: ThreltePointerEvent) => {
                 e.stopPropagation();
                 if (platform.id !== 'S') {
@@ -221,18 +234,20 @@
                 }
             }}
         >
-            <T.SphereGeometry args={[0.5, 16, 16]} />
+            <T.SphereGeometry args={[0.5, sphereSegments, sphereSegments]} />
             <T.MeshBasicMaterial 
                 color={platformGlowColor}
             />
         </T.Mesh>
-        <!-- Punktlicht vom Kern -->
+        <!-- Punktlicht vom Kern - NUR bei nicht-Low-Mode -->
+        {#if showPointLight}
         <T.PointLight
             color={platformGlowColor}
             intensity={isCurrentPlatform ? 50 : 15}
             distance={20}
             decay={2}
         />
+        {/if}
         <!-- Tooltip bei Hover (nur wenn nicht Marktplatz und gehovered) -->
         {#if platform.id !== 'S' && $hovering}
             <Billboard position={[0, 2.5, 0]}>

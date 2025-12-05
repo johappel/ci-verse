@@ -46,15 +46,22 @@
     let platformColor = $derived(marketplace?.color ?? platform.color);
     let platformGlowColor = $derived(marketplace?.glowColor ?? platform.glowColor);
 
+    // Performance-Settings
+    const enableAnimations = $derived(performanceStore.settings.enableAnimations);
+    const usePBR = $derived(performanceStore.settings.usePBRMaterials);
+    const showPointLight = $derived(performanceStore.qualityLevel !== 'low');
+    const sphereSegments = $derived(performanceStore.qualityLevel === 'low' ? 8 : 16);
+
     // Zeit-basierte Animation
     let animTime = $state(0);
     
-    // Oktaeder-Rotation (animiert) + Energie-Puls
+    // Oktaeder-Rotation (animiert) + Energie-Puls - NUR wenn Animationen aktiviert
     let octaederRotation = $state(0);
     let energyPulse = $state(0);
     let isTransporting = $derived(worldStore.state.isTransporting);
     
     useTask((delta) => {
+        if (!enableAnimations) return; // Skip im Low-Mode
         animTime += delta;
         if (isCurrentPlatform) {
             octaederRotation += delta * 0.5;
@@ -382,13 +389,14 @@
     {/if}
 
     <!-- ========== OKTAEDER (Navigation Hub) - jetzt mit Energie-Puls ========== -->
-    <T.Group position.y={15} scale={oktaederScale}>
+    <T.Group position.y={15} scale={enableAnimations ? oktaederScale : 1.0}>
         <!-- Äußerer Oktaeder - leuchtend -->
         <T.Mesh 
-            rotation.y={octaederRotation}
+            rotation.y={enableAnimations ? octaederRotation : 0}
             rotation.x={Math.PI / 8}
         >
             <T.OctahedronGeometry args={[1.5, 0]} />
+            {#if usePBR}
             <T.MeshStandardMaterial 
                 color={platformGlowColor}
                 emissive={platformGlowColor}
@@ -398,20 +406,27 @@
                 transparent
                 opacity={0.85}
             />
+            {:else}
+            <!-- Low-Mode: Einfaches Material -->
+            <T.MeshBasicMaterial 
+                color={platformGlowColor}
+            />
+            {/if}
         </T.Mesh>
         
         <!-- Mittlerer Glow-Layer -->
         
         <!-- Innerer Kern - pulsiert hell -->
-        <T.Mesh rotation.y={octaederRotation * -1.5} scale={0.8 + energyPulse * 0.3}>
-            <T.SphereGeometry args={[0.6, 16, 16]} />
+        <T.Mesh rotation.y={enableAnimations ? octaederRotation * -1.5 : 0} scale={enableAnimations ? 0.8 + energyPulse * 0.3 : 0.8}>
+            <T.SphereGeometry args={[0.6, sphereSegments, sphereSegments]} />
             <T.MeshBasicMaterial 
                 color="#ffff44"
                 opacity={ 1.0 }
             />
         </T.Mesh>
         
-        <!-- Energie-Kern (farbig, pulsierend) -->
+        <!-- Energie-Kern (farbig, pulsierend) - NUR wenn Animationen aktiviert -->
+        {#if enableAnimations}
         <T.Mesh rotation.y={octaederRotation * 2} scale={0.5 + energyPulse * 0.3}>
             <T.IcosahedronGeometry args={[0.8, 0]} />
             <T.MeshBasicMaterial 
@@ -420,8 +435,10 @@
                 opacity={0.8 + energyPulse * 0.4}
             />
         </T.Mesh>
+        {/if}
         
-        <!-- Punktlicht - Intensität variiert stark mit Energie -->
+        <!-- Punktlicht - NUR bei nicht-Low-Mode -->
+        {#if showPointLight}
         <T.PointLight
             color={platformGlowColor}
             intensity={80 + energyPulse * 120}
@@ -436,9 +453,10 @@
             distance={20}
             decay={2}
         />
+        {/if}
         
         <!-- Energie-Glow-Ring um Oktaeder -->
-        {#if isCurrentPlatform}
+        {#if isCurrentPlatform && enableAnimations}
             <T.Mesh rotation.x={Math.PI / 2}>
                 <T.RingGeometry args={[1.8, 2.5, 32]} />
                 <T.MeshBasicMaterial 

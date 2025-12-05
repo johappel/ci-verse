@@ -97,11 +97,11 @@ function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
             geometryDetail: 'low',       // Minimale Geometrie
             enableFog: false,            // Kein Nebel
             enableParticles: false,      // Keine Partikel
-            enableAnimations: true,      // Animationen behalten (UX)
+            enableAnimations: false,     // KEINE Animationen im Low-Mode
             enableGlowRings: false,      // KEINE Glow-Ringe
             enableEnergyEffects: false,  // KEINE Energie-Effekte (Shader!)
             lightBridgeQuality: 'low',   // Einfachste Lichtlinien (nur Kern)
-            pixelRatio: 0.75,            // Reduzierte Auflösung
+            pixelRatio: 0.5,             // HALBE Auflösung für max. Performance
             antialias: false,            // Keine Kantenglättung
             skipPreloadFlight: true      // Überspringe Rundflug
         }

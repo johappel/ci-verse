@@ -16,6 +16,10 @@
     import { base } from '$app/paths';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
+    import { performanceStore } from '$lib/logic/performanceStore.svelte';
+    
+    // Performance: Im Low-Mode Transparenz deaktivieren (GPU-lastig)
+    const enableTransparency = $derived(performanceStore.qualityLevel !== 'low');
     import InteractionPillar from './InteractionPillar.svelte';
     import type { ProjectData } from '$lib/types/project';
     
@@ -130,8 +134,8 @@
         <T.BoxGeometry args={[wall.width, wall.height, wall.depth]} />
         <T.MeshPhysicalMaterial
             color={darkColor}
-            transparent
-            opacity={0.4}
+            transparent={enableTransparency}
+            opacity={enableTransparency ? 0.4 : 0.9}
             metalness={0.2}
             roughness={0.3}
         />
@@ -270,7 +274,7 @@
         <!-- Rahmen mit Glow -->
         <T.Mesh position.z={0.01}>
             <T.PlaneGeometry args={[panels.chatbot.width + 0.3, panels.chatbot.height + 0.3]} />
-            <T.MeshBasicMaterial color={neonCyan} transparent opacity={chatGlow} />
+            <T.MeshBasicMaterial color={neonCyan} transparent={enableTransparency} opacity={enableTransparency ? chatGlow : 1.0} />
         </T.Mesh>
 
         <!-- Panel-Hintergrund -->
@@ -330,7 +334,7 @@
         {#if isChatHovered}
             <T.Mesh position.z={0.02}>
                 <T.PlaneGeometry args={[panels.chatbot.width + 0.5, panels.chatbot.height + 0.5]} />
-                <T.MeshBasicMaterial color={neonCyan} transparent opacity={0.2} />
+                <T.MeshBasicMaterial color={neonCyan} transparent={enableTransparency} opacity={enableTransparency ? 0.2 : 1.0} />
             </T.Mesh>
         {/if}
 
@@ -340,7 +344,7 @@
     <!-- Boden-Markierung -->
     <T.Mesh position.y={0.01} rotation.x={-Math.PI / 2} receiveShadow>
         <T.PlaneGeometry args={[wall.width + 1, 2]} />
-        <T.MeshStandardMaterial color={primaryColor} transparent opacity={0.3} />
+        <T.MeshStandardMaterial color={primaryColor} transparent={enableTransparency} opacity={enableTransparency ? 0.3 : 1.0} />
     </T.Mesh>
 
 </T.Group>

@@ -15,6 +15,10 @@
     import { Text, useCursor, HTML, ImageMaterial } from '@threlte/extras';
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
+    import { performanceStore } from '$lib/logic/performanceStore.svelte';
+    
+    // Performance: Im Low-Mode Transparenz deaktivieren (GPU-lastig)
+    const enableTransparency = $derived(performanceStore.qualityLevel !== 'low');
 
     interface Props {
         project: ProjectData;
@@ -273,10 +277,14 @@
             <!-- === TEXT-POSTER (links) === -->
             {@const textOffsetX = posterImage ? -(s.width / 2 - s.textWidth / 2 - 0.15) : 0}
             <T.Group position.x={textOffsetX}>
-                <!-- Text-Poster Hintergrund -->
+                <!-- Text-Poster Hintergrund: Im Low-Mode dunkler undurchsichtiger Hintergrund -->
                 <T.Mesh position.z={0.01}>
                     <T.PlaneGeometry args={[s.textWidth + 0.1, s.height * 0.92]} />
-                    <T.MeshBasicMaterial color={displayColor} transparent opacity={0.12} />
+                    <T.MeshBasicMaterial 
+                        color={enableTransparency ? displayColor : '#1e293b'}
+                        transparent={enableTransparency}
+                        opacity={enableTransparency ? 0.12 : 1.0}
+                    />
                 </T.Mesh>
                 
                 <!-- Projekt-Titel (oben) -->
@@ -429,10 +437,14 @@
             <!-- === TEXT-POSTER (links auf Rückseite = rechts gespiegelt) === -->
             {@const textOffsetX = posterImage ? -(s.width / 2 - s.textWidth / 2 - 0.15) : 0}
             <T.Group position.x={textOffsetX}>
-                <!-- Text-Poster Hintergrund -->
+                <!-- Text-Poster Hintergrund: Im Low-Mode dunkler undurchsichtiger Hintergrund -->
                 <T.Mesh position.z={0.01}>
                     <T.PlaneGeometry args={[s.textWidth + 0.1, s.height * 0.92]} />
-                    <T.MeshBasicMaterial color={displayColor} transparent opacity={0.12} />
+                    <T.MeshBasicMaterial 
+                        color={enableTransparency ? displayColor : '#1e293b'}
+                        transparent={enableTransparency}
+                        opacity={enableTransparency ? 0.12 : 1.0}
+                    />
                 </T.Mesh>
                 
                 <!-- Projekt-Titel (oben) -->
@@ -529,7 +541,7 @@
                 {@const dividerX = textOffsetX + s.textWidth / 2 + s.gap / 2}
                 <T.Mesh position={[dividerX, 0, 0.015]}>
                     <T.PlaneGeometry args={[0.02, s.height * 0.85]} />
-                    <T.MeshBasicMaterial color={displayColor} transparent opacity={0.4} />
+                    <T.MeshBasicMaterial color={displayColor} transparent={enableTransparency} opacity={enableTransparency ? 0.4 : 1.0} />
                 </T.Mesh>
             {/if}
 

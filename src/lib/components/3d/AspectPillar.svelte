@@ -1,15 +1,20 @@
 <script lang="ts">
     /**
-     * AspectPillar - Leuchtende Bodenplatte vor InfoHexagon-Seiten
+     * AspectPillar - Einfache Bodenplatte vor InfoHexagon-Seiten
      * 
-     * Ähnlich wie InteractionPillar, aber für Aspects statt Projekte.
-     * Klick öffnet ContentCard mit HTML-Content von contentUrl.
+     * Struktur (vereinfacht):
+     * - Äußerer Ring: Immer sichtbar (dezent)
+     * - Innerer Ring: Erscheint bei Nähe (<12 Einheiten)
+     * - Klick öffnet ContentCard mit HTML-Content
      */
     import { T, useThrelte, useTask } from '@threlte/core';
-    import { HTML, useCursor } from '@threlte/extras';
-    import { BadgeInfo } from 'lucide-svelte';
+    import { useCursor, Text, Billboard } from '@threlte/extras';
     import type { PlatformAspect } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
+    import { performanceStore } from '$lib/logic/performanceStore.svelte';
+    
+    // Performance: Im Low-Mode Transparenz deaktivieren (GPU-lastig)
+    const enableTransparency = $derived(performanceStore.qualityLevel !== 'low');
 
     interface Props {
         aspect: PlatformAspect;
@@ -36,28 +41,18 @@
     
     let isNearby = $state(false);
     let isHovered = $state(false);
-    let pulsePhase = $state(0);
     let frameCounter = 0;
     
     const aspectColor = '#60a5fa'; // Blau für Info-Aspects
 
-    useTask((delta) => {
+    useTask(() => {
         frameCounter++;
-        
-        if (isNearby || isHovered) {
-            pulsePhase += delta * 2.5;
-        }
-        
-        if (frameCounter % 6 !== 0) return;
+        if (frameCounter % 10 !== 0) return;
         
         const camPos = $camera.position;
-        const wx = effectiveWorldPos[0];
-        const wy = effectiveWorldPos[1];
-        const wz = effectiveWorldPos[2];
-        
-        const dx = camPos.x - wx;
-        const dy = camPos.y - wy;
-        const dz = camPos.z - wz;
+        const dx = camPos.x - effectiveWorldPos[0];
+        const dy = camPos.y - effectiveWorldPos[1];
+        const dz = camPos.z - effectiveWorldPos[2];
         const distSq = dx * dx + dy * dy + dz * dz;
         
         isNearby = distSq <= ACTIVATION_DISTANCE * ACTIVATION_DISTANCE;
@@ -66,123 +61,64 @@
     function handleClick() {
         if (!isNearby) return;
         
-        // Wenn contentUrl vorhanden, im Iframe-Dialog öffnen
         if (aspect.contentUrl) {
             worldStore.openIframe(aspect.contentUrl, aspect.title);
         } else {
-            // Sonst ContentCard mit Aspect-Daten öffnen
             worldStore.selectAspect(aspect);
         }
     }
-
-    // Puls-Animation
-    let pulseIntensity = $derived(isNearby ? 0.6 + Math.sin(pulsePhase) * 0.4 : 0.2);
-    let ringScale = $derived(isHovered ? 1.15 + Math.sin(pulsePhase * 2) * 0.05 : 1.0);
 </script>
 
 <T.Group position={position} rotation.y={rotation}>
-    <!-- Basis-Platte (dunkel, leicht erhaben) -->
+    <!-- Unsichtbare Klickfläche (gesamter Bereich) -->
     <T.Mesh 
-        position.y={0.02} 
+        position.y={0.01} 
         rotation.x={-Math.PI / 2}
         onclick={handleClick}
         onpointerenter={() => { isHovered = true; onPointerEnter(); }}
         onpointerleave={() => { isHovered = false; onPointerLeave(); }}
     >
         <T.CircleGeometry args={[size, 6]} />
-        <T.MeshStandardMaterial 
-            color={isNearby ? '#1e293b' : '#0f172a'}
-            metalness={0.6}
-            roughness={0.4}
-        />
+        <T.MeshBasicMaterial transparent opacity={0.01} />
     </T.Mesh>
 
-    <!-- Äußerer leuchtender Ring -->
-    <T.Mesh position.y={0.03} rotation.x={-Math.PI / 2} scale={[ringScale, ringScale, 1]}>
-        <T.RingGeometry args={[size * 0.75, size * 0.95, 6]} />
+    <!-- Äußerer Ring - immer sichtbar -->
+    <T.Mesh position.y={0.02} rotation.x={-Math.PI / 2}>
+        <T.RingGeometry args={[size * 0.7, size, 6]} />
         <T.MeshBasicMaterial 
-            color={aspectColor}
-            transparent
-            opacity={pulseIntensity * 0.7}
-            side={2}
+            color={isHovered ? '#ffffff' : '#64748b'}
+            transparent={enableTransparency}
+            opacity={enableTransparency ? (isHovered ? 0.6 : 0.3) : 1.0}
         />
     </T.Mesh>
 
-    <!-- Innerer leuchtender Kern -->
-    <T.Mesh position.y={0.04} rotation.x={-Math.PI / 2}>
-        <T.CircleGeometry args={[size * 0.3, 6]} />
-        <T.MeshBasicMaterial 
-            color={isHovered ? '#ffffff' : aspectColor}
-            transparent
-            opacity={isNearby ? pulseIntensity : 0.15}
-        />
-    </T.Mesh>
-
-    <!-- Info-Symbol in der Mitte (BadgeInfo Icon) -->
+    <!-- Innerer Ring - nur bei Nähe sichtbar -->
     {#if isNearby}
-        <HTML position={[0, 0.15, 0]} center transform scale={0.015} pointerEvents="none">
-            <div style="pointer-events: none;">
-                <BadgeInfo 
-                    size={48} 
-                    strokeWidth={2}
-                    color="#ffffff"
-                />
-            </div>
-        </HTML>
-    {:else}
-        <T.Mesh position.y={0.05} rotation.x={-Math.PI / 2}>
-            <T.RingGeometry args={[size * 0.08, size * 0.15, 16]} />
-            <T.MeshBasicMaterial 
-                color="#94a3b8"
-                transparent
-                opacity={0.3}
-            />
-        </T.Mesh>
-    {/if}
-
-    <!-- Glow nach oben (nur wenn aktiv und gehovert) -->
-    {#if isNearby && isHovered}
-        <T.PointLight
-            position.y={0.3}
+    <T.Mesh position.y={0.03} rotation.x={-Math.PI / 2}>
+        <T.RingGeometry args={[size * 0.2, size * 0.5, 6]} />
+        <T.MeshBasicMaterial 
             color={aspectColor}
-            intensity={8}
-            distance={4}
-            decay={2}
+            transparent={enableTransparency}
+            opacity={enableTransparency ? (isHovered ? 0.9 : 0.6) : 1.0}
         />
+    </T.Mesh>
     {/if}
 
-    <!-- Label (nur wenn nah und gehovert) -->
+    <!-- Hint bei Hover + Nähe -->
     {#if isNearby && isHovered}
-        <HTML position={[0, 0.8, 0]} center transform={false}>
-            <div style="
-                background: #ffffff;
-                color: #0f172a;
-                padding: 8px 12px;
-                border-radius: 6px;
-                font-size: 0.75rem;
-                font-weight: 600;
-                white-space: nowrap;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                border-bottom: 3px solid {aspectColor};
-            ">
-                Mehr erfahren
-            </div>
-        </HTML>
-    {/if}
-
-    <!-- "Komm näher" Hinweis -->
-    {#if !isNearby && isHovered}
-        <HTML position={[0, 0.5, 0]} center transform={false}>
-            <div style="
-                background: rgba(15, 23, 42, 0.9);
-                color: #94a3b8;
-                padding: 6px 10px;
-                border-radius: 4px;
-                font-size: 0.7rem;
-                white-space: nowrap;
-            ">
-                Näher kommen...
-            </div>
-        </HTML>
+    <Billboard position={[0, 0.6, 0]}>
+        <T.Mesh>
+            <T.PlaneGeometry args={[2.2, 0.5]} />
+            <T.MeshBasicMaterial color="#ffffff" />
+        </T.Mesh>
+        <Text
+            text="Mehr erfahren"
+            fontSize={0.18}
+            color="#0f172a"
+            anchorX="center"
+            anchorY="middle"
+            position.z={0.01}
+        />
+    </Billboard>
     {/if}
 </T.Group>

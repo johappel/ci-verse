@@ -16,6 +16,10 @@
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
     import AspectPillar from './AspectPillar.svelte';
+    import { performanceStore } from '$lib/logic/performanceStore.svelte';
+    
+    // Performance-Settings - im Low-Mode Transparenz deaktivieren (GPU-lastig)
+    const enableTransparency = $derived(performanceStore.qualityLevel !== 'low');
 
     interface Props {
         platformName: string;
@@ -179,8 +183,8 @@
                 <T.PlaneGeometry args={[radius * 1.1, height * 0.85]} />
                 <T.MeshBasicMaterial 
                     color={isHovered ? '#3b82f6' : '#0f172a'}
-                    transparent
-                    opacity={isHovered ? 0.8 : 0.5}
+                    transparent={enableTransparency}
+                    opacity={enableTransparency ? (isHovered ? 0.8 : 0.5) : 1.0}
                 />
             </T.Mesh>
 
