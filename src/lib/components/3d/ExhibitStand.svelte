@@ -11,9 +11,10 @@
         project: ProjectData;
         position: [number, number, number];
         platformPosition?: [number, number, number]; // Für Distanz-Check
+        platformId?: string; // Für Task-Optimierung
     }
 
-    let { project, position, platformPosition = [0, 0, 0] }: Props = $props();
+    let { project, position, platformPosition = [0, 0, 0], platformId = '' }: Props = $props();
 
     // Display-Daten
     const posterUrl = project.display?.posterImage?.startsWith('/') ? base + project.display.posterImage : project.display?.posterImage;
@@ -30,7 +31,18 @@
     let isButtonHovered = $state(false);
     let frameCounter = 0;
     
+    // Task-Optimierung: Nur laufen wenn auf dieser Plattform
+    let isOnPlatform = $derived(platformId ? worldStore.state.currentPlatform === platformId : true);
+    let isTransportTarget = $derived(platformId ? worldStore.state.transportTarget === platformId : false);
+    let shouldRunTask = $derived(isOnPlatform || isTransportTarget);
+    
     useTask(() => {
+        // Skip wenn nicht auf dieser Plattform
+        if (!shouldRunTask) {
+            isNearby = false;
+            return;
+        }
+        
         frameCounter++;
         if (frameCounter % 6 !== 0) return;
         

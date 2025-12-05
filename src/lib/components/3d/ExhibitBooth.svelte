@@ -44,8 +44,14 @@
     const ACTIVATION_DISTANCE = 12;
     let isNearby = $state(false);
     
-    // Auf der gleichen Plattform? (für Poster-Sichtbarkeit)
+    // Auf der gleichen Plattform? (für Poster-Sichtbarkeit und Task-Optimierung)
     let isOnPlatform = $derived(worldStore.state.currentPlatform === platformId);
+    
+    // Ist die Zielplattform? (für Transport-Animation)
+    let isTransportTarget = $derived(worldStore.state.transportTarget === platformId);
+    
+    // Task nur laufen lassen wenn relevant (auf Plattform oder Transport-Ziel)
+    let shouldRunTask = $derived(isOnPlatform || isTransportTarget);
     
     let frameCounter = 0;
     
@@ -56,8 +62,14 @@
         platformPosition[2] + position[2]
     ] as [number, number, number]);
     
-    // Entfernungs-Check (alle 6 Frames für Performance)
+    // Entfernungs-Check (alle 6 Frames für Performance, nur wenn auf Plattform)
     useTask(() => {
+        // Skip wenn nicht auf dieser Plattform
+        if (!shouldRunTask) {
+            isNearby = false;
+            return;
+        }
+        
         frameCounter++;
         if (frameCounter % 6 !== 0) return;
         

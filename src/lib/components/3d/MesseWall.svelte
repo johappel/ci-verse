@@ -91,7 +91,17 @@
         })
     );
     
+    // Task-Optimierung: Nur laufen wenn auf dieser Plattform
+    let isTransportTarget = $derived(worldStore.state.transportTarget === platformId);
+    let shouldRunTask = $derived(isOnPlatform || isTransportTarget);
+    
     useTask(() => {
+        // Skip wenn nicht auf dieser Plattform
+        if (!shouldRunTask) {
+            isNearWall = false;
+            return;
+        }
+        
         frameCounter++;
         if (frameCounter % 6 !== 0) return; // Alle 6 Frames
         

@@ -391,6 +391,7 @@
                 {project} 
                 position={[standPositions[i]?.x ?? 0, 2, standPositions[i]?.z ?? 0]} 
                 platformPosition={[platform.x, platform.y, platform.z]}
+                platformId={platform.id}
             />
         {/each}
     {/if}

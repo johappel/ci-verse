@@ -6,9 +6,13 @@
     import MarketplacePlatform from './MarketplacePlatform.svelte';
     import LightBridge from './LightBridge.svelte';
     import TransportPortal from './TransportPortal.svelte';
+    import ShaderWarmup from './ShaderWarmup.svelte';
 
     // Aktiviere Interaktivität für diese Komponente und alle Kinder
     interactivity();
+    
+    // Shader-Warmup Status
+    let shadersWarmedUp = $state(false);
 
     // Alle Plattformen als Array (ohne S, die bekommt MarketplacePlatform)
     let regularPlatforms = Object.values(platforms).filter(p => p.id !== 'S');
@@ -30,6 +34,9 @@
     // Sichtbare Verbindungen: Alle von/zu aktueller Plattform
     let visibleConnections = $derived(getConnectionsForPlatform(worldStore.state.currentPlatform));
 </script>
+
+<!-- Shader Warmup - kompiliert alle WebGL-Shader beim Start -->
+<ShaderWarmup onComplete={() => shadersWarmedUp = true} />
 
 <!-- Reguläre Plattformen (B1, B2, B3, Q1, Q2, Q3) -->
 {#each regularPlatforms as platform (platform.id)}

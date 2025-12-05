@@ -66,8 +66,9 @@
     let animPhase = $state(0);
     let flowPhase = $state(0); // Für fließende Energie-Partikel
     
-    // Animation läuft immer
+    // Animation nur laufen wenn die Linie relevant ist (sichtbar)
     useTask((delta) => {
+        if (!isRelevant) return;
         animPhase += delta * 2; // Geschwindigkeit der Puls-Animation
         flowPhase += delta * 1.5; // Fließbewegung
     });
