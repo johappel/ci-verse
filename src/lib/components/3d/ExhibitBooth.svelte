@@ -19,6 +19,9 @@
     
     // Performance: Im Low-Mode Transparenz deaktivieren (GPU-lastig)
     const enableTransparency = $derived(performanceStore.qualityLevel !== 'low');
+    
+    // Performance: Im Low-Mode nur Vorderseite rendern (keine doppelte Textur/Text-Last)
+    const showBackside = $derived(performanceStore.qualityLevel !== 'low');
 
     interface Props {
         project: ProjectData;
@@ -244,7 +247,10 @@
             />
         </T.Mesh>
 
-        <!-- ========== VORDERSEITE ========== -->
+        <!-- ========== VORDERSEITE (z=0.03) - zeigt NACH INNEN zur Plattform-Mitte ========== -->
+        <!-- User kommt von AUSSEN und sieht diese Seite SELTEN -->
+        {#if showBackside}
+        <!-- FULL QUALITY: Volle Details auf Vorderseite -->
         <T.Group position.z={0.03}>
             <!-- Klickbare Hintergrund-Fläche -->
             <T.Mesh 
@@ -277,7 +283,7 @@
             <!-- === TEXT-POSTER (links) === -->
             {@const textOffsetX = posterImage ? -(s.width / 2 - s.textWidth / 2 - 0.15) : 0}
             <T.Group position.x={textOffsetX}>
-                <!-- Text-Poster Hintergrund: Im Low-Mode dunkler undurchsichtiger Hintergrund -->
+                <!-- Text-Poster Hintergrund -->
                 <T.Mesh position.z={0.01}>
                     <T.PlaneGeometry args={[s.textWidth + 0.1, s.height * 0.92]} />
                     <T.MeshBasicMaterial 
@@ -321,7 +327,7 @@
                     />
                 {/if}
 
-                <!-- Beschreibung (unter Slogan oder Titel) -->
+                <!-- Beschreibung -->
                 {#if shortTeaser}
                     {@const descY = slogan ? s.height * 0.02 : s.height * 0.12}
                     <Text
@@ -351,7 +357,6 @@
                         opacity={isNearby ? (isButtonHovered ? 1 : 0.6) : 0.25} 
                     />
                 </T.Mesh>
-                <!-- Innerer Kreis des Hexagon-Buttons (auch klickbar) -->
                 <T.Mesh 
                     position={[0, -s.height * 0.38, 0.025]}
                     onclick={handleButtonClick}
@@ -365,7 +370,6 @@
                         opacity={isNearby ? 0.9 : 0.5} 
                     />
                 </T.Mesh>
-                <!-- Info-Icon im Hexagon (keine Pointer-Events) -->
                 <Text
                     text={isNearby ? "ℹ️" : "👁️"}
                     fontSize={0.15}
@@ -385,7 +389,7 @@
                 </T.Mesh>
             {/if}
 
-            <!-- === POSTER-BILD (rechts, großflächig, klickbar) === -->
+            <!-- === POSTER-BILD (rechts) === -->
             {#if posterImage && isOnPlatform}
                 {@const imageOffsetX = textOffsetX + s.textWidth / 2 + s.gap + imageWidth / 2}
                 <T.Mesh 
@@ -397,14 +401,33 @@
                     <T.PlaneGeometry args={[imageWidth, imageHeight]} />
                     <ImageMaterial 
                         url={posterImage}
-                        transparent
+                        transparent={false}
                         opacity={1}
                     />
                 </T.Mesh>
             {/if}
         </T.Group>
+        {:else}
+        <!-- LOW-MODE: Einfache Vorderseite (User sieht sie selten) -->
+        <T.Group position.z={0.03}>
+            <T.Mesh>
+                <T.PlaneGeometry args={[s.width, s.height]} />
+                <T.MeshBasicMaterial color="#1e293b" />
+            </T.Mesh>
+            <!-- Nur dezenter Rahmen -->
+            <T.Mesh position={[0, s.height / 2 - 0.06, 0.01]}>
+                <T.BoxGeometry args={[s.width, 0.12, 0.02]} />
+                <T.MeshBasicMaterial color={displayColor} />
+            </T.Mesh>
+            <T.Mesh position={[0, -s.height / 2 + 0.06, 0.01]}>
+                <T.BoxGeometry args={[s.width, 0.12, 0.02]} />
+                <T.MeshBasicMaterial color={displayColor} />
+            </T.Mesh>
+        </T.Group>
+        {/if}
 
-        <!-- ========== RÜCKSEITE (gespiegelt) ========== -->
+        <!-- ========== RÜCKSEITE (z=-0.03) - zeigt NACH AUSSEN ========== -->
+        <!-- User kommt von AUSSEN und sieht diese Seite ZUERST - IMMER volle Details! -->
         <T.Group position.z={-0.03} rotation.y={Math.PI}>
             <!-- Klickbare Hintergrund-Fläche -->
             <T.Mesh 
@@ -434,10 +457,10 @@
                 <T.MeshBasicMaterial color={displayColor} />
             </T.Mesh>
 
-            <!-- === TEXT-POSTER (links auf Rückseite = rechts gespiegelt) === -->
+            <!-- === TEXT-POSTER (links auf Rückseite) === -->
             {@const textOffsetX = posterImage ? -(s.width / 2 - s.textWidth / 2 - 0.15) : 0}
             <T.Group position.x={textOffsetX}>
-                <!-- Text-Poster Hintergrund: Im Low-Mode dunkler undurchsichtiger Hintergrund -->
+                <!-- Text-Poster Hintergrund -->
                 <T.Mesh position.z={0.01}>
                     <T.PlaneGeometry args={[s.textWidth + 0.1, s.height * 0.92]} />
                     <T.MeshBasicMaterial 
@@ -481,7 +504,7 @@
                     />
                 {/if}
 
-                <!-- Beschreibung (unter Slogan oder Titel) -->
+                <!-- Beschreibung -->
                 {#if shortTeaser}
                     {@const descY = slogan ? s.height * 0.02 : s.height * 0.12}
                     <Text
@@ -511,7 +534,6 @@
                         opacity={isNearby ? (isButtonHovered ? 1 : 0.6) : 0.25} 
                     />
                 </T.Mesh>
-                <!-- Innerer Kreis des Hexagon-Buttons (auch klickbar) -->
                 <T.Mesh 
                     position={[0, -s.height * 0.38, 0.025]}
                     onclick={handleButtonClick}
@@ -525,7 +547,6 @@
                         opacity={isNearby ? 0.9 : 0.5} 
                     />
                 </T.Mesh>
-                <!-- Info-Icon im Hexagon (keine Pointer-Events) -->
                 <Text
                     text={isNearby ? "ℹ️" : "👁️"}
                     fontSize={0.15}
@@ -545,7 +566,7 @@
                 </T.Mesh>
             {/if}
 
-            <!-- === POSTER-BILD (rechts auf Rückseite, großflächig, klickbar) === -->
+            <!-- === POSTER-BILD (rechts auf Rückseite) === -->
             {#if posterImage && isOnPlatform}
                 {@const imageOffsetX = textOffsetX + s.textWidth / 2 + s.gap + imageWidth / 2}
                 <T.Mesh 
@@ -557,7 +578,7 @@
                     <T.PlaneGeometry args={[imageWidth, imageHeight]} />
                     <ImageMaterial 
                         url={posterImage}
-                        transparent
+                        transparent={false}
                         opacity={1}
                     />
                 </T.Mesh>

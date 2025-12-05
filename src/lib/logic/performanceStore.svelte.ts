@@ -39,6 +39,10 @@ export interface PerformanceSettings {
     pixelRatio: number;              // Canvas Auflösung (1.0 = native, 0.5 = halbe)
     antialias: boolean;              // Kantenglättung
     
+    // Kamera
+    cameraFlightSpeed: 'normal' | 'fast' | 'instant';  // Fluggeschwindigkeit
+    cameraSmoothTime: number;        // Standard-Glättung für Kamera (0.3 = direkt, 1.5 = weich)
+    
     // Laden
     skipPreloadFlight: boolean;      // Überspringt den initialen Rundflug
 }
@@ -69,6 +73,8 @@ function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
             lightBridgeQuality: 'high',
             pixelRatio: getDevicePixelRatio(),
             antialias: true,
+            cameraFlightSpeed: 'normal',  // Normale Flugzeit
+            cameraSmoothTime: 1.5,        // Weiche Kamera-Bewegung
             skipPreloadFlight: false
         },
         medium: {
@@ -86,6 +92,8 @@ function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
             lightBridgeQuality: 'medium', // Einfachere Lichtlinien
             pixelRatio: 1.0,             // Feste Auflösung
             antialias: true,
+            cameraFlightSpeed: 'normal',  // Normale Flugzeit
+            cameraSmoothTime: 0.9,        // Mittlere Kamera-Glättung
             skipPreloadFlight: false
         },
         low: {
@@ -103,6 +111,8 @@ function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
             lightBridgeQuality: 'low',   // Einfachste Lichtlinien (nur Kern)
             pixelRatio: 0.5,             // HALBE Auflösung für max. Performance
             antialias: false,            // Keine Kantenglättung
+            cameraFlightSpeed: 'instant', // SOFORTIGER Kamerasprung
+            cameraSmoothTime: 0.4,        // Direkte Kamera-Reaktion (weniger Interpolation)
             skipPreloadFlight: true      // Überspringe Rundflug
         }
     };

@@ -140,11 +140,15 @@
 
 	// Transport-Animation wenn sich die Plattform ändert
 	// Die Kamera fliegt auf Höhe der Lichtlinien (Oktaeder-Höhe Y+15)
+	// Im Low-Mode: Sofortiger Sprung statt Animation
 	$effect(() => {
 		if (worldStore.state.isTransporting && worldStore.state.transportTarget && cameraControls) {
 			const target = platforms[worldStore.state.transportTarget];
 			const current = platforms[worldStore.state.currentPlatform];
 			if (target && current) {
+				// Fluggeschwindigkeit aus Settings
+				const flightSpeed = performanceStore.settings.cameraFlightSpeed;
+				
 				// Lichtlinien-Höhe: Oktaeder sind bei platform.y + 15
 				const LIGHT_LINE_HEIGHT = 15;
 				
@@ -162,6 +166,28 @@
 				const finalCamY = target.y + landing.offset[1];
 				const finalCamZ = target.z + landing.offset[2];
 				
+				// === INSTANT MODE: Sofortiger Sprung ===
+				if (flightSpeed === 'instant') {
+					// Berechne korrektes LookAt-Ziel aus landing.lookAtOffset
+					const lookAtX = target.x + landing.lookAtOffset[0];
+					const lookAtY = target.y + landing.lookAtOffset[1];
+					const lookAtZ = target.z + landing.lookAtOffset[2];
+					
+					// Sofort teleportieren (ohne Animation!)
+					cameraControls!.setLookAt(
+						finalCamX, finalCamY, finalCamZ,
+						lookAtX, lookAtY, lookAtZ,
+						false  // FALSE = keine Animation, sofortiger Sprung
+					);
+					
+					// Transport sofort abschließen
+					worldStore.finishTransport();
+					return; // Beende hier, keine weitere Animation
+				}
+				
+				// === FAST MODE: Schnelle Animation ===
+				const speedMultiplier = flightSpeed === 'fast' ? 0.5 : 1.0;
+				
 				// Aktuelle Kamera-Position
 				const startX = cameraControls.camera.position.x;
 				const startY = cameraControls.camera.position.y;
@@ -174,27 +200,27 @@
 				// 3-Stufen-Animation: Aufsteigen → Gleiten → Landen
 				async function flyAlongLightBridge() {
 					// Stufe 1: Sanft auf Flughöhe steigen
-					cameraControls!.smoothTime = 1.8;
+					cameraControls!.smoothTime = 1.8 * speedMultiplier;
 					cameraControls!.setLookAt(
 						startX, flightAltitude, startZ,  // Aufsteigen
 						midX, flightAltitude - 5, midZ,  // Vorausschauen Richtung Ziel
 						true
 					);
-					// Warte bis Aufstieg abgeschlossen (smoothTime * 2 für Sicherheit)
-					await new Promise(r => setTimeout(r, 1600));
+					// Warte bis Aufstieg abgeschlossen
+					await new Promise(r => setTimeout(r, 1600 * speedMultiplier));
 					
 					// Stufe 2: Auf Flughöhe zum Ziel gleiten
-					cameraControls!.smoothTime = 2.5;
+					cameraControls!.smoothTime = 2.5 * speedMultiplier;
 					cameraControls!.setLookAt(
 						finalCamX, flightAltitude, finalCamZ,  // Über dem Ziel
 						target.x, target.y + 5, target.z,      // Schaut zur Plattform runter
 						true
 					);
 					// Warte bis Gleiten abgeschlossen
-					await new Promise(r => setTimeout(r, 2400));
+					await new Promise(r => setTimeout(r, 2400 * speedMultiplier));
 					
 					// Stufe 3: Sanft zur Landeposition absenken
-					cameraControls!.smoothTime = 1.0;
+					cameraControls!.smoothTime = 1.0 * speedMultiplier;
 					cameraControls!.setLookAt(
 						finalCamX, finalCamY, finalCamZ,        // Finale Position
 						target.x, target.y + 5, target.z,      // Look-At zur Mitte
@@ -203,6 +229,7 @@
 
 					// Warte bis Kamera TATSÄCHLICH an Zielposition angekommen ist
 					const POSITION_THRESHOLD = 0.5; // 50cm Toleranz
+					const maxWaitTime = flightSpeed === 'fast' ? 4000 : 8000;
 					await new Promise<void>(resolve => {
 						const checkPosition = setInterval(() => {
 							const cam = cameraControls!.camera.position;
@@ -217,14 +244,15 @@
 							}
 						}, 100); // Prüfe alle 100ms
 						
-						// Fallback nach 8 Sekunden
+						// Fallback
 						setTimeout(() => {
 							clearInterval(checkPosition);
 							resolve();
-						}, 8000);
+						}, maxWaitTime);
 					});
 					
-					cameraControls!.smoothTime = 0.9; // zurücksetzen
+					// SmoothTime aus Settings zurücksetzen
+					cameraControls!.smoothTime = performanceStore.settings.cameraSmoothTime;
 					
 					// Transport abschließen
 					worldStore.finishTransport();
@@ -377,6 +405,7 @@
 	let enableFog = $derived(performanceStore.settings.enableFog);
 	let useHemisphereLight = $derived(performanceStore.settings.useHemisphereLight);
 	let pixelRatio = $derived(performanceStore.settings.pixelRatio);
+	let cameraSmoothTime = $derived(performanceStore.settings.cameraSmoothTime);
 </script>
 
 <!-- Container mit festen viewport-Einheiten -->
@@ -387,8 +416,8 @@
 		<T.PerspectiveCamera makeDefault position={initialCamPos} fov={80} near={1} far={2000}>
 			<CameraControls 
 				bind:ref={cameraControls}
-				smoothTime={1.5}
-				draggingSmoothTime={0.5}
+				smoothTime={cameraSmoothTime}
+				draggingSmoothTime={cameraSmoothTime * 0.4}
 				maxPolarAngle={Math.PI / 2}
 				minPolarAngle={Math.PI / 8}
 				maxDistance={80}

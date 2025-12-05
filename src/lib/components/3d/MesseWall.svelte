@@ -349,8 +349,8 @@
                                 <T.PlaneGeometry args={[imageOnlyWidth, imageOnlyHeight]} />
                                 <ImageMaterial 
                                     url={project.display.posterImage?.startsWith('/') ? base + project.display.posterImage : project.display.posterImage}
-                                    transparent
-                                    opacity={0.98}
+                                    transparent={false}
+                                    opacity={1}
                                 />
                             </T.Mesh>
                         </T.Group>
@@ -462,8 +462,8 @@
                             <T.RingGeometry args={[buttonSize * 0.6, buttonSize, 6]} />
                             <T.MeshBasicMaterial 
                                 color={isNearWall && isButtonHovered ? '#ffffff' : displayColor} 
-                                transparent 
-                                opacity={isNearWall ? (isButtonHovered ? 1 : 0.6) : 0.25} 
+                                transparent={enableTransparency}
+                                opacity={enableTransparency ? (isNearWall ? (isButtonHovered ? 1 : 0.6) : 0.25) : 1.0} 
                             />
                         </T.Mesh>
                         <!-- Innerer Kreis des Hexagon-Buttons (auch klickbar) -->
@@ -476,8 +476,8 @@
                             <T.CircleGeometry args={[buttonSize * 0.6, 6]} />
                             <T.MeshBasicMaterial 
                                 color={isNearWall && isButtonHovered ? displayColor : '#0f172a'} 
-                                transparent 
-                                opacity={isNearWall ? 0.9 : 0.5} 
+                                transparent={enableTransparency}
+                                opacity={enableTransparency ? (isNearWall ? 0.9 : 0.5) : 1.0} 
                             />
                         </T.Mesh>
                         <!-- Info-Icon im Hexagon (keine Pointer-Events) -->
@@ -510,7 +510,7 @@
                             <T.PlaneGeometry args={[imageWidth, imageHeight]} />
                             <ImageMaterial 
                                 url={project.display?.posterImage?.startsWith('/') ? base + project.display.posterImage : project.display?.posterImage || ''}
-                                transparent
+                                transparent={false}
                                 opacity={1}
                             />
                         </T.Mesh>
