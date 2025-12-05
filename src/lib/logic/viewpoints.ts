@@ -89,9 +89,9 @@ function getBoothViewPoint(
             ? startAngle + angleSpread / 2
             : startAngle + (boothIndex / (boothCount - 1)) * angleSpread);
 
-    // Dreieck-Formation
+    // Dreieck-Formation (gegen den Uhrzeigersinn: A → B → C)
     const triangleRadius = useTriangleGroups ? 2.5 : 0;
-    const triangleAngles = [0, 2.0944, 4.1888]; // 0°, 120°, 240°
+    const triangleAngles = [0, -2.0944, -4.1888]; // 0°, -120°, -240° (gegen Uhrzeigersinn)
 
     const localAngle = useTriangleGroups ? triangleAngles[posInGroup] : 0;
     const localX = useTriangleGroups ? Math.cos(groupAngle + localAngle) * triangleRadius : 0;

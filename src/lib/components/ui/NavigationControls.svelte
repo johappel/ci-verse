@@ -199,11 +199,42 @@
 		project?: ProjectData;
 		position: number; // Index innerhalb des Typs
 		label?: string; // Für Marktplatz-Tour
+		groupIndex?: number; // Dreieck-Gruppe (0, 1, 2, ...)
+		posInGroup?: number; // Position im Dreieck (0=A, 1=B, 2=C)
+		groupAngle?: number; // Winkel der Gruppe für Sortierung
+	}
+	
+	// Berechnet Gruppen-Info für einen Booth auf der Plattform
+	// Synchron mit Platform.svelte Layout-Logik
+	function getBoothGroupInfo(boothIndex: number, boothCount: number): { groupIndex: number; posInGroup: number; groupAngle: number } {
+		const sectorSize = (2 * Math.PI) / 6;
+		const hexRotation = Math.PI / 6;
+		const usedSectors = 4;
+		const startSector = 2;
+		const usedArcSize = usedSectors * sectorSize;
+		const startAngle = startSector * sectorSize + hexRotation;
+		const angleSpread = usedArcSize * 0.85;
+		
+		const useTriangleGroups = boothCount >= 6;
+		const groupIndex = useTriangleGroups ? Math.floor(boothIndex / 3) : 0;
+		const posInGroup = useTriangleGroups ? boothIndex % 3 : boothIndex;
+		const totalGroups = useTriangleGroups ? Math.ceil(boothCount / 3) : 1;
+		
+		const groupAngle = useTriangleGroups
+			? (totalGroups === 1
+				? startAngle + angleSpread / 2
+				: startAngle + (groupIndex / (totalGroups - 1)) * angleSpread)
+			: (boothCount === 1
+				? startAngle + angleSpread / 2
+				: startAngle + (boothIndex / (boothCount - 1)) * angleSpread);
+		
+		return { groupIndex, posInGroup, groupAngle };
 	}
 	
 	// Alle anfahrbaren Poster/Booths der aktuellen Plattform
 	// Marktplatz (S): ReceptionWall → Leitlinien-Poster
-	// Andere Plattformen: Booths → Wall-Poster
+	// Andere Plattformen: Booths → Wall-Poster (räumlich sortiert)
+	// Tour-Reihenfolge: Dreieck 1 (A→B→C), Dreieck 2 (A→B→C), Dreieck 3 (A→B→C)
 	let allPosters = $derived.by(() => {
 		const platformId = worldStore.state.currentPlatform;
 		
@@ -232,13 +263,38 @@
 		// Standard-Tour für andere Plattformen
 		const booths = getBoothProjectsForPlatform(platformId);
 		const walls = getWallPostersForPlatform(platformId);
+		const boothCount = booths.length;
 		
-		const targets: PosterTarget[] = [
-			...booths.map((project, i) => ({ type: 'booth' as const, project, position: i })),
-			...walls.map(({ project }, i) => ({ type: 'wall' as const, project, position: i }))
-		];
+		// Booths mit Gruppen-Info versehen
+		const boothTargets: PosterTarget[] = booths.map((project, i) => {
+			const info = getBoothGroupInfo(i, boothCount);
+			return {
+				type: 'booth' as const,
+				project,
+				position: i,
+				groupIndex: info.groupIndex,
+				posInGroup: info.posInGroup,
+				groupAngle: info.groupAngle
+			};
+		});
 		
-		return targets;
+		// Sortieren: Erst nach Gruppen-Winkel (im Uhrzeigersinn), dann nach Position im Dreieck (A→B→C)
+		boothTargets.sort((a, b) => {
+			// Primär: Nach Gruppen-Winkel (Dreiecke im Uhrzeigersinn)
+			const angleDiff = (a.groupAngle ?? 0) - (b.groupAngle ?? 0);
+			if (Math.abs(angleDiff) > 0.01) return angleDiff;
+			// Sekundär: Nach Position im Dreieck (A=0, B=1, C=2)
+			return (a.posInGroup ?? 0) - (b.posInGroup ?? 0);
+		});
+		
+		// Wall-Poster hinzufügen (bleiben in Array-Reihenfolge, da sie schon räumlich sortiert sind)
+		const wallTargets: PosterTarget[] = walls.map(({ project }, i) => ({
+			type: 'wall' as const,
+			project,
+			position: i
+		}));
+		
+		return [...boothTargets, ...wallTargets];
 	});
 	
 	// Poster-Index zurücksetzen wenn Plattform wechselt

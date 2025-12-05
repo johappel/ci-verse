@@ -350,11 +350,12 @@
             }
             
             <!-- Dreieck-Formation: 3 Ecken um gemeinsamen Mittelpunkt, jede Booth schaut nach außen -->
+            <!-- Reihenfolge gegen den Uhrzeigersinn: A (oben) → B (unten-links) → C (unten-rechts) -->
             {@const triangleRadius = useTriangleGroups ? 2.5 : 0}
             {@const triangleAngles = [
-                0,           // Position 0: oben
-                2.0944,      // Position 1: unten-rechts (120°)
-                4.1888       // Position 2: unten-links (240°)
+                0,           // Position 0: oben (A)
+                -2.0944,     // Position 1: unten-links (B) = -120° = gegen Uhrzeigersinn
+                -4.1888      // Position 2: unten-rechts (C) = -240° = gegen Uhrzeigersinn
             ]}
             
             {@const localAngle = useTriangleGroups ? triangleAngles[posInGroup] : 0}
