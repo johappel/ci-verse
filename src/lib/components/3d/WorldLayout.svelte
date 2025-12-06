@@ -10,9 +10,6 @@
 
     // Aktiviere Interaktivität für diese Komponente und alle Kinder
     interactivity();
-    
-    // Shader-Warmup Status
-    let shadersWarmedUp = $state(false);
 
     // Alle Plattformen als Array (ohne S, die bekommt MarketplacePlatform)
     let regularPlatforms = Object.values(platforms).filter(p => p.id !== 'S');
@@ -36,9 +33,9 @@
 </script>
 
 <!-- Shader Warmup - kompiliert alle WebGL-Shader beim Start -->
-<ShaderWarmup onComplete={() => shadersWarmedUp = true} />
+<ShaderWarmup />
 
-<!-- Reguläre Plattformen (B1, B2, B3, Q1, Q2, Q3) -->
+<!-- ALLE Plattformen werden sofort geladen (für Shader-Kompilierung) -->
 {#each regularPlatforms as platform (platform.id)}
     <Platform {platform} projects={getProjectsForPlatform(platform.id)} />
 {/each}

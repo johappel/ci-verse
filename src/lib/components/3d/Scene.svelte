@@ -28,7 +28,6 @@
 
 	// Preload-Status (intern)
 	let isPreloading = $state(true);
-	let tourProgress = $state(0);
 
 	// Startposition: Marktplatz-Landepunkt
 	const startPlatform = platforms['S'];
@@ -55,86 +54,46 @@
 		updateLoading(5, 'Initialisiere 3D-Szene...');
 	});
 
-	// Preload-Rundflug (wird im Turbo-Modus übersprungen)
-	async function runPreloadFlight() {
+	// Direkter Start - alle Plattformen werden sofort geladen, Shader im Hintergrund kompiliert
+	async function initializeScene() {
 		if (!cameraControls) return;
 		
-		// TURBO-MODUS: Überspringe Rundflug komplett
-		if (performanceStore.settings.skipPreloadFlight) {
-			updateLoading(50, 'Turbo-Modus aktiviert...');
-			
-			// Setze Kamera direkt auf Startposition
-			const landing = startPlatform.landing || { offset: [0, 12, -35], lookAtOffset: [0, 3, 0] };
-			cameraControls.setLookAt(
-				startPlatform.x + landing.offset[0],
-				startPlatform.y + landing.offset[1],
-				startPlatform.z + landing.offset[2],
-				startPlatform.x + landing.lookAtOffset[0],
-				startPlatform.y + landing.lookAtOffset[1],
-				startPlatform.z + landing.lookAtOffset[2],
-				false // Keine Animation
-			);
-			
-			// Kurze Verzögerung für Shader-Kompilierung
-			await new Promise(resolve => setTimeout(resolve, 500));
-			
-			updateLoading(100, 'Bereit!', true);
-			isPreloading = false;
-			return;
-		}
+		updateLoading(10, 'Lade 3D-Welt...');
 		
-		// === PHASE 1: Start ===
-		updateLoading(10, 'Starte...');
-		await new Promise(resolve => setTimeout(resolve, 200));
+		// Setze Kamera direkt auf Startposition (Marktplatz-Landepunkt)
+		const landing = startPlatform.landing || { offset: [0, 12, -35], lookAtOffset: [0, 3, 0] };
+		cameraControls.setLookAt(
+			startPlatform.x + landing.offset[0],
+			startPlatform.y + landing.offset[1],
+			startPlatform.z + landing.offset[2],
+			startPlatform.x + landing.lookAtOffset[0],
+			startPlatform.y + landing.lookAtOffset[1],
+			startPlatform.z + landing.lookAtOffset[2],
+			false // Keine Animation
+		);
 		
-		// === PHASE 2: Tour zu Q2 ===
-		updateLoading(20, 'Fliege zu Europa...');
-		cameraControls.smoothTime = 5.0;
+		updateLoading(20, 'Rendere Plattformen...');
 		
-		worldStore.startTransport('B1');
-		
-		
-		// Progress animieren während Flug
-		for (let i = 0; i <= 25; i++) {
-			tourProgress = i / 50;
-			updateLoading(20 + (i * 2), 'Bereite die Plattformen vor...');
+		// Warte bis ShaderWarmup fertig ist (signalisiert via performanceStore)
+		// Polling mit Progress-Updates
+		let progress = 20;
+		while (!performanceStore.shadersReady) {
 			await new Promise(resolve => setTimeout(resolve, 100));
+			progress = Math.min(progress + 5, 90);
+			updateLoading(progress, 'Kompiliere Shader...');
 		}
 		
-		// === PHASE 3: Zurück zum Marktplatz ===
-		updateLoading(70, 'Fliege zum Startpunkt...');
-		
-		worldStore.startTransport('S');
-		
-		// Warte auf Transport-Animation (inkl. Landung)
-		await new Promise(resolve => {
-			const checkTransport = setInterval(() => {
-				if (!worldStore.state.isTransporting) {
-					clearInterval(checkTransport);
-					resolve(undefined);
-				}
-			}, 100);
-		});
-		
-		// === FERTIG ===
 		updateLoading(100, 'Bereit!', true);
 		isPreloading = false;
 	}
 
-	// Initial-Setup: Starte Preload-Flug SOFORT
+	// Initial-Setup: Direkter Start
 	let hasInitialized = $state(false);
 	$effect(() => {
 		if (cameraControls && !hasInitialized) {
 			hasInitialized = true;
-			// Setze Startposition
-			const q2 = platforms['Q2'];
-			cameraControls.setLookAt(
-				0, 80, 60,
-				q2.x, q2.y, q2.z,
-				false
-			);
-			// Starte SOFORT
-			runPreloadFlight();
+			// Starte direkt auf Marktplatz
+			initializeScene();
 		}
 	});
 

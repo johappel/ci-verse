@@ -60,25 +60,11 @@
         performanceStore.gpuTier === 'integrated' ? '#facc15' : '#9ca3af'
     );
     
-    // Turbo-Modus (überspringt Preload-Flug)
-    let turboMode = $state(performanceStore.settings.skipPreloadFlight);
-    
-    $effect(() => {
-        turboMode = performanceStore.settings.skipPreloadFlight;
-    });
-    
     function selectQuality(level: QualityLevel) {
         console.log('[QualityDialog] Setting quality to:', level);
         performanceStore.setQuality(level);
         console.log('[QualityDialog] After set - qualityLevel:', performanceStore.qualityLevel);
         console.log('[QualityDialog] After set - enableGlowRings:', performanceStore.settings.enableGlowRings);
-    }
-    
-    function toggleTurboMode() {
-        // Turbo-Modus setzt automatisch auf 'low' und skipPreloadFlight
-        if (!turboMode) {
-            performanceStore.setQuality('low');
-        }
     }
     
     function closeDialog() {
@@ -243,38 +229,6 @@
                             {/if}
                         </button>
                     {/each}
-                </div>
-                
-                <!-- Turbo Mode Toggle -->
-                <div style="
-                    margin-top: 1rem;
-                    padding: 1rem;
-                    background: linear-gradient(to right, rgba(249, 115, 22, 0.1), rgba(239, 68, 68, 0.1));
-                    border-radius: 0.75rem;
-                    border: 1px solid rgba(251, 146, 60, 0.3);
-                ">
-                    <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-                        <input 
-                            type="checkbox" 
-                            bind:checked={turboMode}
-                            onchange={toggleTurboMode}
-                            style="
-                                width: 1.25rem;
-                                height: 1.25rem;
-                                accent-color: #f97316;
-                                cursor: pointer;
-                            "
-                        />
-                        <div style="flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span style="font-size: 1.125rem;">🏎️</span>
-                                <span style="font-weight: 500; color: white;">Turbo-Modus</span>
-                            </div>
-                            <p style="font-size: 0.875rem; color: rgba(255, 255, 255, 0.6); margin: 0.25rem 0 0 0;">
-                                Überspringt den Rundflug beim Start
-                            </p>
-                        </div>
-                    </label>
                 </div>
                 
                 <!-- Info -->

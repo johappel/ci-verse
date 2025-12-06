@@ -5,6 +5,7 @@
 	import { getBoothProjectsForPlatform, getWallPostersForPlatform, getMarketplaceContent, getPlatformContent } from '$lib/data/mockProjects';
 	import { performanceStore } from '$lib/logic/performanceStore.svelte';
 	import QualityDialog from './QualityDialog.svelte';
+	import {GaugeIcon} from  'lucide-svelte'
 	import type { ProjectData } from '$lib/types/project';
 	
 	// Kamera-Referenz wird von außen gesetzt
@@ -485,7 +486,7 @@
 		<!-- Obere Reihe: H - W - C -->
 		 <!-- Nächstes Poster + Nächste Plattform in einer Reihe -->
 		{#if hasPosters}
-			<div style="display: flex; gap: 30px; margin-top: 4px; margin-botton: 10px;">
+			<div style="display: flex; gap: 3px; margin-top: 4px; margin-botton: 10px;">
 				<!-- Nächstes Poster -->
 				<button
 					onclick={goToNextPoster}
@@ -512,6 +513,13 @@
 					<svg class="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
 						<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
 					</svg>
+				</button>
+				<button
+					onclick={() => isQualityDialogOpen = true}
+					class="nav-key nav-key-rocket"
+					title="Grafik-Einstellungen ({performanceStore.qualityLevel === 'high' ? 'Hoch' : performanceStore.qualityLevel === 'medium' ? 'Mittel' : 'Niedrig'})"
+				>
+					<span style="font-size: 1.1rem;"><GaugeIcon /></span>
 				</button>
 			</div>
 		{:else}
@@ -606,15 +614,15 @@
 		</div>
 		
 		<!-- Rocket-Button für Grafik-Einstellungen -->
-		<div style="display: flex; justify-content: center; margin-top: 4px;">
+		<!-- <div style="display: flex; justify-content: center; margin-top: 4px;">
 			<button
 				onclick={() => isQualityDialogOpen = true}
 				class="nav-key nav-key-rocket"
 				title="Grafik-Einstellungen ({performanceStore.qualityLevel === 'high' ? 'Hoch' : performanceStore.qualityLevel === 'medium' ? 'Mittel' : 'Niedrig'})"
 			>
-				<span style="font-size: 1.1rem;">🚀</span>
+				<span style="font-size: 1.1rem;"><GaugeIcon /></span>
 			</button>
-		</div>
+		</div> -->
 		
 		
 	</div>

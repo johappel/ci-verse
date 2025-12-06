@@ -42,9 +42,6 @@ export interface PerformanceSettings {
     // Kamera
     cameraFlightSpeed: 'normal' | 'fast' | 'instant';  // Fluggeschwindigkeit
     cameraSmoothTime: number;        // Standard-Glättung für Kamera (0.3 = direkt, 1.5 = weich)
-    
-    // Laden
-    skipPreloadFlight: boolean;      // Überspringt den initialen Rundflug
 }
 
 // Helper: Sichere devicePixelRatio
@@ -74,8 +71,7 @@ function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
             pixelRatio: getDevicePixelRatio(),
             antialias: true,
             cameraFlightSpeed: 'normal',  // Normale Flugzeit
-            cameraSmoothTime: 1.5,        // Weiche Kamera-Bewegung
-            skipPreloadFlight: false
+            cameraSmoothTime: 1.5         // Weiche Kamera-Bewegung
         },
         medium: {
             usePBRMaterials: true,
@@ -93,8 +89,7 @@ function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
             pixelRatio: 1.0,             // Feste Auflösung
             antialias: true,
             cameraFlightSpeed: 'normal',  // Normale Flugzeit
-            cameraSmoothTime: 0.9,        // Mittlere Kamera-Glättung
-            skipPreloadFlight: false
+            cameraSmoothTime: 0.9         // Mittlere Kamera-Glättung
         },
         low: {
             usePBRMaterials: false,      // Nur BasicMaterial
@@ -112,8 +107,7 @@ function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
             pixelRatio: 0.5,             // HALBE Auflösung für max. Performance
             antialias: false,            // Keine Kantenglättung
             cameraFlightSpeed: 'instant', // SOFORTIGER Kamerasprung
-            cameraSmoothTime: 0.4,        // Direkte Kamera-Reaktion (weniger Interpolation)
-            skipPreloadFlight: true      // Überspringe Rundflug
+            cameraSmoothTime: 0.4         // Direkte Kamera-Reaktion (weniger Interpolation)
         }
     };
 }
@@ -129,6 +123,9 @@ class PerformanceStore {
     // Reaktiver State
     qualityLevel = $state<QualityLevel>('high');
     settings = $state<PerformanceSettings>(getQualityPresets().high);
+    
+    // Shader-Warmup Status (wird von ShaderWarmup.svelte gesetzt)
+    shadersReady = $state(false);
     
     // FPS-Monitoring
     private frameTimestamps: number[] = [];
@@ -147,6 +144,14 @@ class PerformanceStore {
         if (browser) {
             this.initialize();
         }
+    }
+    
+    /**
+     * Signalisiert dass alle Shader kompiliert sind
+     */
+    setShadersReady() {
+        this.shadersReady = true;
+        console.log('[Performance] Shaders ready!');
     }
     
     /**

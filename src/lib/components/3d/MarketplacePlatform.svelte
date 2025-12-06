@@ -238,7 +238,10 @@
     });
 </script>
 
-<T.Group position={[platform.x, platform.y, platform.z]}>
+<T.Group 
+    position={[platform.x, platform.y, platform.z]}
+    userData={{ isPlatform: true, platformId: platform.id }}
+>
     
     <!-- ========== HEXAGONALE PLATTFORM-BASIS ========== -->
     <T.Mesh

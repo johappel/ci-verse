@@ -140,7 +140,10 @@
     });
 </script>
 
-<T.Group position={[platform.x, platform.y, platform.z]}>
+<T.Group 
+    position={[platform.x, platform.y, platform.z]}
+    userData={{ isPlatform: true, platformId: platform.id }}
+>
     <!-- Hexagonale Plattform-Basis (6-seitiger Zylinder) -->
     <T.Mesh
         onpointerdown={handlePointerDown}
