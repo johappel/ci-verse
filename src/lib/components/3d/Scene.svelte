@@ -102,11 +102,15 @@
 	// Im Low-Mode: Sofortiger Sprung statt Animation
 	$effect(() => {
 		if (worldStore.state.isTransporting && worldStore.state.transportTarget && cameraControls) {
+			console.time('[Transport] Total');
+			console.log('[Transport] Starting transport to:', worldStore.state.transportTarget);
+			
 			const target = platforms[worldStore.state.transportTarget];
 			const current = platforms[worldStore.state.currentPlatform];
 			if (target && current) {
 				// Fluggeschwindigkeit aus Settings
 				const flightSpeed = performanceStore.settings.cameraFlightSpeed;
+				console.log('[Transport] Flight speed:', flightSpeed);
 				
 				// Lichtlinien-Höhe: Oktaeder sind bei platform.y + 15
 				const LIGHT_LINE_HEIGHT = 15;
@@ -158,6 +162,8 @@
 				
 				// 3-Stufen-Animation: Aufsteigen → Gleiten → Landen
 				async function flyAlongLightBridge() {
+					console.log('[Transport] Stage 1: Aufsteigen...');
+					console.time('[Transport] Stage 1');
 					// Stufe 1: Sanft auf Flughöhe steigen
 					cameraControls!.smoothTime = 1.8 * speedMultiplier;
 					cameraControls!.setLookAt(
@@ -167,7 +173,10 @@
 					);
 					// Warte bis Aufstieg abgeschlossen
 					await new Promise(r => setTimeout(r, 1600 * speedMultiplier));
+					console.timeEnd('[Transport] Stage 1');
 					
+					console.log('[Transport] Stage 2: Gleiten...');
+					console.time('[Transport] Stage 2');
 					// Stufe 2: Auf Flughöhe zum Ziel gleiten
 					cameraControls!.smoothTime = 2.5 * speedMultiplier;
 					cameraControls!.setLookAt(
@@ -214,9 +223,11 @@
 					cameraControls!.smoothTime = performanceStore.settings.cameraSmoothTime;
 					
 					// Transport abschließen
+					console.timeEnd('[Transport] Total');
 					worldStore.finishTransport();
 				}
 				
+				console.log('[Transport] Starting flyAlongLightBridge()...');
 				flyAlongLightBridge();
 			}
 		}

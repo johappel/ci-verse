@@ -807,60 +807,99 @@ export function getStaffById(id: string): StaffMember | undefined {
     return mockStaff.find(s => s.id === id);
 }
 
-/** Alle Projekte einer Plattform (basierend auf departments) */
+// ============================================================================
+// MEMOIZATION CACHES
+// Da mockProjects statisch ist, können wir Ergebnisse cachen um teure
+// Array-Operationen bei jedem $derived-Aufruf zu vermeiden
+// ============================================================================
+const projectsForPlatformCache = new Map<string, ProjectData[]>();
+const platformContentCache = new Map<string, PlatformContent | undefined>();
+const boothProjectsCache = new Map<string, ProjectData[]>();
+const wallPostersCache = new Map<string, Array<{ project: ProjectData; position: number }>>();
+const relatedProjectsCache = new Map<string, ProjectData[]>();
+
+/** Alle Projekte einer Plattform (basierend auf departments) - CACHED */
 export function getProjectsForPlatform(platformId: string): ProjectData[] {
-    return mockProjects.filter(p => p.departments.includes(platformId as Department));
+    if (!projectsForPlatformCache.has(platformId)) {
+        projectsForPlatformCache.set(
+            platformId,
+            mockProjects.filter(p => p.departments.includes(platformId as Department))
+        );
+    }
+    return projectsForPlatformCache.get(platformId)!;
 }
 
-/** Plattform-Content nach ID (inkl. Marktplatz S) */
+/** Plattform-Content nach ID (inkl. Marktplatz S) - CACHED */
 export function getPlatformContent(platformId: string): PlatformContent | undefined {
-    if (platformId === 'S') {
-        // Marktplatz ist separat definiert, aber hat die gleichen Basis-Felder
-        return {
-            id: mockMarketplace.id,
-            title: mockMarketplace.title,
-            short: mockMarketplace.short,
-            description: mockMarketplace.description,
-            color: mockMarketplace.color,
-            glowColor: mockMarketplace.glowColor,
-            aspects: [] // Marktplatz hat keine Aspekte, sondern Stände
-        };
+    if (!platformContentCache.has(platformId)) {
+        if (platformId === 'S') {
+            // Marktplatz ist separat definiert, aber hat die gleichen Basis-Felder
+            platformContentCache.set(platformId, {
+                id: mockMarketplace.id,
+                title: mockMarketplace.title,
+                short: mockMarketplace.short,
+                description: mockMarketplace.description,
+                color: mockMarketplace.color,
+                glowColor: mockMarketplace.glowColor,
+                aspects: [] // Marktplatz hat keine Aspekte, sondern Stände
+            });
+        } else {
+            platformContentCache.set(platformId, mockPlatformContents[platformId]);
+        }
     }
-    return mockPlatformContents[platformId];
+    return platformContentCache.get(platformId);
 }
 
 /** 
- * Booth-Projekte einer Plattform (displayType: 'booth' oder 'both')
+ * Booth-Projekte einer Plattform (displayType: 'booth' oder 'both') - CACHED
  * Reihenfolge = Array-Position in mockProjects
  */
 export function getBoothProjectsForPlatform(platformId: string): ProjectData[] {
-    return mockProjects.filter(p => 
-        p.departments.includes(platformId as Department) &&
-        (p.displayType === 'booth' || p.displayType === 'both')
-    );
+    if (!boothProjectsCache.has(platformId)) {
+        boothProjectsCache.set(
+            platformId,
+            mockProjects.filter(p => 
+                p.departments.includes(platformId as Department) &&
+                (p.displayType === 'booth' || p.displayType === 'both')
+            )
+        );
+    }
+    return boothProjectsCache.get(platformId)!;
 }
 
 /** 
- * Wall-Poster einer Plattform (displayType: 'wall' oder 'both')
+ * Wall-Poster einer Plattform (displayType: 'wall' oder 'both') - CACHED
  * Position = Index in gefiltertem Array
  */
 export function getWallPostersForPlatform(platformId: string): Array<{ project: ProjectData; position: number }> {
-    return mockProjects
-        .filter(p => 
-            p.departments.includes(platformId as Department) &&
-            (p.displayType === 'wall' || p.displayType === 'both')
-        )
-        .map((project, index) => ({ project, position: index }));
+    if (!wallPostersCache.has(platformId)) {
+        wallPostersCache.set(
+            platformId,
+            mockProjects
+                .filter(p => 
+                    p.departments.includes(platformId as Department) &&
+                    (p.displayType === 'wall' || p.displayType === 'both')
+                )
+                .map((project, index) => ({ project, position: index }))
+        );
+    }
+    return wallPostersCache.get(platformId)!;
 }
 
 /**
- * Wegweiser-Projekte einer Plattform
+ * Wegweiser-Projekte einer Plattform - CACHED
  * Findet Projekte, die diese Plattform in relatedDepartments haben
  */
 export function getRelatedProjectsForPlatform(platformId: string): ProjectData[] {
-    return mockProjects.filter(p => 
-        p.relatedDepartments?.includes(platformId as Department)
-    );
+    if (!relatedProjectsCache.has(platformId)) {
+        relatedProjectsCache.set(
+            platformId,
+            mockProjects.filter(p => 
+                p.relatedDepartments?.includes(platformId as Department)
+            )
+        );
+    }
+    return relatedProjectsCache.get(platformId)!;
 }
 
 // ============================================================================

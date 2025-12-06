@@ -25,22 +25,42 @@ const RING_CONFIG: Record<string, { radius: number; height: number }> = {
     Q3: { radius: 24, height: 12 }
 };
 
+// Cache für hexagonale Layouts - vermeidet wiederholte Berechnungen
+const hexLayoutCache = new Map<string, HexPosition[]>();
+
 /**
- * Berechnet hexagonale Positionen für Objekte auf einer Plattform
+ * Berechnet hexagonale Positionen für Objekte auf einer Plattform - CACHED
  * @param count Anzahl der Objekte
  * @param maxRadius Maximaler Radius für die Anordnung
  * @returns Array von {x, z} Positionen
  */
 export function getHexagonalLayout(count: number, maxRadius: number): HexPosition[] {
-    if (count === 0) return [];
-    if (count === 1) return [{ x: 0, z: 0 }];
+    // Cache-Key aus count und maxRadius
+    const cacheKey = `${count}-${maxRadius}`;
+    
+    if (hexLayoutCache.has(cacheKey)) {
+        return hexLayoutCache.get(cacheKey)!;
+    }
+    
+    if (count === 0) {
+        hexLayoutCache.set(cacheKey, []);
+        return [];
+    }
+    if (count === 1) {
+        const result = [{ x: 0, z: 0 }];
+        hexLayoutCache.set(cacheKey, result);
+        return result;
+    }
 
     const positions: HexPosition[] = [];
     
     // Zentrum
     positions.push({ x: 0, z: 0 });
     
-    if (count === 1) return positions;
+    if (count === 1) {
+        hexLayoutCache.set(cacheKey, positions);
+        return positions;
+    }
 
     // Hexagonale Ringe um das Zentrum
     let ring = 1;
@@ -61,6 +81,7 @@ export function getHexagonalLayout(count: number, maxRadius: number): HexPositio
         ring++;
     }
 
+    hexLayoutCache.set(cacheKey, positions);
     return positions;
 }
 

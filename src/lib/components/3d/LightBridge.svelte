@@ -30,29 +30,32 @@
     let origin = $derived(currentPlatformId === from.id ? from : to);
     let destination = $derived(currentPlatformId === from.id ? to : from);
     
-    // Lade den Namen der Zielplattform aus PlatformContent
+    // Lade den Namen der Zielplattform
     let destinationName = $derived(getPlatformContent(destination.id)?.title ?? destination.id);
 
-    // Punkte für die Lichtlinie - enden am Oktaeder (Y+15)
+    // ============================================
+    // STATISCHE GEOMETRIE - nur einmal berechnen!
+    // from und to ändern sich NIE während der Lebensdauer
+    // ============================================
     const OKTAEDER_HEIGHT = 15;
-    let midHeight = $derived(Math.max(from.y, to.y) + OKTAEDER_HEIGHT + 10);
+    const midHeight = Math.max(from.y, to.y) + OKTAEDER_HEIGHT + 10;
     
-    // Bezier-Kurve für sanften Bogen - Start und Ende am Oktaeder
-    let curve = $derived(new QuadraticBezierCurve3(
+    // Bezier-Kurve für sanften Bogen - EINMAL erstellen
+    const curve = new QuadraticBezierCurve3(
         new Vector3(from.x, from.y + OKTAEDER_HEIGHT, from.z),
         new Vector3((from.x + to.x) / 2, midHeight, (from.z + to.z) / 2),
         new Vector3(to.x, to.y + OKTAEDER_HEIGHT, to.z)
-    ));
+    );
 
-    // Punkte entlang der Kurve für MeshLine
-    let linePoints = $derived(curve.getPoints(50));
+    // Punkte entlang der Kurve - EINMAL berechnen
+    const linePoints = curve.getPoints(50);
 
-    // Mittelpunkt für Label (3D Position)
-    let labelPosition = $derived<[number, number, number]>([
+    // Mittelpunkt für Label (statisch)
+    const labelPosition: [number, number, number] = [
         (from.x + to.x) / 2,
         midHeight + 1,
         (from.z + to.z) / 2
-    ]);
+    ];
 
     // Wird dieses Ziel gerade gehovert (im TransportPortal)?
     let isDestinationHovered = $derived(worldStore.state.hoveredDestination === destination.id);

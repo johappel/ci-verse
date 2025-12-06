@@ -252,11 +252,20 @@ export const sPlatformElements: SPlatformElement[] = [
 // HELPER FUNKTIONEN
 // ============================================
 
+// Cache für Verbindungen pro Plattform - vermeidet wiederholte filter() Aufrufe
+const connectionsCache = new Map<string, Connection[]>();
+
 /**
- * Holt alle Verbindungen für eine bestimmte Plattform
+ * Holt alle Verbindungen für eine bestimmte Plattform - CACHED
  */
 export function getConnectionsForPlatform(platformId: string): Connection[] {
-    return connections.filter(c => c.from === platformId || c.to === platformId);
+    if (!connectionsCache.has(platformId)) {
+        connectionsCache.set(
+            platformId,
+            connections.filter(c => c.from === platformId || c.to === platformId)
+        );
+    }
+    return connectionsCache.get(platformId)!;
 }
 
 /**
