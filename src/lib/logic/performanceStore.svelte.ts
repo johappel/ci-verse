@@ -217,6 +217,11 @@ class PerformanceStore {
     private hasDowngraded = $state(false);
     private initialized = false;
     
+    // Auto-Benchmark Status
+    needsAutoBenchmark = $state(false);  // True wenn kein gespeichertes Setting vorhanden
+    autoBenchmarkComplete = $state(false);
+    autoBenchmarkResult = $state<{ minFPS: number; avgFPS: number; maxFPS: number; recommended: QualityLevel } | null>(null);
+    
     // Statistiken (für Debug-Overlay)
     currentFPS = $state(60);
     gpuTier = $state<'integrated' | 'dedicated' | 'unknown'>('unknown');
@@ -269,10 +274,19 @@ class PerformanceStore {
                     // Sofort Fallback-Settings anwenden für korrektes initiales Rendering
                     this.settings = { ...this.presets[level] };
                     console.log('[Performance] Gespeichertes Quality-Level:', level);
+                    this.needsAutoBenchmark = false;
                 }
+            } else {
+                // Keine gespeicherte Einstellung → Auto-Benchmark benötigt
+                console.log('[Performance] Keine gespeicherte Einstellung - Auto-Benchmark wird gestartet');
+                this.needsAutoBenchmark = true;
+                // Starte mit Medium als sicherer Default
+                this.qualityLevel = 'medium';
+                this.settings = { ...this.presets['medium'] };
             }
         } catch (e) {
             console.warn('[Performance] Quality-Level laden fehlgeschlagen:', e);
+            this.needsAutoBenchmark = true;
         }
     }
     
@@ -559,6 +573,40 @@ class PerformanceStore {
     stopBenchmark() {
         console.log('[Performance] Benchmark gestoppt');
         this.isBenchmarking = false;
+    }
+    
+    /**
+     * Beendet den Auto-Benchmark und setzt die empfohlene Qualität
+     */
+    finishAutoBenchmark(result: { minFPS: number; avgFPS: number; maxFPS: number }) {
+        // Empfehlung berechnen
+        let recommended: QualityLevel;
+        if (result.avgFPS >= 50) {
+            recommended = 'high';
+        } else if (result.avgFPS >= 30) {
+            recommended = 'medium';
+        } else {
+            recommended = 'low';
+        }
+        
+        this.autoBenchmarkResult = { ...result, recommended };
+        this.autoBenchmarkComplete = true;
+        this.needsAutoBenchmark = false;
+        
+        // Qualität automatisch setzen
+        console.log('[Performance] Auto-Benchmark abgeschlossen - Empfehlung:', recommended, 'bei', result.avgFPS, 'FPS');
+        this.setQuality(recommended);
+    }
+    
+    /**
+     * Überspringt den Auto-Benchmark und verwendet die Standard-Qualität
+     */
+    skipAutoBenchmark() {
+        this.needsAutoBenchmark = false;
+        this.autoBenchmarkComplete = true;
+        // Medium als sicherer Default, speichern
+        this.setQuality('medium');
+        console.log('[Performance] Auto-Benchmark übersprungen - verwende Medium');
     }
 }
 

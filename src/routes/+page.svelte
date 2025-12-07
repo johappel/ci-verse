@@ -10,6 +10,7 @@
     import EventsPanel from "$lib/components/ui/EventsPanel.svelte";
     import IframeDialog from "$lib/components/ui/IframeDialog.svelte";
     import PartnerDialog from "$lib/components/ui/PartnerDialog.svelte";
+    import AutoBenchmark from "$lib/components/ui/AutoBenchmark.svelte";
     import { initWorldStore, worldStore } from "$lib/logic/store.svelte";
     import { mockProjects, getPlatformContent, getMarketplaceContent } from "$lib/data/mockProjects";
     import { platforms } from "$lib/logic/platforms";
@@ -207,6 +208,9 @@
         onClose={() => worldStore.closeEventsPanel()} 
     />
 {/if}
+
+<!-- Auto-Benchmark beim ersten Start (kein gespeichertes Quality-Level) -->
+<AutoBenchmark />
 
 <style>
     /* Transport-Overlay Styles */
