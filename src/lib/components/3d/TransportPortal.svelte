@@ -117,9 +117,8 @@
     const hexButtonGeometry = new CylinderGeometry(1.3, 1.3, 0.5, 6);
 </script>
 
-<!-- Transport-Portal nur sichtbar wenn auf S-Plattform ODER beim Aufladen/Transport -->
-{#if isOnS || shouldAnimate}
-    <T.Group position={[0, 2, 0]}>
+<!-- Transport-Portal immer sichtbar (auf Marktplatz-Plattform) -->
+<T.Group position={[0, 2, 0]}>
         <!-- Basis-Plattform (rund, flach) - auf der Plattform-Oberfläche -->
         <T.Mesh position.y={0.1} rotation.x={-Math.PI / 2}>
             <T.CircleGeometry args={[8, 32]} />
@@ -296,4 +295,3 @@
             {/if}
         </Billboard>
     </T.Group>
-{/if}
