@@ -18,14 +18,13 @@
     import { performanceStore } from '$lib/logic/performanceStore.svelte';
     import PosterImage from './PosterImage.svelte';
     
+    import { getViewPoint } from '$lib/logic/viewpoints';
+    
     // ⚠️ DEBUG: Temporär alle Texte deaktivieren um Performance zu testen
     const DEBUG_DISABLE_TEXT = false;
     
     // Performance: Im Low-Mode Transparenz deaktivieren (GPU-lastig)
     const enableTransparency = $derived(performanceStore.qualityLevel !== 'low');
-    
-    // Performance: Im Low-Mode nur Vorderseite rendern (keine doppelte Textur/Text-Last)
-    const showBackside = $derived(performanceStore.qualityLevel !== 'low');
     
     // Performance: Im Low-Mode keine Hover-Spotlights (zusätzliche Lichtquellen)
     const showHoverSpotlight = $derived(performanceStore.qualityLevel !== 'low');
@@ -37,6 +36,7 @@
         size?: 'small' | 'medium' | 'large';
         platformPosition?: [number, number, number]; // Welt-Position der Plattform
         platformId?: string; // ID der Plattform für Sichtbarkeits-Check
+        inGroup?: boolean; // In Dreiergruppe? Dann keine Rückwand
     }
 
     let { 
@@ -45,8 +45,12 @@
         rotation = 0,
         size = 'medium',
         platformPosition = [0, 0, 0],
-        platformId = ''
+        platformId = '',
+        inGroup = false
     }: Props = $props();
+
+    // Performance: Im Low-Mode oder bei Dreiergruppen nur Vorderseite rendern
+    const showBackside = $derived(performanceStore.qualityLevel !== 'low' && !inGroup);
 
     const { camera } = useThrelte();
     const { hovering, onPointerEnter, onPointerLeave } = useCursor('pointer');
@@ -125,40 +129,30 @@
         project.title.length > 16 ? 0.24 : 0.28
     );
 
-    // Klick auf Banner: Kamera positioniert sich davor
+    // Klick auf Banner: Kamera positioniert sich davor (über zentrale ViewPoint API)
     function handleBannerClick(e: Event) {
         e.stopPropagation(); // Verhindert Durchschuss zu dahinterliegenden Objekten
         
-        const worldBoothX = platformPosition[0] + position[0];
-        const worldBoothY = platformPosition[1] + position[1];
-        const worldBoothZ = platformPosition[2] + position[2];
+        // Nutze zentrale ViewPoint API für konsistente Kamera-Berechnung
+        const viewPoint = getViewPoint(project.id, 'booth', platformId);
         
-        const viewDistance = 5; // Näher für bessere Lesbarkeit
-        
-        const cos = Math.cos(rotation);
-        const sin = Math.sin(rotation);
-        // Kamera-Offset INVERTIERT: nach außen statt nach innen (für Dreiecks-Formation)
-        const worldOffsetX = -viewDistance * sin;
-        const worldOffsetZ = -viewDistance * cos;
-        
-        // Kamera auf Augenhöhe relativ zur Banner-Mitte
-        const bannerCenterY = worldBoothY + s.height / 2 + 0.3;
-        const cameraY = bannerCenterY; // Kamera auf gleicher Höhe wie Banner-Mitte
-        
-        const cameraPos = {
-            x: worldBoothX + worldOffsetX,
-            y: cameraY,
-            z: worldBoothZ + worldOffsetZ
-        };
-        
-        // LookAt zeigt direkt auf die Banner-Mitte
-        const lookAtPos = {
-            x: worldBoothX,
-            y: bannerCenterY,
-            z: worldBoothZ
-        };
-        
-        worldStore.setViewTarget(cameraPos, lookAtPos);
+        if (viewPoint) {
+            worldStore.setViewTarget(viewPoint.camera, viewPoint.target);
+        } else {
+            // Fallback: Lokale Berechnung (sollte nicht passieren)
+            const worldBoothX = platformPosition[0] + position[0];
+            const worldBoothY = platformPosition[1] + position[1];
+            const worldBoothZ = platformPosition[2] + position[2];
+            
+            const viewDistance = 5;
+            const forwardX = -Math.sin(rotation);
+            const forwardZ = -Math.cos(rotation);
+            
+            worldStore.setViewTarget(
+                { x: worldBoothX + forwardX * viewDistance, y: worldBoothY + s.height / 2 + 0.3, z: worldBoothZ + forwardZ * viewDistance },
+                { x: worldBoothX, y: worldBoothY + s.height / 2 + 0.3, z: worldBoothZ }
+            );
+        }
     }
 
     function handlePointerEnter() {
@@ -193,6 +187,19 @@
 </script>
 
 <T.Group position={position} rotation.y={rotation} scale={1.1}>
+    
+    <!-- ========== BODEN-SCHATTEN (nur bei High-Quality) ========== -->
+    {#if performanceStore.qualityLevel === 'high'}
+    <T.Mesh position={[0, 0.02, 0]} rotation.x={-Math.PI / 2}>
+        <T.PlaneGeometry args={[s.width * 1.1, s.footDepth * 3]} />
+        <T.MeshBasicMaterial 
+            color="#000000"
+            transparent
+            opacity={0.25}
+            depthWrite={false}
+        />
+    </T.Mesh>
+    {/if}
     
     <!-- ========== STELLWAND-FUSS (leicht, Stützen nach beiden Seiten) ========== -->
     <T.Group>

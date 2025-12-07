@@ -196,13 +196,14 @@ Die `PosterImage`-Komponente passt die Textur-Qualität automatisch an:
 
 | Einstellung | 🔥 High | ⚡ Medium | 🌿 Low |
 |-------------|---------|----------|--------|
-| `cameraFlightSpeed` | `'normal'` | `'normal'` | `'instant'` |
+| `cameraFlightSpeed` | `'normal'` | `'fast'` | `'instant'` |
 | `cameraSmoothTime` | `1.5` | `0.9` | `0.4` |
 
 ### Erklärung
 
 - **`cameraFlightSpeed`**: Geschwindigkeit bei Plattform-Wechsel
-  - High/Medium: Normale Fluganimation (2-3 Sekunden)
+  - High: Normale Fluganimation (2-3 Sekunden, cinematisch)
+  - Medium: Schnelle Fluganimation (~1 Sekunde)
   - Low: **Sofortiger Sprung** → keine Zwischen-Frames
 
 - **`cameraSmoothTime`**: Glättung der Kamera-Bewegung

@@ -74,51 +74,89 @@ function getBoothViewPoint(
     const startAngle = startSector * sectorSize + hexRotation;
     const angleSpread = usedArcSize * 0.85;
 
+    // NEU: Dreiergruppen-Logik synchronisiert mit Platform.svelte
     const useTriangleGroups = boothCount >= 6;
+    const completeTripleCount = Math.floor(boothCount / 3);
+    const boothsInTriples = completeTripleCount * 3;
+    
+    // Ist dieser Booth in einer Dreiergruppe oder ein Rest-Booth?
+    const isInTripleGroup = useTriangleGroups && boothIndex < boothsInTriples;
+    const isRestBooth = useTriangleGroups && boothIndex >= boothsInTriples;
 
-    const groupIndex = useTriangleGroups ? Math.floor(boothIndex / 3) : 0;
-    const posInGroup = useTriangleGroups ? boothIndex % 3 : 0;
-    const totalGroups = useTriangleGroups ? Math.ceil(boothCount / 3) : 1;
+    // Rest-Booths: Index relativ zu den Rest-Booths
+    const restBoothIndex = isRestBooth ? boothIndex - boothsInTriples : 0;
+    const restBoothCount = boothCount - boothsInTriples;
 
-    // Gruppen-Winkel
-    const groupAngle = useTriangleGroups
-        ? (totalGroups === 1
+    let boothX: number, boothZ: number, boothRotation: number;
+
+    if (isInTripleGroup) {
+        // --- DREIERGRUPPEN-LOGIK (synchronisiert mit Platform.svelte) ---
+        const groupIndex = Math.floor(boothIndex / 3);
+        const posInGroup = boothIndex % 3;
+        const totalGroups = completeTripleCount + (restBoothCount > 0 ? 1 : 0);
+
+        // Gruppen-Winkel (mit Rest-Gruppen berücksichtigt)
+        const groupAngle = (completeTripleCount === 1 && restBoothCount === 0)
             ? startAngle + angleSpread / 2
-            : startAngle + (groupIndex / (totalGroups - 1)) * angleSpread)
-        : (boothCount === 1
+            : startAngle + (groupIndex / (totalGroups - 1)) * angleSpread;
+
+        // Dreieck-Formation (gegen den Uhrzeigersinn: A → B → C)
+        const triangleRadius = 2.5;
+        const triangleAngles = [0, -2.0944, -4.1888]; // 0°, -120°, -240°
+
+        const localAngle = triangleAngles[posInGroup];
+        const localX = Math.cos(groupAngle + localAngle) * triangleRadius;
+        const localZ = Math.sin(groupAngle + localAngle) * triangleRadius;
+
+        // Welt-Position
+        const baseRadius = platformSize * 0.48;
+        const centerX = Math.cos(groupAngle) * baseRadius;
+        const centerZ = Math.sin(groupAngle) * baseRadius;
+
+        boothX = centerX + localX;
+        boothZ = centerZ + localZ;
+
+        // Rotation: Booth zeigt nach INNEN zum Dreieck-Zentrum
+        boothRotation = -(groupAngle + localAngle) + Math.PI / 2 + Math.PI;
+    } else if (isRestBooth) {
+        // --- REST-BOOTH-LOGIK (synchronisiert mit Platform.svelte) ---
+        // Rest-Booths werden einzeln positioniert, zwischen die Dreiergruppen verteilt
+        const totalGroups = completeTripleCount + (restBoothCount > 0 ? 1 : 0);
+        const groupAngle = startAngle + ((completeTripleCount + restBoothIndex * 0.5) / (totalGroups - 0.5)) * angleSpread;
+
+        const baseRadius = platformSize * 0.45;
+        boothX = Math.cos(groupAngle) * baseRadius;
+        boothZ = Math.sin(groupAngle) * baseRadius;
+
+        // Rotation: Rest-Booth zeigt zur Plattform-Mitte
+        boothRotation = -groupAngle + Math.PI / 2;
+    } else {
+        // --- EINZELN (weniger als 6 Booths) ---
+        const groupAngle = boothCount === 1
             ? startAngle + angleSpread / 2
-            : startAngle + (boothIndex / (boothCount - 1)) * angleSpread);
+            : startAngle + (boothIndex / (boothCount - 1)) * angleSpread;
 
-    // Dreieck-Formation (gegen den Uhrzeigersinn: A → B → C)
-    const triangleRadius = useTriangleGroups ? 2.5 : 0;
-    const triangleAngles = [0, -2.0944, -4.1888]; // 0°, -120°, -240° (gegen Uhrzeigersinn)
+        const baseRadius = platformSize * 0.45;
+        boothX = Math.cos(groupAngle) * baseRadius;
+        boothZ = Math.sin(groupAngle) * baseRadius;
 
-    const localAngle = useTriangleGroups ? triangleAngles[posInGroup] : 0;
-    const localX = useTriangleGroups ? Math.cos(groupAngle + localAngle) * triangleRadius : 0;
-    const localZ = useTriangleGroups ? Math.sin(groupAngle + localAngle) * triangleRadius : 0;
-
-    // Welt-Position
-    const baseRadius = useTriangleGroups ? platformSize * 0.48 : platformSize * 0.45;
-    const centerX = Math.cos(groupAngle) * baseRadius;
-    const centerZ = Math.sin(groupAngle) * baseRadius;
-
-    const boothX = centerX + localX;
-    const boothZ = centerZ + localZ;
-
-    // Rotation (jede Booth zeigt nach INNEN zum Dreieck-Zentrum)
-    const boothRotation = useTriangleGroups
-        ? -(groupAngle + localAngle) + Math.PI / 2 + Math.PI
-        : -groupAngle + Math.PI / 2;
+        // Rotation: Booth zeigt zur Plattform-Mitte
+        boothRotation = -groupAngle + Math.PI / 2;
+    }
 
     // Welt-Koordinaten
     const worldBoothX = px + boothX;
     const worldBoothZ = pz + boothZ;
 
-    // Kamera-Position (aus ExhibitBooth.svelte, Zeilen 95-120)
+    // Kamera-Position
     const viewDistance = 5;
     const cos = Math.cos(boothRotation);
     const sin = Math.sin(boothRotation);
-    // Kamera-Offset INVERTIERT: nach außen (für Dreiecks-Formation)
+    
+    // Kamera-Offset: VOR der Booth (in Blickrichtung)
+    // Dreiergruppen: Kamera muss nach außen (invertiert)
+    // Rest-Booths & Einzelne: Kamera muss nach außen (auch invertiert, da sie zur Mitte zeigen)
+    // Die Formel bleibt gleich, weil boothRotation bereits korrekt ist
     const worldOffsetX = -viewDistance * sin;
     const worldOffsetZ = -viewDistance * cos;
 

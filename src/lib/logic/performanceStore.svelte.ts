@@ -121,8 +121,8 @@ export const GEOMETRY_SEGMENTS: Record<'high' | 'medium' | 'low', number> = {
 
 class PerformanceStore {
     // Reaktiver State
-    qualityLevel = $state<QualityLevel>('high');
-    settings = $state<PerformanceSettings>(getQualityPresets().high);
+    qualityLevel = $state<QualityLevel>('medium');
+    settings = $state<PerformanceSettings>(getQualityPresets().medium);
     
     // Shader-Warmup Status (wird von ShaderWarmup.svelte gesetzt)
     shadersReady = $state(false);

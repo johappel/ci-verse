@@ -409,13 +409,13 @@
             />
         {/if}
 
-        <!-- Freistehende Exhibit-Booths: Innerer Kreis (max 7) + Dreiecks-Ecken (je 3) -->
+        <!-- Freistehende Exhibit-Booths: Dreiergruppen + Rest einzeln zur Mitte -->
         {#if !DEBUG_DISABLE_BOOTH}
         {#each boothProjects as project, i}
             {@const boothCount = boothProjects.length}
             {@const boothSize = boothCount > 6 ? 'small' : (boothCount > 3 ? 'medium' : 'medium')}
             
-            <!-- Layout-System: Einzeln (≤5) oder in Dreiergruppen (≥6) -->
+            <!-- Layout-System: Dreiergruppen + Rest einzeln -->
             {@const sectorSize = (2 * Math.PI) / 6}
             {@const hexRotation = Math.PI / 6}
             {@const usedSectors = 4}
@@ -424,45 +424,58 @@
             {@const startAngle = startSector * sectorSize + hexRotation}
             {@const angleSpread = usedArcSize * 0.85}
             
-            {@const useTriangleGroups = boothCount >= 6}
+            <!-- Anzahl kompletter Dreiergruppen und Rest -->
+            {@const completeTripleCount = Math.floor(boothCount / 3)}
+            {@const boothsInTriples = completeTripleCount * 3}
+            {@const restCount = boothCount - boothsInTriples}
             
-            {@const groupIndex = useTriangleGroups ? Math.floor(i / 3) : 0}
-            {@const posInGroup = useTriangleGroups ? i % 3 : 0}
-            {@const totalGroups = useTriangleGroups ? Math.ceil(boothCount / 3) : 1}
+            <!-- Ist diese Booth in einer Dreiergruppe oder Rest? -->
+            {@const isInTripleGroup = boothCount >= 6 && i < boothsInTriples}
+            {@const isRestBooth = boothCount >= 6 && i >= boothsInTriples}
             
-            <!-- Zentrum der Gruppe berechnen -->
-            {@const groupAngle = useTriangleGroups
-                ? (totalGroups === 1
+            <!-- Für Dreiergruppen: Index innerhalb der Gruppen -->
+            {@const tripleIndex = isInTripleGroup ? i : 0}
+            {@const groupIndex = isInTripleGroup ? Math.floor(tripleIndex / 3) : 0}
+            {@const posInGroup = isInTripleGroup ? tripleIndex % 3 : 0}
+            {@const totalGroups = completeTripleCount + (restCount > 0 ? 1 : 0)}
+            
+            <!-- Für Rest-Booths: Index innerhalb des Rests -->
+            {@const restIndex = isRestBooth ? i - boothsInTriples : 0}
+            
+            <!-- Winkel berechnen -->
+            {@const groupAngle = isInTripleGroup
+                ? (completeTripleCount === 1 && restCount === 0
                     ? startAngle + angleSpread / 2
                     : startAngle + (groupIndex / (totalGroups - 1)) * angleSpread)
-                : (boothCount === 1 
-                    ? startAngle + angleSpread / 2
-                    : startAngle + (i / (boothCount - 1)) * angleSpread)
+                : isRestBooth
+                    ? startAngle + ((completeTripleCount + restIndex * 0.5) / (totalGroups - 0.5)) * angleSpread
+                    : (boothCount === 1 
+                        ? startAngle + angleSpread / 2
+                        : startAngle + (i / (boothCount - 1)) * angleSpread)
             }
             
-            <!-- Dreieck-Formation: 3 Ecken um gemeinsamen Mittelpunkt, jede Booth schaut nach außen -->
-            <!-- Reihenfolge gegen den Uhrzeigersinn: A (oben) → B (unten-links) → C (unten-rechts) -->
-            {@const triangleRadius = useTriangleGroups ? 2.5 : 0}
+            <!-- Dreieck-Formation nur für komplette Gruppen -->
+            {@const triangleRadius = isInTripleGroup ? 2.5 : 0}
             {@const triangleAngles = [
                 0,           // Position 0: oben (A)
-                -2.0944,     // Position 1: unten-links (B) = -120° = gegen Uhrzeigersinn
-                -4.1888      // Position 2: unten-rechts (C) = -240° = gegen Uhrzeigersinn
+                -2.0944,     // Position 1: unten-links (B) = -120°
+                -4.1888      // Position 2: unten-rechts (C) = -240°
             ]}
             
-            {@const localAngle = useTriangleGroups ? triangleAngles[posInGroup] : 0}
-            {@const localX = useTriangleGroups ? Math.cos(groupAngle + localAngle) * triangleRadius : 0}
-            {@const localZ = useTriangleGroups ? Math.sin(groupAngle + localAngle) * triangleRadius : 0}
+            {@const localAngle = isInTripleGroup ? triangleAngles[posInGroup] : 0}
+            {@const localX = isInTripleGroup ? Math.cos(groupAngle + localAngle) * triangleRadius : 0}
+            {@const localZ = isInTripleGroup ? Math.sin(groupAngle + localAngle) * triangleRadius : 0}
             
-            <!-- Welt-Position: Gruppen-Zentrum + lokale Dreieck-Position -->
-            {@const baseRadius = useTriangleGroups ? platform.size * 0.48 : platform.size * 0.45}
+            <!-- Welt-Position -->
+            {@const baseRadius = isInTripleGroup ? platform.size * 0.48 : platform.size * 0.45}
             {@const centerX = Math.cos(groupAngle) * baseRadius}
             {@const centerZ = Math.sin(groupAngle) * baseRadius}
             
             {@const boothX = centerX + localX}
             {@const boothZ = centerZ + localZ}
             
-            <!-- Rotation: Jede Booth zeigt nach INNEN zum Dreieck-Zentrum (Kamera schaut von außen) -->
-            {@const boothRotation = useTriangleGroups
+            <!-- Rotation: Dreiergruppen nach außen, Rest/Einzelne zur Mitte -->
+            {@const boothRotation = isInTripleGroup
                 ? -(groupAngle + localAngle) + Math.PI / 2 + Math.PI
                 : -groupAngle + Math.PI / 2
             }
@@ -474,6 +487,7 @@
                 size={boothSize}
                 platformPosition={[platform.x, platform.y, platform.z]}
                 platformId={platform.id}
+                inGroup={isInTripleGroup}
             />
         {/each}
         {/if}
