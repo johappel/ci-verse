@@ -515,9 +515,9 @@
         />
     {/if}
 
-    <!-- Ein zentrales Ambient-Licht für die ganze Plattform - reduziert für bessere Glow-Wirkung -->
+    <!-- Ein zentrales Ambient-Licht für die ganze Plattform - leicht geneigt für natürlichere Schatten -->
     <T.PointLight
-        position={[0, 10, 0]}
+        position={[3, 10, 2]}
         color={platformGlowColor}
         intensity={15}
         distance={platform.size * 2}
