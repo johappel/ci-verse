@@ -91,7 +91,7 @@
         "enableParticles": false,
         "enableAnimations": false,
         "enableGlowRings": false,
-        "enableEnergyEffects": false,
+        "enableEnergyEffects": true,
         "lightBridgeQuality": "low"
       },
       "rendering": {

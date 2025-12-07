@@ -148,7 +148,7 @@ function getDefaultPresets(): Record<QualityLevel, PerformanceSettings> {
             enableParticles: false,
             enableAnimations: false,
             enableGlowRings: false,
-            enableEnergyEffects: false,
+            enableEnergyEffects: true,  // EnergyFloor bleibt sichtbar (config.json überschreibt)
             lightBridgeQuality: 'low',
             pixelRatio: 0.5,
             antialias: false,
@@ -214,11 +214,36 @@ class PerformanceStore {
         if (this.initialized) return;
         this.initialized = true;
         
-        // Config aus JSON laden, dann Settings anwenden
+        // 1. Erst gespeichertes Quality-Level aus LocalStorage laden
+        this.loadQualityLevel();
+        
+        // 2. Dann Config aus JSON laden und Settings anwenden
         this.loadConfigFromJSON().then(() => {
-            this.loadSettings();
+            // 3. Hardware erkennen (kann Quality-Level ändern wenn kein gespeichertes vorhanden)
             this.detectHardware();
         });
+    }
+    
+    /**
+     * Lädt Quality-Level aus LocalStorage und wendet Fallback-Settings sofort an
+     */
+    private loadQualityLevel() {
+        if (!browser) return;
+        
+        try {
+            const stored = localStorage.getItem('ci-verse-quality');
+            if (stored) {
+                const level = stored as QualityLevel;
+                if (['high', 'medium', 'low'].includes(level)) {
+                    this.qualityLevel = level;
+                    // Sofort Fallback-Settings anwenden für korrektes initiales Rendering
+                    this.settings = { ...this.presets[level] };
+                    console.log('[Performance] Gespeichertes Quality-Level:', level);
+                }
+            }
+        } catch (e) {
+            console.warn('[Performance] Quality-Level laden fehlgeschlagen:', e);
+        }
     }
     
     /**
@@ -231,6 +256,8 @@ class PerformanceStore {
             const response = await fetch('/config.json');
             if (!response.ok) {
                 console.warn('[Performance] config.json nicht gefunden, verwende Fallback-Presets');
+                // Fallback-Settings anwenden
+                this.settings = { ...this.presets[this.qualityLevel] };
                 return;
             }
             
@@ -258,9 +285,12 @@ class PerformanceStore {
             this.settings = { ...this.presets[this.qualityLevel] };
             this.configLoaded = true;
             
-            console.log('[Performance] Presets aus config.json angewendet');
+            console.log('[Performance] Presets aus config.json angewendet für Level:', this.qualityLevel);
+            console.log('[Performance] enableEnergyEffects:', this.settings.enableEnergyEffects);
         } catch (e) {
             console.warn('[Performance] config.json laden fehlgeschlagen, verwende Fallback-Presets:', e);
+            // Fallback-Settings anwenden
+            this.settings = { ...this.presets[this.qualityLevel] };
         }
     }
     
@@ -339,27 +369,6 @@ class PerformanceStore {
             return localStorage.getItem('ci-verse-quality') !== null;
         } catch {
             return false;
-        }
-    }
-    
-    /**
-     * Lädt Settings aus LocalStorage
-     */
-    private loadSettings() {
-        if (!browser) return;
-        
-        try {
-            const stored = localStorage.getItem('ci-verse-quality');
-            if (stored) {
-                const level = stored as QualityLevel;
-                if (this.presets[level]) {
-                    this.qualityLevel = level;
-                    this.settings = { ...this.presets[level] };
-                    console.log('[Performance] Geladene Qualität:', level);
-                }
-            }
-        } catch (e) {
-            console.warn('[Performance] Settings laden fehlgeschlagen:', e);
         }
     }
     
