@@ -10,6 +10,7 @@
  * - SSR-kompatibel (Browser-APIs nur client-seitig)
  */
 import { browser } from '$app/environment';
+import { base } from '$app/paths';
 
 export type QualityLevel = 'high' | 'medium' | 'low';
 
@@ -33,7 +34,8 @@ export interface PerformanceSettings {
     enableParticles: boolean;        // Partikel-Effekte
     enableAnimations: boolean;       // Kamera/Objekt-Animationen
     enableGlowRings: boolean;        // Plattform-Leucht-Ringe
-    enableEnergyEffects: boolean;    // EnergyFloor + EnergyBeam auf Marktplatz
+    enableEnergyFloor: boolean;      // EnergyFloor auf Marktplatz (Energie-Ströme am Boden)
+    enableEnergyEffects: boolean;    // EnergyBeam auf Marktplatz (vertikaler Strahl)
     lightBridgeQuality: 'high' | 'medium' | 'low';  // Lichtlinien-Qualität
     
     // Rendern
@@ -70,6 +72,7 @@ interface ConfigJSON {
             enableParticles: boolean;
             enableAnimations: boolean;
             enableGlowRings: boolean;
+            enableEnergyFloor?: boolean;
             enableEnergyEffects: boolean;
             lightBridgeQuality: 'high' | 'medium' | 'low';
         };
@@ -102,6 +105,7 @@ function convertPreset(preset: ConfigJSON['qualityPresets'][QualityLevel]): Perf
         enableParticles: preset.effects.enableParticles,
         enableAnimations: preset.effects.enableAnimations,
         enableGlowRings: preset.effects.enableGlowRings,
+        enableEnergyFloor: preset.effects.enableEnergyFloor ?? preset.effects.enableEnergyEffects,
         enableEnergyEffects: preset.effects.enableEnergyEffects,
         lightBridgeQuality: preset.effects.lightBridgeQuality,
         pixelRatio: preset.rendering.pixelRatio === 'auto' ? getDevicePixelRatio() : preset.rendering.pixelRatio,
@@ -125,6 +129,7 @@ function getDefaultPresets(): Record<QualityLevel, PerformanceSettings> {
             enableParticles: true,
             enableAnimations: true,
             enableGlowRings: true,
+            enableEnergyFloor: true,
             enableEnergyEffects: true,
             lightBridgeQuality: 'high',
             pixelRatio: getDevicePixelRatio(),
@@ -143,6 +148,7 @@ function getDefaultPresets(): Record<QualityLevel, PerformanceSettings> {
             enableParticles: false,
             enableAnimations: true,
             enableGlowRings: true,
+            enableEnergyFloor: true,
             enableEnergyEffects: true,
             lightBridgeQuality: 'medium',
             pixelRatio: 1.0,
@@ -161,7 +167,8 @@ function getDefaultPresets(): Record<QualityLevel, PerformanceSettings> {
             enableParticles: false,
             enableAnimations: false,
             enableGlowRings: false,
-            enableEnergyEffects: true,  // EnergyFloor bleibt sichtbar (config.json überschreibt)
+            enableEnergyFloor: true,     // Floor bleibt an (weniger GPU-Last)
+            enableEnergyEffects: false,  // Beam deaktiviert für maximale Performance
             lightBridgeQuality: 'low',
             pixelRatio: 0.5,
             antialias: false,
@@ -275,8 +282,14 @@ class PerformanceStore {
     private async loadConfigFromJSON(): Promise<void> {
         if (!browser) return;
         
+        console.log('[Performance] loadConfigFromJSON() gestartet...');
+        console.log('[Performance] Base path:', base);
+        
         try {
-            const response = await fetch('/config.json');
+            const configUrl = `${base}/config.json`;
+            console.log('[Performance] Fetching:', configUrl);
+            const response = await fetch(configUrl);
+            console.log('[Performance] fetch response:', response.status, response.ok);
             if (!response.ok) {
                 console.warn('[Performance] config.json nicht gefunden, verwende Fallback-Presets');
                 // Fallback-Settings anwenden
@@ -285,7 +298,8 @@ class PerformanceStore {
             }
             
             const config: ConfigJSON = await response.json();
-            console.log('[Performance] config.json geladen');
+            console.log('[Performance] config.json geladen:', config);
+            console.log('[Performance] RAW low preset enableEnergyEffects:', config.qualityPresets.low.effects.enableEnergyEffects);
             
             // Presets konvertieren
             this.presets = {
@@ -293,6 +307,7 @@ class PerformanceStore {
                 medium: convertPreset(config.qualityPresets.medium),
                 low: convertPreset(config.qualityPresets.low)
             };
+            console.log('[Performance] Konvertiertes low preset enableEnergyEffects:', this.presets.low.enableEnergyEffects);
             
             // Geometry Segments übernehmen
             if (config.geometrySegments) {

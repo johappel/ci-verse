@@ -284,11 +284,12 @@
                 />
             {:else}
                 <Text
-                    text="Transport"
+                    text={"Transport\nzu den Plattformen"}
                     color="#60a5fa"
                     fontSize={0.8}
                     anchorX="center"
                     anchorY="middle"
+                    textAlign="center"
                     outlineWidth={0.04}
                     outlineColor="#1e1b4b"
                 />

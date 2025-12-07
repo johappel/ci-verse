@@ -48,7 +48,8 @@
     let isTransporting = $derived(isTransportingState && isCurrentPlatform);
 
     // Performance-Einstellungen (ändern sich selten)
-    let enableEnergyEffects = $derived(performanceStore.settings.enableEnergyEffects);
+    let enableEnergyFloor = $derived(performanceStore.settings.enableEnergyFloor);
+    let enableEnergyBeam = $derived(performanceStore.settings.enableEnergyEffects);
     let enableGlowRings = $derived(performanceStore.settings.enableGlowRings);
 
     // Marketplace-Content laden (gecacht, ändert sich nie)
@@ -287,7 +288,7 @@
     <!-- ========== ENERGIE-BODEN (Leitlinien fliessen zur Mitte) ========== -->
     <!-- 6 Stroeme fuer alle 6 Poster-Positionen an den Hexagon-Waenden -->
     <!-- Hexagon-Edge-Winkel = edgeIndex * 60 Grad + 30 Grad (Plattform-Rotation) -->
-    {#if enableEnergyEffects}
+    {#if enableEnergyFloor}
     <EnergyFloor 
         radius={platform.size * 0.85}
         intensity={0.2}
@@ -393,7 +394,7 @@
     {/each}
 
     <!-- ========== ENERGIE-SÄULE (vom Boden zum Oktaeder) ========== -->
-    {#if enableEnergyEffects}
+    {#if enableEnergyBeam}
     <EnergyBeam 
         height={13}
         baseY={2.1}

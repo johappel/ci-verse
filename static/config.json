@@ -23,6 +23,7 @@
         "enableParticles": true,
         "enableAnimations": true,
         "enableGlowRings": true,
+        "enableEnergyFloor": true,
         "enableEnergyEffects": true,
         "lightBridgeQuality": "high"
       },
@@ -57,6 +58,7 @@
         "enableParticles": false,
         "enableAnimations": true,
         "enableGlowRings": true,
+        "enableEnergyFloor": true,
         "enableEnergyEffects": true,
         "lightBridgeQuality": "medium"
       },
@@ -91,7 +93,8 @@
         "enableParticles": false,
         "enableAnimations": false,
         "enableGlowRings": false,
-        "enableEnergyEffects": true,
+        "enableEnergyFloor": true,
+        "enableEnergyEffects": false,
         "lightBridgeQuality": "low"
       },
       "rendering": {
@@ -122,13 +125,13 @@
     
     "B_platforms": {
       "_comment": "Bildungsplattformen (B1, B2, B3)",
-      "offset": [-15, 8, -9],
+      "offset": [-12, 8, -9],
       "lookAtOffset": [0, 3, 0]
     },
     
     "Q_platforms": {
       "_comment": "Querschnittsplattformen (Q1, Q2, Q3) - etwas höher",
-      "offset": [-15, 10, -9],
+      "offset": [-12, 10, -9],
       "lookAtOffset": [0, 3, 0]
     },
     
