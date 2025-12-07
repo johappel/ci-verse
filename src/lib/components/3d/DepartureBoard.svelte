@@ -53,7 +53,7 @@
     let isNearby = $derived(cameraDistance <= interactionDistance);
     
     // Ist der User auf dem Marktplatz?
-    let isOnMarketplace = $derived(worldStore.state.currentPlatform === 'S');
+    let isOnMarketplace = $derived(worldStore.currentPlatform === 'S');
     
     useTask(() => {
         if ($camera && groupRef) {

@@ -19,8 +19,8 @@
 
     let isHovered = $state(false);
 
-    // Bestimme die aktuelle Plattform
-    let currentPlatformId = $derived(worldStore.state.currentPlatform);
+    // Bestimme die aktuelle Plattform (separates Signal, nicht state-Objekt!)
+    let currentPlatformId = $derived(worldStore.currentPlatform);
     
     // Ist diese Linie relevant für den User? (Verbindung geht VON oder ZU aktueller Plattform)
     let isRelevant = $derived(currentPlatformId === from.id || currentPlatformId === to.id);
@@ -124,25 +124,26 @@
     }
 </script>
 
-<!-- Lichtstrahl - IMMER sichtbar wenn relevant (von aktueller Plattform) -->
-{#if isRelevant}
+<!-- 
+    PERFORMANCE: Alle Meshes sind IMMER gemountet!
+    Sichtbarkeit wird per `visible` gesteuert um Shader-Neukompilierung zu vermeiden.
+    WebGL-Objekte werden beim Mount erstellt und bleiben bestehen.
+-->
+<T.Group visible={isRelevant}>
     <!-- Äußerster diffuser Glow (nur aktiv + nur bei High-Qualität) -->
-    {#if isActive && showOuterGlow}
-        <T.Mesh>
-            <MeshLineGeometry points={linePoints} />
-            <MeshLineMaterial
-                width={outerGlowWidth}
-                color={color}
-                opacity={glowOpacity * 0.4}
-                transparent
-                depthWrite={false}
-            />
-        </T.Mesh>
-    {/if}
+    <T.Mesh visible={isActive && showOuterGlow}>
+        <MeshLineGeometry points={linePoints} />
+        <MeshLineMaterial
+            width={outerGlowWidth}
+            color={color}
+            opacity={glowOpacity * 0.4}
+            transparent
+            depthWrite={false}
+        />
+    </T.Mesh>
 
     <!-- Mittlerer Glow-Layer (nur bei Medium/High) -->
-    {#if showGlow}
-    <T.Mesh>
+    <T.Mesh visible={showGlow}>
         <MeshLineGeometry points={linePoints} />
         <MeshLineMaterial
             width={glowWidth}
@@ -152,7 +153,6 @@
             depthWrite={false}
         />
     </T.Mesh>
-    {/if}
 
     <!-- Heller Kern - interaktiv -->
     <T.Mesh
@@ -169,7 +169,30 @@
             depthWrite={false}
         />
     </T.Mesh>
-{/if}
+    
+    <!-- Kleine leuchtende Punkte an Start und Ende -->
+    <!-- Start-Punkt -->
+    <T.Mesh position={[from.x, from.y + OKTAEDER_HEIGHT, from.z]}>
+        <T.SphereGeometry args={[isActive ? 0.4 : 0.2, 8, 8]} />
+        <T.MeshBasicMaterial color={displayColor} transparent opacity={coreOpacity} />
+    </T.Mesh>
+    <!-- Start-Glow -->
+    <T.Mesh position={[from.x, from.y + OKTAEDER_HEIGHT, from.z]} visible={isActive}>
+        <T.SphereGeometry args={[0.8, 8, 8]} />
+        <T.MeshBasicMaterial color={color} transparent opacity={glowOpacity} />
+    </T.Mesh>
+    
+    <!-- End-Punkt -->
+    <T.Mesh position={[to.x, to.y + OKTAEDER_HEIGHT, to.z]}>
+        <T.SphereGeometry args={[isActive ? 0.4 : 0.2, 8, 8]} />
+        <T.MeshBasicMaterial color={displayColor} transparent opacity={coreOpacity} />
+    </T.Mesh>
+    <!-- End-Glow -->
+    <T.Mesh position={[to.x, to.y + OKTAEDER_HEIGHT, to.z]} visible={isActive}>
+        <T.SphereGeometry args={[0.8, 8, 8]} />
+        <T.MeshBasicMaterial color={color} transparent opacity={glowOpacity} />
+    </T.Mesh>
+</T.Group>
 
 <!-- Ziel-Label bei Hover als 3D Glasscheibe -->
 {#if isHovered && isRelevant}
@@ -211,33 +234,4 @@
 
     <!-- Glow-Effekt am Ziel-Oktaeder -->
     <T.PointLight position={[destination.x, destination.y + OKTAEDER_HEIGHT, destination.z]} color="#ffffff" intensity={50} distance={40} />
-{/if}
-
-<!-- Kleine leuchtende Punkte an Start und Ende - immer sichtbar wenn relevant -->
-{#if isRelevant}
-    <!-- Start-Punkt -->
-    <T.Mesh position={[from.x, from.y + OKTAEDER_HEIGHT, from.z]}>
-        <T.SphereGeometry args={[isActive ? 0.4 : 0.2, 8, 8]} />
-        <T.MeshBasicMaterial color={displayColor} transparent opacity={coreOpacity} />
-    </T.Mesh>
-    <!-- Start-Glow -->
-    {#if isActive}
-        <T.Mesh position={[from.x, from.y + OKTAEDER_HEIGHT, from.z]}>
-            <T.SphereGeometry args={[0.8, 8, 8]} />
-            <T.MeshBasicMaterial color={color} transparent opacity={glowOpacity} />
-        </T.Mesh>
-    {/if}
-    
-    <!-- End-Punkt -->
-    <T.Mesh position={[to.x, to.y + OKTAEDER_HEIGHT, to.z]}>
-        <T.SphereGeometry args={[isActive ? 0.4 : 0.2, 8, 8]} />
-        <T.MeshBasicMaterial color={displayColor} transparent opacity={coreOpacity} />
-    </T.Mesh>
-    <!-- End-Glow -->
-    {#if isActive}
-        <T.Mesh position={[to.x, to.y + OKTAEDER_HEIGHT, to.z]}>
-            <T.SphereGeometry args={[0.8, 8, 8]} />
-            <T.MeshBasicMaterial color={color} transparent opacity={glowOpacity} />
-        </T.Mesh>
-    {/if}
 {/if}

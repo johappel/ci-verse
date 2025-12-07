@@ -97,19 +97,19 @@
         worldStore.setHoveredDestination(null);
     }
 
-    // Ist der User gerade auf S?
-    let isOnS = $derived(worldStore.state.currentPlatform === 'S');
+    // Ist der User gerade auf S? (separate Signale!)
+    let isOnS = $derived(worldStore.currentPlatform === 'S');
     
     // Ist Transport aktiv? (Animation während Flug)
-    let isTransporting = $derived(worldStore.state.isTransporting && worldStore.state.currentPlatform === 'S');
+    let isTransporting = $derived(worldStore.isTransporting && worldStore.currentPlatform === 'S');
     
     // Soll Animation laufen? (Normal auf S, schnell beim Transport)
     let shouldAnimate = $derived(isTransporting);
     
     // Ziel-Plattform für Anzeige
     let targetPlatform = $derived(
-        worldStore.state.transportTarget 
-            ? platforms[worldStore.state.transportTarget] 
+        worldStore.transportTarget 
+            ? platforms[worldStore.transportTarget] 
             : null
     );
     

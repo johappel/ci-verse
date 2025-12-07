@@ -124,7 +124,7 @@
     }
     
     // Ist der User auf dem Marktplatz?
-    let isOnMarketplace = $derived(worldStore.state.currentPlatform === 'S');
+    let isOnMarketplace = $derived(worldStore.currentPlatform === 'S');
 </script>
 
 <T.Group position={position} rotation.y={rotation} scale={1.0}>

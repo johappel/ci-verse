@@ -55,7 +55,7 @@
 
     // Aktive Perspektive
     let activePerspective = $derived(worldStore.state.activePerspective);
-    let isTransporting = $derived(worldStore.state.isTransporting);
+    let isTransporting = $derived(worldStore.isTransporting);
 
     // Zeit für Animation
     let time = $state(0);

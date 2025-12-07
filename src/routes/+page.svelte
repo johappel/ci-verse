@@ -39,10 +39,10 @@
         cameraControls = controls;
     }
 
-    // Transport-Info: Zielplattform-Name (Kurzname aus mockProjects)
+    // Transport-Info: Zielplattform-Name (Kurzname aus mockProjects) - separate Signale!
     let transportTargetName = $derived(
-        worldStore.state.transportTarget 
-            ? getPlatformName(worldStore.state.transportTarget)
+        worldStore.transportTarget 
+            ? getPlatformName(worldStore.transportTarget)
             : ''
     );
 
@@ -141,7 +141,7 @@
     {/if}
 
     <!-- Transport-Overlay (Flug zwischen Plattformen) - auch während Loading! -->
-    {#if worldStore.state.isTransporting}
+    {#if worldStore.isTransporting}
         <div 
             class="transport-overlay"
             class:during-loading={isLoading}

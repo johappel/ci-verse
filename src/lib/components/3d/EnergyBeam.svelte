@@ -34,8 +34,8 @@
         ]
     }: Props = $props();
 
-    let isTransporting = $derived(worldStore.state.isTransporting);
-    let isOnS = $derived(worldStore.state.currentPlatform === 'S');
+    let isTransporting = $derived(worldStore.isTransporting);
+    let isOnS = $derived(worldStore.currentPlatform === 'S');
 
     // Zeit für Animation
     let time = $state(0);

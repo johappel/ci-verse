@@ -58,7 +58,7 @@
     let hoveredButtonId = $state<string | null>(null);
     
     // Auf der gleichen Plattform? (für Poster-Sichtbarkeit)
-    let isOnPlatform = $derived(worldStore.state.currentPlatform === platformId);
+    let isOnPlatform = $derived(worldStore.currentPlatform === platformId);
     
     // Distanz-Check: Wie nah ist die Kamera an den Wänden?
     // Aktivierung nur wenn Kamera nahe genug an einer Wand ist
@@ -96,7 +96,7 @@
     );
     
     // Task-Optimierung: Nur laufen wenn auf dieser Plattform
-    let isTransportTarget = $derived(worldStore.state.transportTarget === platformId);
+    let isTransportTarget = $derived(worldStore.transportTarget === platformId);
     let shouldRunTask = $derived(isOnPlatform || isTransportTarget);
     
     useTask(() => {

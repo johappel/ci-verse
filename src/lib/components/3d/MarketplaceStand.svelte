@@ -194,7 +194,7 @@
     });
     
     // Ist der User auf dem Marktplatz? HTML nur dort rendern!
-    let isOnMarketplace = $derived(worldStore.state.currentPlatform === 'S');
+    let isOnMarketplace = $derived(worldStore.currentPlatform === 'S');
 </script>
 
 <T.Group position={position} rotation.y={rotation}>

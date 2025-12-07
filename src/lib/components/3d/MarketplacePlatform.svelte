@@ -23,6 +23,7 @@
     import EnergyFloor from './EnergyFloor.svelte';
     import EnergyBeam from './EnergyBeam.svelte';
     import NexusTerminal from './NexusTerminal.svelte';
+    import TransportPortal from './TransportPortal.svelte';
     import { worldStore } from '$lib/logic/store.svelte';
     import { performanceStore } from '$lib/logic/performanceStore.svelte';
     import { getMarketplaceContent } from '$lib/data/mockProjects';
@@ -35,18 +36,29 @@
 
     let { platform }: Props = $props();
 
-    // Performance-Einstellungen
+    // ============================================
+    // DIREKTE TRANSPORT-SIGNALE (nicht mehr über state-Objekt!)
+    // worldStore.currentPlatform etc. sind separate $state Variablen
+    // ============================================
+    let currentPlatformId = $derived(worldStore.currentPlatform);
+    let isTransportingState = $derived(worldStore.isTransporting);
+    
+    // Abgeleitete Werte NUR von den isolierten Selektoren
+    let isCurrentPlatform = $derived(currentPlatformId === platform.id);
+    let isTransporting = $derived(isTransportingState && isCurrentPlatform);
+
+    // Performance-Einstellungen (ändern sich selten)
     let enableEnergyEffects = $derived(performanceStore.settings.enableEnergyEffects);
     let enableGlowRings = $derived(performanceStore.settings.enableGlowRings);
 
-    // Marketplace-Content laden
-    const marketplace = $derived(getMarketplaceContent());
+    // Marketplace-Content laden (gecacht, ändert sich nie)
+    const marketplace = getMarketplaceContent(); // NICHT $derived - statisch!
 
-    // Farben aus Content-Daten (Fallback auf platforms.ts)
-    let platformColor = $derived(marketplace?.color ?? platform.color);
-    let platformGlowColor = $derived(marketplace?.glowColor ?? platform.glowColor);
+    // Farben aus Content-Daten (statisch)
+    const platformColor = marketplace?.color ?? platform.color;
+    const platformGlowColor = marketplace?.glowColor ?? platform.glowColor;
 
-    // Performance-Settings
+    // Performance-Settings (ändern sich selten)
     const enableAnimations = $derived(performanceStore.settings.enableAnimations);
     const usePBR = $derived(performanceStore.settings.usePBRMaterials);
     const showPointLight = $derived(performanceStore.qualityLevel !== 'low');
@@ -58,7 +70,6 @@
     // Oktaeder-Rotation (animiert) + Energie-Puls - NUR wenn Animationen aktiviert
     let octaederRotation = $state(0);
     let energyPulse = $state(0);
-    let isTransporting = $derived(worldStore.state.isTransporting);
     
     useTask((delta) => {
         if (!enableAnimations) return; // Skip im Low-Mode
@@ -86,9 +97,6 @@
     $effect(() => {
         glowOpacity.target = $hovering || isCurrentPlatform ? 0.7 : 0.3;
     });
-
-    // Ist diese Plattform die aktuelle?
-    let isCurrentPlatform = $derived(worldStore.state.currentPlatform === platform.id);
     
     // Drag-Detection
     let pointerDownPos = $state<{ x: number; y: number } | null>(null);
@@ -272,6 +280,9 @@
         />
     </T.Mesh>
     {/if}
+
+    <!-- ========== TRANSPORT-PORTAL (Navigation zu anderen Plattformen) ========== -->
+    <TransportPortal />
 
     <!-- ========== ENERGIE-BODEN (Leitlinien fliessen zur Mitte) ========== -->
     <!-- 6 Stroeme fuer alle 6 Poster-Positionen an den Hexagon-Waenden -->

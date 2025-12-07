@@ -21,6 +21,7 @@
 	
 	// Benachrichtige Parent wenn CameraControls bereit
 	$effect(() => {
+		console.log('[Scene $effect 1] cameraControls check');
 		if (cameraControls) {
 			onCameraReady?.(cameraControls);
 		}
@@ -50,6 +51,7 @@
 	
 	// Sofort beim Mount den ersten Update senden
 	$effect(() => {
+		console.log('[Scene $effect 2] loading update');
 		// Sende sofort initialen Status
 		updateLoading(5, 'Initialisiere 3D-Szene...');
 	});
@@ -90,6 +92,7 @@
 	// Initial-Setup: Direkter Start
 	let hasInitialized = $state(false);
 	$effect(() => {
+		console.log('[Scene $effect 3] init check');
 		if (cameraControls && !hasInitialized) {
 			hasInitialized = true;
 			// Starte direkt auf Marktplatz
@@ -101,12 +104,13 @@
 	// Die Kamera fliegt auf Höhe der Lichtlinien (Oktaeder-Höhe Y+15)
 	// Im Low-Mode: Sofortiger Sprung statt Animation
 	$effect(() => {
-		if (worldStore.state.isTransporting && worldStore.state.transportTarget && cameraControls) {
+		console.log('[Scene $effect] Checking transport conditions...');
+		if (worldStore.isTransporting && worldStore.transportTarget && cameraControls) {
 			console.time('[Transport] Total');
-			console.log('[Transport] Starting transport to:', worldStore.state.transportTarget);
+			console.log('[Transport] Starting transport to:', worldStore.transportTarget);
 			
-			const target = platforms[worldStore.state.transportTarget];
-			const current = platforms[worldStore.state.currentPlatform];
+			const target = platforms[worldStore.transportTarget];
+			const current = platforms[worldStore.currentPlatform];
 			if (target && current) {
 				// Fluggeschwindigkeit aus Settings
 				const flightSpeed = performanceStore.settings.cameraFlightSpeed;
@@ -164,6 +168,9 @@
 				async function flyAlongLightBridge() {
 					console.log('[Transport] Stage 1: Aufsteigen...');
 					console.time('[Transport] Stage 1');
+					
+					// DEBUG: Messe Zeit für setLookAt
+					console.time('[Transport] setLookAt Stage 1');
 					// Stufe 1: Sanft auf Flughöhe steigen
 					cameraControls!.smoothTime = 1.8 * speedMultiplier;
 					cameraControls!.setLookAt(
@@ -171,6 +178,8 @@
 						midX, flightAltitude - 5, midZ,  // Vorausschauen Richtung Ziel
 						true
 					);
+					console.timeEnd('[Transport] setLookAt Stage 1');
+					
 					// Warte bis Aufstieg abgeschlossen
 					await new Promise(r => setTimeout(r, 1600 * speedMultiplier));
 					console.timeEnd('[Transport] Stage 1');
@@ -239,8 +248,8 @@
 	// - Klick in der Mitte → Kamera bleibt außen, schaut nach innen
 	$effect(() => {
 		const target = worldStore.state.localCameraTarget;
-		if (target && cameraControls && !worldStore.state.isTransporting) {
-			const currentPlatform = platforms[worldStore.state.currentPlatform];
+		if (target && cameraControls && !worldStore.isTransporting) {
+			const currentPlatform = platforms[worldStore.currentPlatform];
 			if (currentPlatform) {
 				// Berechne Distanz vom Klickpunkt zur Plattformmitte
 				const dx = target.x - currentPlatform.x;
@@ -289,7 +298,7 @@
 	// Verwendet exakte Welt-Koordinaten für Kamera und LookAt
 	$effect(() => {
 		const view = worldStore.state.viewTarget;
-		if (view && cameraControls && !worldStore.state.isTransporting) {
+		if (view && cameraControls && !worldStore.isTransporting) {
 			cameraControls.setLookAt(
 				view.camera.x, view.camera.y, view.camera.z,
 				view.lookAt.x, view.lookAt.y, view.lookAt.z,
@@ -345,11 +354,11 @@
 		if (!cameraControls) return;
 		
 		// Während Transport oder Preload: keine Boundary
-		if (worldStore.state.isTransporting || isPreloading) {
+		if (worldStore.isTransporting || isPreloading) {
 			clearCameraBoundary();
 		} else {
 			// Setze Boundary für aktuelle Plattform
-			updateCameraBoundary(worldStore.state.currentPlatform);
+			updateCameraBoundary(worldStore.currentPlatform);
 		}
 	});
 

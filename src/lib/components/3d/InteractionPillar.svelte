@@ -47,9 +47,9 @@
     let isHovered = $state(false);
     let frameCounter = 0;
     
-    // Task-Optimierung: Nur laufen wenn auf dieser Plattform
-    let isOnPlatform = $derived(platformId ? worldStore.state.currentPlatform === platformId : true);
-    let isTransportTarget = $derived(platformId ? worldStore.state.transportTarget === platformId : false);
+    // Task-Optimierung: Nur laufen wenn auf dieser Plattform (separate Signale!)
+    let isOnPlatform = $derived(platformId ? worldStore.currentPlatform === platformId : true);
+    let isTransportTarget = $derived(platformId ? worldStore.transportTarget === platformId : false);
     let shouldRunTask = $derived(isOnPlatform || isTransportTarget);
     
     const displayColor = project.display?.color || project.color || '#3b82f6';

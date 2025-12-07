@@ -18,16 +18,21 @@ interface ExtendedAppState extends AppState {
 }
 
 export class WorldStore {
-    state = $state<ExtendedAppState>({
+    // ============================================
+    // SEPARATE TRANSPORT-SIGNALE (Performance-kritisch!)
+    // Diese sind vom Haupt-State getrennt, um granulare Updates zu ermöglichen
+    // ============================================
+    currentPlatform = $state<string>('S');
+    isTransporting = $state<boolean>(false);
+    transportTarget = $state<string | null>(null);
+    
+    // Haupt-State (weniger performance-kritisch)
+    state = $state<Omit<ExtendedAppState, 'currentPlatform' | 'isTransporting' | 'transportTarget'>>({
         projects: [],
         activePerspective: 'default',
         hoveredId: null,
         selectedId: null,
         activeQPlatform: null,
-        // NEU: Transport-System
-        currentPlatform: 'S',
-        isTransporting: false,
-        transportTarget: null,
         hoveredDestination: null, // Für Lichtlinien-Highlight
         // NEU: Lokale Kamera-Bewegung auf Plattform (Boden-Klick)
         localCameraTarget: null, // {x, y, z} Position auf der Plattform
@@ -140,15 +145,25 @@ export class WorldStore {
 
     // NEU: Transport-System (vereinfacht - alle Plattformen sind vorgeladen)
     startTransport(targetId: string) {
-        if (this.state.isTransporting) return; // Bereits unterwegs
-        if (this.state.currentPlatform === targetId) return; // Schon dort
+        console.log('[Store] startTransport called:', targetId);
         
-        this.state.isTransporting = true;
-        this.state.transportTarget = targetId;
+        if (this.isTransporting) return; // Bereits unterwegs
+        if (this.currentPlatform === targetId) return; // Schon dort
+        
+        console.time('[Store] FULL FREEZE MEASUREMENT');
+        
+        // Setze Transport-Signale (separate $state, nicht im Haupt-state-Objekt!)
+        this.transportTarget = targetId;
+        this.isTransporting = true;
+        
+        // Dieser setTimeout wird NACH allen synchronen $derived/$effect ausgeführt
+        setTimeout(() => {
+            console.timeEnd('[Store] FULL FREEZE MEASUREMENT');
+        }, 0);
         
         // Fallback-Timeout falls finishTransport nicht aufgerufen wird
         setTimeout(() => {
-            if (this.state.isTransporting && this.state.transportTarget === targetId) {
+            if (this.isTransporting && this.transportTarget === targetId) {
                 this.finishTransport();
             }
         }, 5000);
@@ -156,13 +171,13 @@ export class WorldStore {
     
     // Transport abschließen (wird von Scene nach Animation aufgerufen)
     finishTransport() {
-        if (!this.state.isTransporting) return;
+        if (!this.isTransporting) return;
         
-        if (this.state.transportTarget) {
-            this.state.currentPlatform = this.state.transportTarget;
+        if (this.transportTarget) {
+            this.currentPlatform = this.transportTarget;
         }
-        this.state.isTransporting = false;
-        this.state.transportTarget = null;
+        this.isTransporting = false;
+        this.transportTarget = null;
 
         // Pending ViewTarget nach Transport ausführen
         if (this.state.pendingViewTarget) {
@@ -182,7 +197,7 @@ export class WorldStore {
     }
 
     setCurrentPlatform(platformId: string) {
-        this.state.currentPlatform = platformId;
+        this.currentPlatform = platformId;
     }
 
     // NEU: Chat-Modal für ProjectChart
@@ -300,7 +315,7 @@ export class WorldStore {
         // Import getViewPoint dynamisch zur Laufzeit (vermeidet circular dependencies)
         import('./viewpoints').then(({ getViewPoint }) => {
             // Wenn auf gleicher Plattform: Direkt viewTarget setzen
-            if (platformId === this.state.currentPlatform) {
+            if (platformId === this.currentPlatform) {
                 const viewPoint = getViewPoint(projectId, displayType, platformId);
                 if (viewPoint) {
                     this.setViewTarget(viewPoint.camera, viewPoint.target);

@@ -24,6 +24,9 @@
 	const platformTourOrder = ['S', 'B1', 'B2', 'B3', 'Q1', 'Q2', 'Q3'] as const;
 	let currentPlatformTourIndex = $state(-1); // -1 = noch nicht gestartet
 	
+	// Aktuelle Plattform-ID - gecacht für Performance (separates Signal!)
+	let currentPlatformId = $derived(worldStore.currentPlatform);
+	
 	// Quality-Dialog State
 	let isQualityDialogOpen = $state(false);
 	
@@ -144,8 +147,8 @@
 	}
 	
 	function goHome() {
-		if (worldStore.state.isTransporting || isInputFocused) return;
-		if (worldStore.state.currentPlatform !== 'S') {
+		if (worldStore.isTransporting || isInputFocused) return;
+		if (currentPlatformId !== 'S') {
 			worldStore.startTransport('S');
 		}
 	}
@@ -154,7 +157,7 @@
 	function goToCenter() {
 		if (isInputFocused || !cameraControls) return;
 		
-		const viewPoint = getCenterViewPoint(worldStore.state.currentPlatform);
+		const viewPoint = getCenterViewPoint(currentPlatformId);
 		if (viewPoint) {
 			cameraControls.setLookAt(
 				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
@@ -173,7 +176,7 @@
 	
 	// Aktueller Index in der Plattform-Tour basierend auf aktueller Plattform
 	let currentPlatformIndex = $derived(
-		platformTourOrder.indexOf(worldStore.state.currentPlatform as typeof platformTourOrder[number])
+		platformTourOrder.indexOf(currentPlatformId as typeof platformTourOrder[number])
 	);
 	
 	// Nächste Plattform in der Tour
@@ -186,7 +189,7 @@
 	
 	// Zur nächsten Plattform in der Tour navigieren
 	function goToNextPlatform() {
-		if (worldStore.state.isTransporting || isInputFocused) return;
+		if (worldStore.isTransporting || isInputFocused) return;
 		
 		// Poster-Index zurücksetzen
 		currentPosterIndex = -1;
@@ -242,7 +245,7 @@
 	// Andere Plattformen: Booths → Wall-Poster (räumlich sortiert)
 	// Tour-Reihenfolge: Dreieck 1 (A→B→C), Dreieck 2 (A→B→C), Dreieck 3 (A→B→C)
 	let allPosters = $derived.by(() => {
-		const platformId = worldStore.state.currentPlatform;
+		const platformId = currentPlatformId; // Nutze gecachte Plattform-ID
 		
 		// Spezielle Tour für Marktplatz
 		if (platformId === 'S') {
@@ -306,7 +309,7 @@
 	// Poster-Index zurücksetzen wenn Plattform wechselt
 	$effect(() => {
 		// Bei Plattformwechsel resetten
-		const _platform = worldStore.state.currentPlatform;
+		const _platform = currentPlatformId;
 		currentPosterIndex = -1;
 	});
 	
@@ -321,7 +324,7 @@
 		currentPosterIndex = (currentPosterIndex + 1) % allPosters.length;
 		
 		const target = allPosters[currentPosterIndex];
-		const platformId = worldStore.state.currentPlatform;
+		const platformId = currentPlatformId;
 		
 		if (!target) return;
 		
@@ -389,9 +392,9 @@
 	}
 	
 	// Aktuelle Plattform-Info
-	let currentPlatformName = $derived(getPlatformContent(worldStore.state.currentPlatform)?.title || 'Unbekannt');
-	let isOnMarktplatz = $derived(worldStore.state.currentPlatform === 'S');
-	let isTransporting = $derived(worldStore.state.isTransporting);
+	let currentPlatformName = $derived(getPlatformContent(currentPlatformId)?.title || 'Unbekannt');
+	let isOnMarktplatz = $derived(currentPlatformId === 'S');
+	let isTransporting = $derived(worldStore.isTransporting);
 	
 	// Prüfe ob Taste aktiv ist
 	function isKeyActive(key: string): boolean {

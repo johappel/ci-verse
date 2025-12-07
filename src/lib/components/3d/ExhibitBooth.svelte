@@ -52,10 +52,10 @@
     let isNearby = $state(false);
     
     // Auf der gleichen Plattform? (für Poster-Sichtbarkeit und Task-Optimierung)
-    let isOnPlatform = $derived(worldStore.state.currentPlatform === platformId);
+    let isOnPlatform = $derived(worldStore.currentPlatform === platformId);
     
     // Ist die Zielplattform? (für Transport-Animation)
-    let isTransportTarget = $derived(worldStore.state.transportTarget === platformId);
+    let isTransportTarget = $derived(worldStore.transportTarget === platformId);
     
     // Task nur laufen lassen wenn relevant (auf Plattform oder Transport-Ziel)
     let shouldRunTask = $derived(isOnPlatform || isTransportTarget);

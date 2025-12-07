@@ -20,17 +20,28 @@
     } from '$lib/data/mockProjects';
     import type { Object3D, Intersection } from 'three';
 
-    let { platform, projects = [] }: { platform: PlatformType; projects: ProjectData[] } = $props();
+    let { platform, projects = [] }: { platform: PlatformType; projects?: ProjectData[] } = $props();
 
-    // Plattform-Content (Aspects, WallPosters, BoothProjects)
-    let platformContent = $derived(getPlatformContent(platform.id));
-    let boothProjects = $derived(getBoothProjectsForPlatform(platform.id));
-    let wallPosters = $derived(getWallPostersForPlatform(platform.id));
-    let relatedProjects = $derived(getRelatedProjectsForPlatform(platform.id));
+    // ============================================
+    // DIREKTE TRANSPORT-SIGNALE (nicht mehr über state-Objekt!)
+    // worldStore.currentPlatform etc. sind separate $state Variablen
+    // ============================================
+    let currentPlatformId = $derived(worldStore.currentPlatform);
+    let transportTargetId = $derived(worldStore.transportTarget);
+    
+    // Abgeleitete Werte NUR von den isolierten Selektoren
+    let isCurrentPlatform = $derived(currentPlatformId === platform.id);
+    let isTransportTarget = $derived(transportTargetId === platform.id);
 
-    // Farben aus Content-Daten (Fallback auf platforms.ts)
-    let platformColor = $derived(platformContent?.color ?? platform.color);
-    let platformGlowColor = $derived(platformContent?.glowColor ?? platform.glowColor);
+    // Plattform-Content - GECACHT, nicht reaktiv auf worldStore
+    const platformContent = getPlatformContent(platform.id);
+    const boothProjects = getBoothProjectsForPlatform(platform.id);
+    const wallPosters = getWallPostersForPlatform(platform.id);
+    const relatedProjects = getRelatedProjectsForPlatform(platform.id);
+
+    // Farben aus Content-Daten (statisch)
+    const platformColor = platformContent?.color ?? platform.color;
+    const platformGlowColor = platformContent?.glowColor ?? platform.glowColor;
 
     // Referenzen für Spotlight-Targets (je Spot ein eigenes Target)
     let spotTargets: (Object3D | undefined)[] = $state(Array(6).fill(undefined));
@@ -59,14 +70,8 @@
         glowOpacity.target = $hovering ? 0.9 : baseOpacity;
     });
 
-    // Layout für Projekt-Stände auf der Plattform
-    let standPositions = $derived(getHexagonalLayout(projects.length, platform.size * 0.6));
-
-    // Ist diese Plattform die aktuelle?
-    let isCurrentPlatform = $derived(worldStore.state.currentPlatform === platform.id);
-    
-    // Ist diese Plattform das Transport-Ziel?
-    let isTransportTarget = $derived(worldStore.state.transportTarget === platform.id);
+    // Layout für Projekt-Stände auf der Plattform (statisch)
+    const standPositions = getHexagonalLayout(projects.length, platform.size * 0.6);
     
     // ALLE Plattformen rendern immer ihre Inhalte (für flüssige Übergänge)
     let shouldRenderContent = true;
@@ -432,8 +437,11 @@
         {/each}
     {/if}
 
-    <!-- 6 Spotlights wie in einer Messehalle (Performance-abhängig) -->
-    {#if shouldRenderSpotlights}
+    <!-- 
+        6 Spotlights wie in einer Messehalle (Performance-abhängig)
+        WICHTIG: Immer gemountet mit visible={} statt {#if} um Shader-Kompilierung beim Transport zu vermeiden!
+    -->
+    <T.Group visible={shouldRenderSpotlights}>
         {#each spotlightPositions.slice(0, spotlightCount) as spot, i}
             <!-- Target-Objekt direkt unter dem Spot (leicht zur Mitte versetzt) -->
             <T.Object3D 
@@ -487,15 +495,14 @@
                 <T.MeshBasicMaterial color="#374151" />
             {/if}
         </T.Mesh>
-    {/if}
+    </T.Group>
 
     <!-- Dezentes Ambient-Licht für Plattformen ohne Spotlights -->
-    {#if !shouldRenderSpotlights}
-        <T.PointLight
-            position={[0, 10, 0]}
-            color={platformGlowColor}
-            intensity={5}
-            distance={platform.size * 1.5}
-        />
-    {/if}
+    <T.PointLight
+        visible={!shouldRenderSpotlights}
+        position={[0, 10, 0]}
+        color={platformGlowColor}
+        intensity={5}
+        distance={platform.size * 1.5}
+    />
 </T.Group>
