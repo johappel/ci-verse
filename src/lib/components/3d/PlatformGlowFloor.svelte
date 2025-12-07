@@ -34,6 +34,11 @@
 
     // Warmweiße Lichtfarbe für alle Lampen und Boden-Glows
     const lightColor = '#fff8e0';
+    
+    // Traverse-Konfiguration
+    const traverseRadius = platformSize * spotRadius;
+    const traverseColor = '#1a1a1a';
+    const tubeRadius = 0.08;
 
     // Shader Material für weiche Glow-Spots - WARMWEISS
     const glowMaterial = new ShaderMaterial({
@@ -115,24 +120,40 @@
     <T.PlaneGeometry args={[platformSize * 2, platformSize * 2]} />
 </T.Mesh>
 
-<!-- Hexagonale Traverse (Ring) - fast schwarz -->
-<T.Mesh position.y={lampHeight} rotation.x={Math.PI / 2}>
-    <T.TorusGeometry args={[platformSize * spotRadius, 0.12, 6, 6]} />
-    <T.MeshBasicMaterial color="#0f0f0f" />
+<!-- Hexagonale Traverse (Doppelring mit Querstreben) -->
+
+<!-- Äußerer Ring (oben) -->
+<T.Mesh position.y={lampHeight + 0.15} rotation.x={Math.PI / 2}>
+    <T.TorusGeometry args={[traverseRadius, tubeRadius, 8, 6]} />
+    <T.MeshStandardMaterial color={traverseColor} metalness={0.7} roughness={0.4} />
 </T.Mesh>
+
+<!-- Innerer Ring (unten) -->
+<T.Mesh position.y={lampHeight - 0.15} rotation.x={Math.PI / 2}>
+    <T.TorusGeometry args={[traverseRadius, tubeRadius, 8, 6]} />
+    <T.MeshStandardMaterial color={traverseColor} metalness={0.7} roughness={0.4} />
+</T.Mesh>
+
+<!-- 6 vertikale Streben zwischen den Ringen (an den Ecken) -->
+{#each lamps as lamp}
+    <T.Mesh position={[lamp.x, lampHeight, lamp.z]}>
+        <T.CylinderGeometry args={[tubeRadius, tubeRadius, 0.3, 8]} />
+        <T.MeshStandardMaterial color={traverseColor} metalness={0.7} roughness={0.4} />
+    </T.Mesh>
+{/each}
 
 <!-- 6 Lampen an der Traverse -->
 {#each lamps as lamp}
     <!-- Aufhängung (vertikale Stange) -->
-    <T.Mesh position={[lamp.x, lampHeight - 0.4, lamp.z]}>
-        <T.CylinderGeometry args={[0.06, 0.06, 0.8, 8]} />
-        <T.MeshBasicMaterial color="#0f0f0f" />
+    <T.Mesh position={[lamp.x, lampHeight - 0.5, lamp.z]}>
+        <T.CylinderGeometry args={[0.05, 0.05, 0.7, 8]} />
+        <T.MeshStandardMaterial color={traverseColor} metalness={0.7} roughness={0.4} />
     </T.Mesh>
     
     <!-- Lampen-Kegel (hängt unter der Traverse) -->
-    <T.Mesh position={[lamp.x, lampHeight - 1.0, lamp.z]}>
-        <T.ConeGeometry args={[0.5, 0.7, 8]} />
-        <T.MeshBasicMaterial color="#111111" />
+    <T.Mesh position={[lamp.x, lampHeight - 1.05, lamp.z]}>
+        <T.ConeGeometry args={[0.45, 0.6, 8]} />
+        <T.MeshStandardMaterial color={traverseColor} metalness={0.6} roughness={0.5} />
     </T.Mesh>
     
     <!-- Leuchtende Linse (emissive Scheibe an Unterseite) - WARMWEISS -->
