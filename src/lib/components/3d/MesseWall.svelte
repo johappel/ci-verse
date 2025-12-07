@@ -13,12 +13,13 @@
      * - Klick auf Wandknopf → Öffnet externe URL
      */
     import { T, useThrelte, useTask } from '@threlte/core';
-    import { Text, useCursor, HTML, ImageMaterial } from '@threlte/extras';
+    import { Text, useCursor, HTML } from '@threlte/extras';
     import { base } from '$app/paths';
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
     import { getCameraY } from '$lib/logic/platforms';
     import { performanceStore } from '$lib/logic/performanceStore.svelte';
+    import PosterImage from './PosterImage.svelte';
     
     // Performance: Im Low-Mode Transparenz deaktivieren (GPU-lastig)
     const enableTransparency = $derived(performanceStore.qualityLevel !== 'low');
@@ -341,18 +342,17 @@
                                 />
                             </T.Mesh>
                             
-                            <!-- Poster-Bild -->
-                            <T.Mesh 
-                                position.z={0.2}
-                                onclick={() => handlePosterClick(x, z, rotY, offsetX)}
-                            >
-                                <T.PlaneGeometry args={[imageOnlyWidth, imageOnlyHeight]} />
-                                <ImageMaterial 
-                                    url={project.display.posterImage?.startsWith('/') ? base + project.display.posterImage : project.display.posterImage}
-                                    transparent={false}
-                                    opacity={1}
+                            <!-- Poster-Bild mit Performance-optimierter Textur -->
+                            <!-- preserveQuality=true für Leitlinien (enthalten Text) -->
+                            <T.Group onclick={() => handlePosterClick(x, z, rotY, offsetX)}>
+                                <PosterImage 
+                                    url={project.display.posterImage || ''}
+                                    width={imageOnlyWidth}
+                                    height={imageOnlyHeight}
+                                    position={[0, 0, 0.2]}
+                                    preserveQuality={true}
                                 />
-                            </T.Mesh>
+                            </T.Group>
                         </T.Group>
                     {/if}
                 {:else}
@@ -501,19 +501,17 @@
                     {/if}
 
                     <!-- === POSTER-BILD (rechts) === -->
+                    <!-- Textur-Qualität wird automatisch über PosterImage gesteuert -->
                     {#if hasImage && isOnPlatform}
                         {@const imageOffsetX = textOffsetX + textWidth / 2 + gap + imageWidth / 2}
-                        <T.Mesh 
-                            position={[imageOffsetX, 0, 0.22]}
-                            onclick={() => handlePosterClick(x, z, rotY, offsetX)}
-                        >
-                            <T.PlaneGeometry args={[imageWidth, imageHeight]} />
-                            <ImageMaterial 
-                                url={project.display?.posterImage?.startsWith('/') ? base + project.display.posterImage : project.display?.posterImage || ''}
-                                transparent={false}
-                                opacity={1}
+                        <T.Group onclick={() => handlePosterClick(x, z, rotY, offsetX)}>
+                            <PosterImage 
+                                url={project.display?.posterImage || ''}
+                                width={imageWidth}
+                                height={imageHeight}
+                                position={[imageOffsetX, 0, 0.22]}
                             />
-                        </T.Mesh>
+                        </T.Group>
                     {/if}
                 {/if}
             </T.Group>

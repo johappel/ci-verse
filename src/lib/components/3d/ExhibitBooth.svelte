@@ -12,16 +12,20 @@
      * - Klick auf Hexagon-Button (bei Nähe) → Öffnet ProjectCard
      */
     import { T, useThrelte, useTask } from '@threlte/core';
-    import { Text, useCursor, HTML, ImageMaterial } from '@threlte/extras';
+    import { Text, useCursor, HTML } from '@threlte/extras';
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
     import { performanceStore } from '$lib/logic/performanceStore.svelte';
+    import PosterImage from './PosterImage.svelte';
     
     // Performance: Im Low-Mode Transparenz deaktivieren (GPU-lastig)
     const enableTransparency = $derived(performanceStore.qualityLevel !== 'low');
     
     // Performance: Im Low-Mode nur Vorderseite rendern (keine doppelte Textur/Text-Last)
     const showBackside = $derived(performanceStore.qualityLevel !== 'low');
+    
+    // Performance: Im Low-Mode keine Hover-Spotlights (zusätzliche Lichtquellen)
+    const showHoverSpotlight = $derived(performanceStore.qualityLevel !== 'low');
 
     interface Props {
         project: ProjectData;
@@ -390,21 +394,21 @@
             {/if}
 
             <!-- === POSTER-BILD (rechts) === -->
+            <!-- Textur-Qualität wird automatisch über PosterImage gesteuert -->
             {#if posterImage && isOnPlatform}
                 {@const imageOffsetX = textOffsetX + s.textWidth / 2 + s.gap + imageWidth / 2}
-                <T.Mesh 
-                    position={[imageOffsetX, 0, 0.02]}
+                <T.Group
                     onpointerenter={handlePointerEnter}
                     onpointerleave={handlePointerLeave}
                     onclick={handleBannerClick}
                 >
-                    <T.PlaneGeometry args={[imageWidth, imageHeight]} />
-                    <ImageMaterial 
+                    <PosterImage 
                         url={posterImage}
-                        transparent={false}
-                        opacity={1}
+                        width={imageWidth}
+                        height={imageHeight}
+                        position={[imageOffsetX, 0, 0.02]}
                     />
-                </T.Mesh>
+                </T.Group>
             {/if}
         </T.Group>
         {:else}
@@ -567,27 +571,27 @@
             {/if}
 
             <!-- === POSTER-BILD (rechts auf Rückseite) === -->
+            <!-- Textur-Qualität wird automatisch über PosterImage gesteuert -->
             {#if posterImage && isOnPlatform}
                 {@const imageOffsetX = textOffsetX + s.textWidth / 2 + s.gap + imageWidth / 2}
-                <T.Mesh 
-                    position={[imageOffsetX, 0, 0.02]}
+                <T.Group
                     onpointerenter={handlePointerEnter}
                     onpointerleave={handlePointerLeave}
                     onclick={handleBannerClick}
                 >
-                    <T.PlaneGeometry args={[imageWidth, imageHeight]} />
-                    <ImageMaterial 
+                    <PosterImage 
                         url={posterImage}
-                        transparent={false}
-                        opacity={1}
+                        width={imageWidth}
+                        height={imageHeight}
+                        position={[imageOffsetX, 0, 0.02]}
                     />
-                </T.Mesh>
+                </T.Group>
             {/if}
         </T.Group>
     </T.Group>
 
-    <!-- Spotlight bei Hover (von beiden Seiten) -->
-    {#if isHovered}
+    <!-- Spotlight bei Hover (im Low-Mode deaktiviert) -->
+    {#if isHovered && showHoverSpotlight}
         <T.SpotLight
             position={[0, s.height + 2, 3]}
             target.position={[0, s.height / 2, 0]}

@@ -92,6 +92,39 @@ Dieses Dokument beschreibt die drei Qualitätsstufen des CI-Verse Performance-Sy
 
 ---
 
+## Texturen (Poster-Bilder)
+
+Die `PosterImage`-Komponente passt die Textur-Qualität automatisch an:
+
+| Einstellung | 🔥 High | ⚡ Medium | 🌿 Low |
+|-------------|---------|----------|--------|
+| `minFilter` | `LinearMipmapLinearFilter` | `LinearFilter` | `NearestFilter` |
+| `magFilter` | `LinearFilter` | `LinearFilter` | `NearestFilter` |
+| `anisotropy` | `4` | `2` | `1` |
+| `generateMipmaps` | ✅ `true` | ❌ `false` | ❌ `false` |
+
+### Erklärung
+
+- **`minFilter`**: Filter für verkleinertes Bild (Entfernung)
+  - High: Beste Qualität mit Mipmaps (weiche Übergänge)
+  - Medium: Linear interpoliert, keine Mipmaps
+  - Low: Nearest-Neighbor (pixelig, aber schnell)
+
+- **`magFilter`**: Filter für vergrößertes Bild (Nähe)
+  - High/Medium: Linear interpoliert
+  - Low: Nearest-Neighbor (pixelig)
+
+- **`anisotropy`**: Qualität bei schräger Betrachtung
+  - High: 4x anisotrope Filterung
+  - Medium: 2x
+  - Low: Keine (1x)
+
+- **`generateMipmaps`**: Vorberechnete kleinere Texturversionen
+  - High: Aktiviert für bessere Qualität bei Entfernung
+  - Medium/Low: Deaktiviert → spart VRAM und Ladezeit
+
+---
+
 ## Effekte
 
 | Einstellung | 🔥 High | ⚡ Medium | 🌿 Low |
