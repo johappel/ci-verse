@@ -75,8 +75,8 @@ export const platforms: Record<string, Platform> = {
         color: '#64748b',      // Slate
         glowColor: '#94a3b8',
         landing: {
-            offset: [12, 10, 18],       // Rechts-vorne vom Portal, erhöht
-            lookAtOffset: [0, 4, -12]   // Schaut zum Turm (hinten-mitte)
+            offset: [12, 10, 18],       // Rechts-vorne, erhöht
+            lookAtOffset: [-20, 3, -12] // Schaut zum NexusTerminal (links-hinten)
         }
     },
 
@@ -90,7 +90,7 @@ export const platforms: Record<string, Platform> = {
         color: '#fcd34d',      // Amber
         glowColor: '#fde68a',
         landing: {
-            offset: [-9, 8, -5],       // Vor InfoHexagon Titel-Seite (Index 5, Winkel ~210°)
+            offset: [-15, 8, -9],      // Weiter weg vom InfoHexagon (AspectPillar-Abstand)
             lookAtOffset: [0, 3, 0]    // Schaut zum InfoHexagon-Zentrum
         }
     },
@@ -103,7 +103,7 @@ export const platforms: Record<string, Platform> = {
         color: '#fb923c',      // Orange
         glowColor: '#fdba74',
         landing: {
-            offset: [-9, 8, -5],       // Vor InfoHexagon Titel-Seite (Index 5, Winkel ~210°)
+            offset: [-15, 8, -9],      // Weiter weg vom InfoHexagon (AspectPillar-Abstand)
             lookAtOffset: [0, 3, 0]    // Schaut zum InfoHexagon-Zentrum
         }
     },
@@ -116,7 +116,7 @@ export const platforms: Record<string, Platform> = {
         color: '#f87171',      // Red
         glowColor: '#fca5a5',
         landing: {
-            offset: [-9, 8, -5],       // Vor InfoHexagon Titel-Seite (Index 5, Winkel ~210°)
+            offset: [-15, 8, -9],      // Weiter weg vom InfoHexagon (AspectPillar-Abstand)
             lookAtOffset: [0, 3, 0]    // Schaut zum InfoHexagon-Zentrum
         }
     },
@@ -131,7 +131,7 @@ export const platforms: Record<string, Platform> = {
         color: '#a78bfa',      // Violet
         glowColor: '#c4b5fd',
         landing: {
-            offset: [-9, 10, -5],      // Vor InfoHexagon Titel-Seite (Index 5, Winkel ~210°)
+            offset: [-15, 10, -9],     // Weiter weg vom InfoHexagon (AspectPillar-Abstand)
             lookAtOffset: [0, 3, 0]    // Schaut zum InfoHexagon-Zentrum
         }
     },
@@ -144,7 +144,7 @@ export const platforms: Record<string, Platform> = {
         color: '#fbbf24',      // Yellow
         glowColor: '#fcd34d',
         landing: {
-            offset: [-9, 10, -5],      // Vor InfoHexagon Titel-Seite (Index 5, Winkel ~210°)
+            offset: [-15, 10, -9],     // Weiter weg vom InfoHexagon (AspectPillar-Abstand)
             lookAtOffset: [0, 3, 0]    // Schaut zum InfoHexagon-Zentrum
         }
     },
@@ -157,7 +157,7 @@ export const platforms: Record<string, Platform> = {
         color: '#22d3ee',      // Cyan
         glowColor: '#67e8f9',
         landing: {
-            offset: [-9, 10, -5],      // Vor InfoHexagon Titel-Seite (Index 5, Winkel ~210°)
+            offset: [-15, 10, -9],     // Weiter weg vom InfoHexagon (AspectPillar-Abstand)
             lookAtOffset: [0, 3, 0]    // Schaut zum InfoHexagon-Zentrum
         }
     }

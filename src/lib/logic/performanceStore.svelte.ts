@@ -2,6 +2,7 @@
  * PerformanceStore - Verwaltet Qualitätseinstellungen für schwache Hardware
  * 
  * Features:
+ * - Lädt Konfiguration aus /static/config.json (zentrale Einstellungen)
  * - Automatische Hardware-Erkennung
  * - Drei Qualitätsstufen: high, medium, low
  * - Frame-Rate-Monitoring mit automatischem Downgrade
@@ -44,6 +45,29 @@ export interface PerformanceSettings {
     cameraSmoothTime: number;        // Standard-Glättung für Kamera (0.3 = direkt, 1.5 = weich)
 }
 
+// Config-Interface für JSON-Datei
+interface ConfigJSON {
+    qualityPresets: Record<QualityLevel, {
+        comment?: string;
+        materials: { usePBRMaterials: boolean; useEmissive: boolean };
+        shadows: { enableShadows: boolean };
+        lighting: { maxSpotlights: number; useHemisphereLight: boolean };
+        geometry: { geometryDetail: 'high' | 'medium' | 'low' };
+        effects: {
+            enableFog: boolean;
+            enableParticles: boolean;
+            enableAnimations: boolean;
+            enableGlowRings: boolean;
+            enableEnergyEffects: boolean;
+            lightBridgeQuality: 'high' | 'medium' | 'low';
+        };
+        rendering: { pixelRatio: number | 'auto'; antialias: boolean };
+        camera: { flightSpeed: 'normal' | 'fast' | 'instant'; smoothTime: number };
+    }>;
+    geometrySegments: Record<'high' | 'medium' | 'low', number>;
+    autoDowngrade: { enabled: boolean; fpsThreshold: number; measurementCount: number };
+}
+
 // Helper: Sichere devicePixelRatio
 function getDevicePixelRatio(): number {
     if (browser && typeof window !== 'undefined') {
@@ -52,8 +76,30 @@ function getDevicePixelRatio(): number {
     return 1;
 }
 
-// Preset-Definitionen (als Funktion für dynamische pixelRatio)
-function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
+// Konvertiert JSON-Preset zu PerformanceSettings
+function convertPreset(preset: ConfigJSON['qualityPresets'][QualityLevel]): PerformanceSettings {
+    return {
+        usePBRMaterials: preset.materials.usePBRMaterials,
+        useEmissive: preset.materials.useEmissive,
+        enableShadows: preset.shadows.enableShadows,
+        maxSpotlights: preset.lighting.maxSpotlights,
+        useHemisphereLight: preset.lighting.useHemisphereLight,
+        geometryDetail: preset.geometry.geometryDetail,
+        enableFog: preset.effects.enableFog,
+        enableParticles: preset.effects.enableParticles,
+        enableAnimations: preset.effects.enableAnimations,
+        enableGlowRings: preset.effects.enableGlowRings,
+        enableEnergyEffects: preset.effects.enableEnergyEffects,
+        lightBridgeQuality: preset.effects.lightBridgeQuality,
+        pixelRatio: preset.rendering.pixelRatio === 'auto' ? getDevicePixelRatio() : preset.rendering.pixelRatio,
+        antialias: preset.rendering.antialias,
+        cameraFlightSpeed: preset.camera.flightSpeed,
+        cameraSmoothTime: preset.camera.smoothTime
+    };
+}
+
+// Fallback-Presets (falls config.json nicht geladen werden kann)
+function getDefaultPresets(): Record<QualityLevel, PerformanceSettings> {
     return {
         high: {
             usePBRMaterials: true,
@@ -70,50 +116,50 @@ function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
             lightBridgeQuality: 'high',
             pixelRatio: getDevicePixelRatio(),
             antialias: true,
-            cameraFlightSpeed: 'normal',  // Normale Flugzeit
-            cameraSmoothTime: 1.5         // Weiche Kamera-Bewegung
+            cameraFlightSpeed: 'normal',
+            cameraSmoothTime: 1.5
         },
         medium: {
             usePBRMaterials: true,
             useEmissive: true,
-            enableShadows: false,        // Keine Schatten
-            maxSpotlights: 3,            // Weniger Spotlights
+            enableShadows: false,
+            maxSpotlights: 3,
             useHemisphereLight: true,
             geometryDetail: 'medium',
             enableFog: true,
-            enableParticles: false,      // Keine Partikel
+            enableParticles: false,
             enableAnimations: true,
-            enableGlowRings: true,       // Glow-Ringe behalten
-            enableEnergyEffects: true,   // Energie-Effekte behalten
-            lightBridgeQuality: 'medium', // Einfachere Lichtlinien
-            pixelRatio: 1.0,             // Feste Auflösung
+            enableGlowRings: true,
+            enableEnergyEffects: true,
+            lightBridgeQuality: 'medium',
+            pixelRatio: 1.0,
             antialias: true,
-            cameraFlightSpeed: 'fast',    // Schnellere Flugzeit
-            cameraSmoothTime: 0.9         // Mittlere Kamera-Glättung
+            cameraFlightSpeed: 'fast',
+            cameraSmoothTime: 0.9
         },
         low: {
-            usePBRMaterials: false,      // Nur BasicMaterial
-            useEmissive: false,          // Kein Glow
-            enableShadows: false,        // Keine Schatten
-            maxSpotlights: 0,            // Keine Spotlights
-            useHemisphereLight: false,   // Nur Ambient+Directional
-            geometryDetail: 'low',       // Minimale Geometrie
-            enableFog: false,            // Kein Nebel
-            enableParticles: false,      // Keine Partikel
-            enableAnimations: false,     // KEINE Animationen im Low-Mode
-            enableGlowRings: false,      // KEINE Glow-Ringe
-            enableEnergyEffects: false,  // KEINE Energie-Effekte (Shader!)
-            lightBridgeQuality: 'low',   // Einfachste Lichtlinien (nur Kern)
-            pixelRatio: 0.5,             // HALBE Auflösung für max. Performance
-            antialias: false,            // Keine Kantenglättung
-            cameraFlightSpeed: 'instant', // SOFORTIGER Kamerasprung
-            cameraSmoothTime: 0.4         // Direkte Kamera-Reaktion (weniger Interpolation)
+            usePBRMaterials: false,
+            useEmissive: false,
+            enableShadows: false,
+            maxSpotlights: 0,
+            useHemisphereLight: false,
+            geometryDetail: 'low',
+            enableFog: false,
+            enableParticles: false,
+            enableAnimations: false,
+            enableGlowRings: false,
+            enableEnergyEffects: false,
+            lightBridgeQuality: 'low',
+            pixelRatio: 0.5,
+            antialias: false,
+            cameraFlightSpeed: 'instant',
+            cameraSmoothTime: 0.4
         }
     };
 }
 
-// Geometrie-Segment-Multiplikatoren
-export const GEOMETRY_SEGMENTS: Record<'high' | 'medium' | 'low', number> = {
+// Geometrie-Segment-Multiplikatoren (werden aus config.json überschrieben)
+export let GEOMETRY_SEGMENTS: Record<'high' | 'medium' | 'low', number> = {
     high: 1.0,
     medium: 0.6,
     low: 0.3
@@ -122,7 +168,14 @@ export const GEOMETRY_SEGMENTS: Record<'high' | 'medium' | 'low', number> = {
 class PerformanceStore {
     // Reaktiver State
     qualityLevel = $state<QualityLevel>('medium');
-    settings = $state<PerformanceSettings>(getQualityPresets().medium);
+    settings = $state<PerformanceSettings>(getDefaultPresets().medium);
+    
+    // Geladene Presets (aus config.json oder Fallback)
+    private presets: Record<QualityLevel, PerformanceSettings> = getDefaultPresets();
+    private configLoaded = $state(false);
+    
+    // Auto-Downgrade Einstellungen (aus config.json)
+    private autoDowngradeConfig = { enabled: true, fpsThreshold: 20, measurementCount: 5 };
     
     // Shader-Warmup Status (wird von ShaderWarmup.svelte gesetzt)
     shadersReady = $state(false);
@@ -161,8 +214,54 @@ class PerformanceStore {
         if (this.initialized) return;
         this.initialized = true;
         
-        this.loadSettings();
-        this.detectHardware();
+        // Config aus JSON laden, dann Settings anwenden
+        this.loadConfigFromJSON().then(() => {
+            this.loadSettings();
+            this.detectHardware();
+        });
+    }
+    
+    /**
+     * Lädt Konfiguration aus /static/config.json
+     */
+    private async loadConfigFromJSON(): Promise<void> {
+        if (!browser) return;
+        
+        try {
+            const response = await fetch('/config.json');
+            if (!response.ok) {
+                console.warn('[Performance] config.json nicht gefunden, verwende Fallback-Presets');
+                return;
+            }
+            
+            const config: ConfigJSON = await response.json();
+            console.log('[Performance] config.json geladen');
+            
+            // Presets konvertieren
+            this.presets = {
+                high: convertPreset(config.qualityPresets.high),
+                medium: convertPreset(config.qualityPresets.medium),
+                low: convertPreset(config.qualityPresets.low)
+            };
+            
+            // Geometry Segments übernehmen
+            if (config.geometrySegments) {
+                GEOMETRY_SEGMENTS = { ...config.geometrySegments };
+            }
+            
+            // Auto-Downgrade Einstellungen
+            if (config.autoDowngrade) {
+                this.autoDowngradeConfig = { ...config.autoDowngrade };
+            }
+            
+            // Aktuelles Level neu anwenden mit geladenen Presets
+            this.settings = { ...this.presets[this.qualityLevel] };
+            this.configLoaded = true;
+            
+            console.log('[Performance] Presets aus config.json angewendet');
+        } catch (e) {
+            console.warn('[Performance] config.json laden fehlgeschlagen, verwende Fallback-Presets:', e);
+        }
     }
     
     /**
@@ -253,10 +352,9 @@ class PerformanceStore {
             const stored = localStorage.getItem('ci-verse-quality');
             if (stored) {
                 const level = stored as QualityLevel;
-                const presets = getQualityPresets();
-                if (presets[level]) {
+                if (this.presets[level]) {
                     this.qualityLevel = level;
-                    this.settings = { ...presets[level] };
+                    this.settings = { ...this.presets[level] };
                     console.log('[Performance] Geladene Qualität:', level);
                 }
             }
@@ -284,7 +382,7 @@ class PerformanceStore {
     setQuality(level: QualityLevel) {
         console.log('[Performance] Setze Qualität auf:', level);
         this.qualityLevel = level;
-        this.settings = { ...getQualityPresets()[level] };
+        this.settings = { ...this.presets[level] };
         this.saveSettings();
     }
     

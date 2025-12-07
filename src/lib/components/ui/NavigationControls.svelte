@@ -159,6 +159,8 @@
 		
 		const viewPoint = getCenterViewPoint(currentPlatformId);
 		if (viewPoint) {
+			// SmoothTime basierend auf Quality-Level
+			cameraControls.smoothTime = performanceStore.settings.cameraSmoothTime;
 			cameraControls.setLookAt(
 				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
 				viewPoint.target.x, viewPoint.target.y, viewPoint.target.z,
@@ -348,6 +350,8 @@
 	function navigateToReceptionWall() {
 		const viewPoint = getMarketplaceViewPoint('reception');
 		if (viewPoint && cameraControls) {
+			// SmoothTime basierend auf Quality-Level (schnellere Bewegung bei niedrigerer Qualität)
+			cameraControls.smoothTime = performanceStore.settings.cameraSmoothTime;
 			cameraControls.setLookAt(
 				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
 				viewPoint.target.x, viewPoint.target.y, viewPoint.target.z,
@@ -359,6 +363,8 @@
 	function navigateToLeitlinie(posterIndex: number) {
 		const viewPoint = getMarketplaceViewPoint('leitlinie', posterIndex);
 		if (viewPoint && cameraControls) {
+			// SmoothTime basierend auf Quality-Level
+			cameraControls.smoothTime = performanceStore.settings.cameraSmoothTime;
 			cameraControls.setLookAt(
 				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
 				viewPoint.target.x, viewPoint.target.y, viewPoint.target.z,
@@ -371,6 +377,8 @@
 	function navigateToBooth(projectId: string, platformId: string) {
 		const viewPoint = getViewPoint(projectId, 'booth', platformId);
 		if (viewPoint && cameraControls) {
+			// SmoothTime basierend auf Quality-Level
+			cameraControls.smoothTime = performanceStore.settings.cameraSmoothTime;
 			cameraControls.setLookAt(
 				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
 				viewPoint.target.x, viewPoint.target.y, viewPoint.target.z,
@@ -383,6 +391,8 @@
 	function navigateToWallPoster(projectId: string, platformId: string) {
 		const viewPoint = getViewPoint(projectId, 'wall', platformId);
 		if (viewPoint && cameraControls) {
+			// SmoothTime basierend auf Quality-Level
+			cameraControls.smoothTime = performanceStore.settings.cameraSmoothTime;
 			cameraControls.setLookAt(
 				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
 				viewPoint.target.x, viewPoint.target.y, viewPoint.target.z,

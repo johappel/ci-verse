@@ -1,0 +1,119 @@
+{
+  "_comment": "CI-Verse Konfiguration - Qualitätsstufen und Kamera-Einstellungen. Änderungen hier werden beim nächsten Laden der Seite wirksam.",
+  
+  "qualityPresets": {
+    "high": {
+      "comment": "Volle Qualität für leistungsstarke Geräte",
+      "materials": {
+        "usePBRMaterials": true,
+        "useEmissive": true
+      },
+      "shadows": {
+        "enableShadows": true
+      },
+      "lighting": {
+        "maxSpotlights": 6,
+        "useHemisphereLight": true
+      },
+      "geometry": {
+        "geometryDetail": "high"
+      },
+      "effects": {
+        "enableFog": true,
+        "enableParticles": true,
+        "enableAnimations": true,
+        "enableGlowRings": true,
+        "enableEnergyEffects": true,
+        "lightBridgeQuality": "high"
+      },
+      "rendering": {
+        "pixelRatio": "auto",
+        "antialias": true
+      },
+      "camera": {
+        "flightSpeed": "normal",
+        "smoothTime": 1.5
+      }
+    },
+    
+    "medium": {
+      "comment": "Ausgewogene Qualität für mittlere Hardware",
+      "materials": {
+        "usePBRMaterials": true,
+        "useEmissive": true
+      },
+      "shadows": {
+        "enableShadows": false
+      },
+      "lighting": {
+        "maxSpotlights": 3,
+        "useHemisphereLight": true
+      },
+      "geometry": {
+        "geometryDetail": "medium"
+      },
+      "effects": {
+        "enableFog": true,
+        "enableParticles": false,
+        "enableAnimations": true,
+        "enableGlowRings": true,
+        "enableEnergyEffects": true,
+        "lightBridgeQuality": "medium"
+      },
+      "rendering": {
+        "pixelRatio": 1.0,
+        "antialias": true
+      },
+      "camera": {
+        "flightSpeed": "fast",
+        "smoothTime": 0.9
+      }
+    },
+    
+    "low": {
+      "comment": "Minimale Qualität für schwache Geräte / maximale Performance",
+      "materials": {
+        "usePBRMaterials": false,
+        "useEmissive": false
+      },
+      "shadows": {
+        "enableShadows": false
+      },
+      "lighting": {
+        "maxSpotlights": 0,
+        "useHemisphereLight": false
+      },
+      "geometry": {
+        "geometryDetail": "low"
+      },
+      "effects": {
+        "enableFog": false,
+        "enableParticles": false,
+        "enableAnimations": false,
+        "enableGlowRings": false,
+        "enableEnergyEffects": false,
+        "lightBridgeQuality": "low"
+      },
+      "rendering": {
+        "pixelRatio": 0.5,
+        "antialias": false
+      },
+      "camera": {
+        "flightSpeed": "instant",
+        "smoothTime": 0.4
+      }
+    }
+  },
+  
+  "geometrySegments": {
+    "high": 1.0,
+    "medium": 0.6,
+    "low": 0.3
+  },
+  
+  "autoDowngrade": {
+    "enabled": true,
+    "fpsThreshold": 20,
+    "measurementCount": 5
+  }
+}

@@ -82,7 +82,8 @@
         <T.MeshBasicMaterial transparent opacity={0.01} />
     </T.Mesh>
 
-    <!-- Äußerer Ring - immer sichtbar -->
+    <!-- Äußerer Ring - nur bei Nähe sichtbar -->
+    {#if isNearby}
     <T.Mesh position.y={0.02} rotation.x={-Math.PI / 2}>
         <T.RingGeometry args={[size * 0.7, size, 6]} />
         <T.MeshBasicMaterial 
@@ -91,6 +92,7 @@
             opacity={enableTransparency ? (isHovered ? 0.6 : 0.3) : 1.0}
         />
     </T.Mesh>
+    {/if}
 
     <!-- Innerer Ring - nur bei Nähe sichtbar -->
     {#if isNearby}
