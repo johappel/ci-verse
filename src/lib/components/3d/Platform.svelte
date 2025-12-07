@@ -2,6 +2,7 @@
     import { T, useTask } from '@threlte/core';
     import { useCursor, Text, Billboard } from '@threlte/extras';
     import { Spring } from 'svelte/motion';
+    import { AdditiveBlending } from 'three';
     import type { Platform as PlatformType } from '$lib/logic/platforms';
     import type { ProjectData, PlatformContent } from '$lib/types/project';
     import ExhibitStand from './ExhibitStand.svelte';
@@ -9,6 +10,7 @@
     import MesseWall from './MesseWall.svelte';
     import ExhibitBooth from './ExhibitBooth.svelte';
     import Signpost from './Signpost.svelte';
+    import PlatformGlowFloor from './PlatformGlowFloor.svelte';
     import { getHexagonalLayout } from '$lib/logic/layout';
     import { worldStore } from '$lib/logic/store.svelte';
     import { performanceStore } from '$lib/logic/performanceStore.svelte';
@@ -50,25 +52,31 @@
     let octaederRotation = $state(0);
     const enableAnimations = $derived(performanceStore.settings.enableAnimations);
     
-    useTask((delta) => {
-        if (isCurrentPlatform && enableAnimations) {
-            octaederRotation += delta * 0.5; // Langsame Rotation
-        }
-    });
+    // DEAKTIVIERT für Performance-Test - useTask läuft für alle 6 Plattformen jeden Frame
+    // useTask((delta) => {
+    //     if (isCurrentPlatform && enableAnimations) {
+    //         octaederRotation += delta * 0.5; // Langsame Rotation
+    //     }
+    // });
 
     // Oktaeder-Hover-State für Lichtlinien-Aktivierung
     let oktaederHovered = $state(false);
 
-    // Cursor-Änderung bei Hover
-    const { hovering, onPointerEnter, onPointerLeave } = useCursor();
+    // Cursor-Änderung bei Hover - DEAKTIVIERT für Performance-Test
+    // const { hovering, onPointerEnter, onPointerLeave } = useCursor();
+    let hovering = $state(false);
+    function onPointerEnter() { hovering = true; }
+    function onPointerLeave() { hovering = false; }
     
-    // Glow-Intensität für den Ring bei Hover
-    const glowOpacity = new Spring(0.15, { stiffness: 0.4, damping: 0.7 });
+    // DEAKTIVIERT für Performance-Test - Spring könnte den Freeze verursachen
+    // const glowOpacity = new Spring(0.15, { stiffness: 0.4, damping: 0.7 });
+    let glowOpacity = { current: 0.15 }; // Dummy-Objekt
 
-    $effect(() => {
-        const baseOpacity = isCurrentPlatform ? 0.5 : 0.15;
-        glowOpacity.target = $hovering ? 0.9 : baseOpacity;
-    });
+    // DEAKTIVIERT für Performance-Test - dieser $effect könnte den Freeze verursachen
+    // $effect(() => {
+    //     const baseOpacity = isCurrentPlatform ? 0.5 : 0.15;
+    //     glowOpacity.target = $hovering ? 0.9 : baseOpacity;
+    // });
 
     // Layout für Projekt-Stände auf der Plattform (statisch)
     const standPositions = getHexagonalLayout(projects.length, platform.size * 0.6);
@@ -149,7 +157,7 @@
     position={[platform.x, platform.y, platform.z]}
     userData={{ isPlatform: true, platformId: platform.id }}
 >
-    <!-- Hexagonale Plattform-Basis (6-seitiger Zylinder) -->
+    <!-- Hexagonale Plattform-Basis (6-seitiger Zylinder) - ABGEDUNKELT -->
     <T.Mesh
         onpointerdown={handlePointerDown}
         onpointerup={handlePointerUp}
@@ -162,8 +170,10 @@
         <T.CylinderGeometry args={[platform.size, platform.size, 3, 6]} />
         <T.MeshStandardMaterial
             color={platformColor}
-            metalness={0.3}
-            roughness={0.6}
+            metalness={0.4}
+            roughness={0.8}
+            emissive={platformColor}
+            emissiveIntensity={0.05}
         />
     </T.Mesh>
 
@@ -257,7 +267,7 @@
         />
         {/if}
         <!-- Tooltip bei Hover (nur wenn nicht Marktplatz und gehovered) -->
-        {#if platform.id !== 'S' && $hovering}
+        {#if platform.id !== 'S' && hovering}
             <Billboard position={[0, 2.5, 0]}>
                 <Text
                     text="→ Marktplatz"
@@ -438,71 +448,23 @@
     {/if}
 
     <!-- 
-        6 Spotlights wie in einer Messehalle (Performance-abhängig)
-        WICHTIG: Immer gemountet mit visible={} statt {#if} um Shader-Kompilierung beim Transport zu vermeiden!
+        SHADER-BASIERTE GLOW-SPOTS (wie EnergyFloor)
+        Ein einziger Shader erzeugt 6 weiche diffuse Glows
     -->
-    <T.Group visible={shouldRenderSpotlights}>
-        {#each spotlightPositions.slice(0, spotlightCount) as spot, i}
-            <!-- Target-Objekt direkt unter dem Spot (leicht zur Mitte versetzt) -->
-            <T.Object3D 
-                position={[spot.x * platform.size * 0.85, 0, spot.z * platform.size * 0.85]} 
-                bind:ref={spotTargets[i]} 
-            />
-            
-            <!-- Spotlight von oben - zielt fast senkrecht nach unten -->
-            <T.SpotLight
-                position={[spot.x * platform.size, spotlightHeight - 1.5, spot.z * platform.size]}
-                target={spotTargets[i]}
-                color={platformGlowColor}
-                intensity={250}
-                distance={spotlightHeight * 2.5}
-                angle={0.7}
-                penumbra={0.6}
-                decay={1.2}
-                castShadow={performanceStore.settings.enableShadows}
-            />
-            <!-- Aufhängung (kurze Stange) -->
-            <T.Mesh position={[spot.x * platform.size, spotlightHeight - 0.5, spot.z * platform.size]}>
-                <T.CylinderGeometry args={[0.08, 0.08, 1, 8]} />
-                {#if usePBRMaterials}
-                    <T.MeshStandardMaterial color="#374151" metalness={0.8} roughness={0.3} />
-                {:else}
-                    <T.MeshBasicMaterial color="#374151" />
-                {/if}
-            </T.Mesh>
-            <!-- Spot-Gehäuse (hängt unter der Traverse) -->
-            <T.Mesh position={[spot.x * platform.size, spotlightHeight - 1.3, spot.z * platform.size]}>
-                <T.CylinderGeometry args={[0.5, 0.3, 0.6, 8]} />
-                {#if usePBRMaterials}
-                    <T.MeshStandardMaterial color="#1f2937" metalness={0.7} roughness={0.3} />
-                {:else}
-                    <T.MeshBasicMaterial color="#1f2937" />
-                {/if}
-            </T.Mesh>
-            <!-- Leuchtende Linse -->
-            <T.Mesh position={[spot.x * platform.size, spotlightHeight - 1.7, spot.z * platform.size]}>
-                <T.SphereGeometry args={[0.25, 8, 8]} />
-                <T.MeshBasicMaterial color={platformGlowColor} />
-            </T.Mesh>
-        {/each}
-        
-        <!-- Dünne Traversen-Struktur die die Lampen verbindet (horizontal liegend) -->
-        <T.Mesh position.y={spotlightHeight} rotation.x={Math.PI / 2}>
-            <T.TorusGeometry args={[platform.size * spotlightRadius, 0.15, 6, 6]} />
-            {#if usePBRMaterials}
-                <T.MeshStandardMaterial color="#374151" metalness={0.8} roughness={0.3} />
-            {:else}
-                <T.MeshBasicMaterial color="#374151" />
-            {/if}
-        </T.Mesh>
-    </T.Group>
+    {#if shouldRenderSpotlights}
+        <PlatformGlowFloor 
+            platformSize={platform.size}
+            glowColor={platformGlowColor}
+            spotCount={spotlightCount}
+        />
+    {/if}
 
-    <!-- Dezentes Ambient-Licht für Plattformen ohne Spotlights -->
+    <!-- Ein zentrales Ambient-Licht für die ganze Plattform -->
     <T.PointLight
-        visible={!shouldRenderSpotlights}
         position={[0, 10, 0]}
         color={platformGlowColor}
-        intensity={5}
-        distance={platform.size * 1.5}
+        intensity={15}
+        distance={platform.size * 2}
+        decay={1.5}
     />
 </T.Group>
