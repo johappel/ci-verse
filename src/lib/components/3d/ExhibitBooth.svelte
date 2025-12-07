@@ -13,6 +13,7 @@
      */
     import { T, useThrelte, useTask } from '@threlte/core';
     import { Text, useCursor, HTML } from '@threlte/extras';
+    import { ShaderMaterial, DoubleSide } from 'three';
     import type { ProjectData } from '$lib/types/project';
     import { worldStore } from '$lib/logic/store.svelte';
     import { performanceStore } from '$lib/logic/performanceStore.svelte';
@@ -28,6 +29,68 @@
     
     // Performance: Im Low-Mode keine Hover-Spotlights (zusätzliche Lichtquellen)
     const showHoverSpotlight = $derived(performanceStore.qualityLevel !== 'low');
+
+    // Weicher elliptischer Schatten-Shader (für großen Ambient-Schatten)
+    const shadowMaterial = new ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        side: DoubleSide,
+        uniforms: {
+            uOpacity: { value: 0.18 },
+            uFalloff: { value: 1.5 }
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            uniform float uOpacity;
+            uniform float uFalloff;
+            varying vec2 vUv;
+            
+            void main() {
+                vec2 centered = (vUv - 0.5) * 2.0;
+                float dist = length(centered);
+                float alpha = 1.0 - smoothstep(0.0, 1.0, pow(dist, uFalloff));
+                alpha *= uOpacity;
+                gl_FragColor = vec4(0.0, 0.0, 0.0, alpha);
+            }
+        `
+    });
+    
+    // Intensiver Kontakt-Schatten (für Füße - dort wo Objekt den Boden berührt)
+    const contactShadowMaterial = new ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        side: DoubleSide,
+        uniforms: {
+            uOpacity: { value: 0.5 },
+            uFalloff: { value: 0.8 }  // Schnellerer Falloff = schärferer Schatten
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            uniform float uOpacity;
+            uniform float uFalloff;
+            varying vec2 vUv;
+            
+            void main() {
+                vec2 centered = (vUv - 0.5) * 2.0;
+                float dist = length(centered);
+                float alpha = 1.0 - smoothstep(0.0, 1.0, pow(dist, uFalloff));
+                alpha *= uOpacity;
+                gl_FragColor = vec4(0.0, 0.0, 0.0, alpha);
+            }
+        `
+    });
 
     interface Props {
         project: ProjectData;
@@ -190,14 +253,25 @@
     
     <!-- ========== BODEN-SCHATTEN (nur bei High-Quality) ========== -->
     {#if performanceStore.qualityLevel === 'high'}
-    <T.Mesh position={[0, 0.02, 0]} rotation.x={-Math.PI / 2}>
-        <T.PlaneGeometry args={[s.width * 1.1, s.footDepth * 3]} />
-        <T.MeshBasicMaterial 
-            color="#000000"
-            transparent
-            opacity={0.25}
-            depthWrite={false}
-        />
+    <!-- 1. Großer weicher Ambient-Schatten (unter dem gesamten Stand) -->
+    <T.Mesh position={[0, 0.005, 0]} rotation.x={-Math.PI / 2} material={shadowMaterial}>
+        <T.PlaneGeometry args={[s.width * 1.2, 3.5]} />
+    </T.Mesh>
+    
+    <!-- 2. Kontakt-Schatten unter linker Stütze (intensiv, klein) -->
+    <T.Mesh position={[-s.width * 0.35, 0.008, -0.35]} rotation.x={-Math.PI / 2} material={contactShadowMaterial}>
+        <T.PlaneGeometry args={[0.5, 0.9]} />
+    </T.Mesh>
+    <T.Mesh position={[-s.width * 0.35, 0.008, 0.35]} rotation.x={-Math.PI / 2} material={contactShadowMaterial}>
+        <T.PlaneGeometry args={[0.5, 0.9]} />
+    </T.Mesh>
+    
+    <!-- 3. Kontakt-Schatten unter rechter Stütze (intensiv, klein) -->
+    <T.Mesh position={[s.width * 0.35, 0.008, -0.35]} rotation.x={-Math.PI / 2} material={contactShadowMaterial}>
+        <T.PlaneGeometry args={[0.5, 0.9]} />
+    </T.Mesh>
+    <T.Mesh position={[s.width * 0.35, 0.008, 0.35]} rotation.x={-Math.PI / 2} material={contactShadowMaterial}>
+        <T.PlaneGeometry args={[0.5, 0.9]} />
     </T.Mesh>
     {/if}
     
