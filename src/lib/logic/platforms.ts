@@ -90,8 +90,8 @@ export const platforms: Record<string, Platform> = {
         color: '#fcd34d',      // Amber
         glowColor: '#fde68a',
         landing: {
-            offset: [8, 8, -5],        // Nah an InfoHexagon, seitlich
-            lookAtOffset: [0, 5, 15]   // Schaut Richtung Wände (hinten)
+            offset: [-9, 8, -5],       // Vor InfoHexagon Titel-Seite (Index 5, Winkel ~210°)
+            lookAtOffset: [0, 3, 0]    // Schaut zum InfoHexagon-Zentrum
         }
     },
     B2: {
@@ -103,8 +103,8 @@ export const platforms: Record<string, Platform> = {
         color: '#fb923c',      // Orange
         glowColor: '#fdba74',
         landing: {
-            offset: [-8, 8, -5],       // Nah an InfoHexagon, seitlich
-            lookAtOffset: [0, 5, 15]   // Schaut Richtung Wände (hinten)
+            offset: [-9, 8, -5],       // Vor InfoHexagon Titel-Seite (Index 5, Winkel ~210°)
+            lookAtOffset: [0, 3, 0]    // Schaut zum InfoHexagon-Zentrum
         }
     },
     B3: {
@@ -116,8 +116,8 @@ export const platforms: Record<string, Platform> = {
         color: '#f87171',      // Red
         glowColor: '#fca5a5',
         landing: {
-            offset: [-8, 8, -5],       // Nah an InfoHexagon, seitlich
-            lookAtOffset: [0, 5, 15]   // Schaut Richtung Wände (hinten)
+            offset: [-9, 8, -5],       // Vor InfoHexagon Titel-Seite (Index 5, Winkel ~210°)
+            lookAtOffset: [0, 3, 0]    // Schaut zum InfoHexagon-Zentrum
         }
     },
 
@@ -131,8 +131,8 @@ export const platforms: Record<string, Platform> = {
         color: '#a78bfa',      // Violet
         glowColor: '#c4b5fd',
         landing: {
-            offset: [10, 10, -8],      // Nah an InfoHexagon, seitlich
-            lookAtOffset: [0, 5, 20]   // Schaut Richtung Wände
+            offset: [-9, 10, -5],      // Vor InfoHexagon Titel-Seite (Index 5, Winkel ~210°)
+            lookAtOffset: [0, 3, 0]    // Schaut zum InfoHexagon-Zentrum
         }
     },
     Q2: {
@@ -144,8 +144,8 @@ export const platforms: Record<string, Platform> = {
         color: '#fbbf24',      // Yellow
         glowColor: '#fcd34d',
         landing: {
-            offset: [-10, 10, -8],     // Nah an InfoHexagon, seitlich
-            lookAtOffset: [0, 5, 20]   // Schaut Richtung Wände
+            offset: [-9, 10, -5],      // Vor InfoHexagon Titel-Seite (Index 5, Winkel ~210°)
+            lookAtOffset: [0, 3, 0]    // Schaut zum InfoHexagon-Zentrum
         }
     },
     Q3: {
@@ -157,8 +157,8 @@ export const platforms: Record<string, Platform> = {
         color: '#22d3ee',      // Cyan
         glowColor: '#67e8f9',
         landing: {
-            offset: [-10, 10, -8],     // Nah an InfoHexagon, seitlich
-            lookAtOffset: [0, 5, 20]   // Schaut Richtung Wände
+            offset: [-9, 10, -5],      // Vor InfoHexagon Titel-Seite (Index 5, Winkel ~210°)
+            lookAtOffset: [0, 3, 0]    // Schaut zum InfoHexagon-Zentrum
         }
     }
 };

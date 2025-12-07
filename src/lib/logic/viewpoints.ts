@@ -409,6 +409,11 @@ function getLeitlinieViewPoint(
 
 /**
  * ViewPoint für InfoHexagon (Plattform-Zentrum)
+ * 
+ * Verwendet die Landing-Konfiguration der Plattform, damit der
+ * Landepunkt (beim Transport) und der Center-ViewPoint (C-Taste) identisch sind.
+ * 
+ * Für nicht-Marktplatz-Plattformen zeigt die Kamera zur Titel-Seite des InfoHexagons.
  */
 export function getCenterViewPoint(platformId: string): ViewPoint | null {
     const platform = platforms[platformId];
@@ -418,19 +423,39 @@ export function getCenterViewPoint(platformId: string): ViewPoint | null {
     const py = platform.y;
     const pz = platform.z;
 
-    const cameraY = getCameraY(py);
+    // Landing-Konfiguration aus Plattform-Definition verwenden
+    const landing = platform.landing || {
+        offset: [0, 10, 18],           // Default: vor der Plattform
+        lookAtOffset: [1, 3, 0]        // Default: zur Mitte schauen
+    };
+
+    // Kamera-Position: Plattform-Position + Landing-Offset
+    const cameraX = px + landing.offset[0];
+    const cameraY = py + landing.offset[1];
+    const cameraZ = pz + landing.offset[2];
+
+    // Blickziel: Plattform-Position + lookAtOffset
+    const targetX = px + landing.lookAtOffset[0];
+    const targetY = py + landing.lookAtOffset[1];
+    const targetZ = pz + landing.lookAtOffset[2];
+
+    // Distanz berechnen
+    const dx = cameraX - targetX;
+    const dy = cameraY - targetY;
+    const dz = cameraZ - targetZ;
+    const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
     return {
         camera: {
-            x: px,
+            x: cameraX,
             y: cameraY,
-            z: pz + 18
+            z: cameraZ
         },
         target: {
-            x: px,
-            y: py + 3,
-            z: pz
+            x: targetX,
+            y: targetY,
+            z: targetZ
         },
-        distance: 18
+        distance
     };
 }
