@@ -21,6 +21,9 @@
     import { performanceStore } from '$lib/logic/performanceStore.svelte';
     import PosterImage from './PosterImage.svelte';
     
+    // ⚠️ DEBUG: Temporär alle Texte deaktivieren um Performance zu testen
+    const DEBUG_DISABLE_TEXT = false;
+    
     // Performance: Im Low-Mode Transparenz deaktivieren (GPU-lastig)
     const enableTransparency = $derived(performanceStore.qualityLevel !== 'low');
 
@@ -403,6 +406,7 @@
                         </T.Mesh>
                         
                         <!-- Projekt-Titel (ganz oben, knapp unter Rahmen) -->
+                        {#if !DEBUG_DISABLE_TEXT}
                         <Text
                             text={project.title}
                             fontSize={titleFontSize}
@@ -414,6 +418,7 @@
                             maxWidth={textWidth * 0.90}
                             textAlign="center"
                         />
+                        {/if}
 
                         <!-- Trennlinie unter dem Titel (fester Abstand) -->
                         <T.Mesh position={[0, contentHeight * 0.28, 0.24]}>
@@ -422,7 +427,7 @@
                         </T.Mesh>
 
                         <!-- Slogan (falls vorhanden) - direkt unter Trennlinie -->
-                        {#if project.display?.slogan}
+                        {#if project.display?.slogan && !DEBUG_DISABLE_TEXT}
                             <Text
                                 text={project.display.slogan}
                                 fontSize={sloganFontSize}
@@ -437,7 +442,7 @@
                         {/if}
 
                         <!-- Beschreibung (shortTeaser) - direkt unter Slogan oder Trennlinie -->
-                        {#if project.shortTeaser}
+                        {#if project.shortTeaser && !DEBUG_DISABLE_TEXT}
                             {@const descY = project.display?.slogan ? contentHeight * 0.08 : contentHeight * 0.18}
                             <Text
                                 text={project.shortTeaser}

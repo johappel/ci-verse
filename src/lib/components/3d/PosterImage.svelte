@@ -78,6 +78,9 @@
         }
     }
 
+    // ⚠️ DEBUG: Temporär alle PosterImages deaktivieren um Performance zu testen
+    const DEBUG_DISABLE_IMAGES = false;
+
     // Textur laden mit Performance-Optimierung
     const texture = useTexture(processedUrl, {
         transform: (tex) => {
@@ -92,19 +95,27 @@
     });
 </script>
 
-{#await texture then map}
-    <T.Mesh {position}>
-        <T.PlaneGeometry args={[width, height]} />
-        <T.MeshBasicMaterial 
-            {map} 
-            {transparent}
-            {opacity}
-        />
-    </T.Mesh>
-{:catch}
-    <!-- Fallback bei Ladefehler: Farbiger Platzhalter -->
+{#if DEBUG_DISABLE_IMAGES}
+    <!-- DEBUG: Platzhalter statt Bild -->
     <T.Mesh {position}>
         <T.PlaneGeometry args={[width, height]} />
         <T.MeshBasicMaterial color="#374151" />
     </T.Mesh>
-{/await}
+{:else}
+    {#await texture then map}
+        <T.Mesh {position}>
+            <T.PlaneGeometry args={[width, height]} />
+            <T.MeshBasicMaterial 
+                {map} 
+                {transparent}
+                {opacity}
+            />
+        </T.Mesh>
+    {:catch}
+        <!-- Fallback bei Ladefehler: Farbiger Platzhalter -->
+        <T.Mesh {position}>
+            <T.PlaneGeometry args={[width, height]} />
+            <T.MeshBasicMaterial color="#374151" />
+        </T.Mesh>
+    {/await}
+{/if}

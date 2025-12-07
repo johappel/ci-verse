@@ -153,7 +153,7 @@
 				}
 				
 				// === FAST MODE: Schnelle Animation ===
-				const speedMultiplier = flightSpeed === 'fast' ? 0.5 : 1.0;
+				const speedMultiplier = flightSpeed === 'fast' ? 0.4 : 1.3;
 				
 				// Aktuelle Kamera-Position
 				const startX = cameraControls.camera.position.x;

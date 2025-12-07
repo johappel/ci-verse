@@ -88,7 +88,7 @@ function getQualityPresets(): Record<QualityLevel, PerformanceSettings> {
             lightBridgeQuality: 'medium', // Einfachere Lichtlinien
             pixelRatio: 1.0,             // Feste Auflösung
             antialias: true,
-            cameraFlightSpeed: 'normal',  // Normale Flugzeit
+            cameraFlightSpeed: 'fast',    // Schnellere Flugzeit
             cameraSmoothTime: 0.9         // Mittlere Kamera-Glättung
         },
         low: {

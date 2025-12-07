@@ -22,6 +22,15 @@
     } from '$lib/data/mockProjects';
     import type { Object3D, Intersection } from 'three';
 
+    // ============================================
+    // DEBUG FLAGS - Zum Testen welche Komponente Lags verursacht
+    // Setze auf true um Komponente zu deaktivieren
+    // ============================================
+    const DEBUG_DISABLE_BOOTH = false;       // ExhibitBooth deaktivieren
+    const DEBUG_DISABLE_INFO_HEXAGON = false; // InfoHexagon deaktivieren
+    const DEBUG_DISABLE_WALL = false;        // MesseWall deaktivieren
+    const DEBUG_DISABLE_SIGN = false;       // Oktaeder + Namensschild deaktivieren
+
     let { platform, projects = [] }: { platform: PlatformType; projects?: ProjectData[] } = $props();
 
     // ============================================
@@ -202,6 +211,7 @@
 
     <!-- Rotierender Oktaeder über dem Schild - Ankerpunkt für Lichtlinien -->
     <!-- Klick auf Oktaeder = Zurück zum Marktplatz (S) -->
+    {#if !DEBUG_DISABLE_SIGN}
     {@const usePBR = performanceStore.settings.usePBRMaterials}
     {@const sphereSegments = performanceStore.qualityLevel === 'low' ? 8 : 16}
     {@const showPointLight = performanceStore.qualityLevel !== 'low'}
@@ -293,42 +303,62 @@
     <!-- 3D Namensschild - unter dem Oktaeder -->
     <Billboard position={[0, 12, 0]}>
         {@const displayName = platformContent?.short ?? platform.id}
-        <!-- Halbtransparente Glasscheibe mit mehr Tiefe -->
-        <T.Mesh>
-            <T.BoxGeometry args={[displayName.length * 0.5 + 1.5, 1.8, 0.3]} />
-            <T.MeshStandardMaterial 
-                color={isCurrentPlatform ? '#ffffff' : '#1e293b'}
-                transparent
-                opacity={isCurrentPlatform ? 0.95 : 0.85}
-                metalness={0.1}
-                roughness={0.2}
+        {@const signUsePBR = performanceStore.settings.usePBRMaterials}
+        {@const signWidth = displayName.length * 0.5 + 1.5}
+        
+        <!-- Äußerer Rahmen (Akzentfarbe) -->
+        <T.Mesh position.z={-0.1}>
+            <T.BoxGeometry args={[signWidth + 0.4, 2.2, 0.08]} />
+            <T.MeshBasicMaterial 
+                color={platformGlowColor}
             />
         </T.Mesh>
         
-        <!-- Rahmen mit Tiefe -->
+        <!-- Innerer Rahmen (dunkler Rand) -->
         <T.Mesh position.z={-0.05}>
-            <T.BoxGeometry args={[displayName.length * 0.5 + 1.7, 2, 0.1]} />
-            <T.MeshStandardMaterial 
+            <T.BoxGeometry args={[signWidth + 0.15, 1.95, 0.08]} />
+            <T.MeshBasicMaterial 
+                color="#0f172a"
+            />
+        </T.Mesh>
+        
+        <!-- Hauptfläche -->
+        <T.Mesh>
+            <T.BoxGeometry args={[signWidth, 1.7, 0.1]} />
+            <T.MeshBasicMaterial 
+                color={isCurrentPlatform ? '#1e293b' : '#0f172a'}
+            />
+        </T.Mesh>
+        
+        <!-- Obere Akzentlinie -->
+        <T.Mesh position={[0, 0.75, 0.06]}>
+            <T.BoxGeometry args={[signWidth - 0.2, 0.06, 0.02]} />
+            <T.MeshBasicMaterial 
                 color={platformGlowColor}
-                emissive={platformGlowColor}
-                emissiveIntensity={0.3}
-                transparent
-                opacity={0.7}
+            />
+        </T.Mesh>
+        
+        <!-- Untere Akzentlinie -->
+        <T.Mesh position={[0, -0.75, 0.06]}>
+            <T.BoxGeometry args={[signWidth - 0.2, 0.06, 0.02]} />
+            <T.MeshBasicMaterial 
+                color={platformGlowColor}
             />
         </T.Mesh>
 
-        <!-- 3D Text (kleinere Schrift) -->
+        <!-- 3D Text -->
         <Text
             text={displayName}
-            color={isCurrentPlatform ? '#1e293b' : '#ffffff'}
+            color={isCurrentPlatform ? '#f8fafc' : '#e2e8f0'}
             fontSize={0.7}
             anchorX="center"
             anchorY="middle"
-            position.z={0.2}
-            outlineWidth={isCurrentPlatform ? 0 : 0.02}
+            position.z={0.15}
+            outlineWidth={0.02}
             outlineColor="#000000"
         />
     </Billboard>
+    {/if}
 
     <!-- Wegweiser unter dem Plattformschild (nur wenn relatedProjects vorhanden) -->
     {#if relatedProjects.length > 0 && platform.id !== 'S'}
@@ -349,7 +379,7 @@
     
     {#if platformContent && platform.id !== 'S' && shouldRenderContent}
         <!-- Info-Hexagon im Zentrum -->
-        {#if platformContent.aspects.length > 0}
+        {#if platformContent.aspects.length > 0 && !DEBUG_DISABLE_INFO_HEXAGON}
             <InfoHexagon
                 platformName={platformContent.title}
                 platformDescription={platformContent.description}
@@ -363,7 +393,7 @@
         {/if}
 
         <!-- Messe-Wand am hinteren Rand (dynamische Anzahl Hexagon-Kanten) -->
-        {#if wallPosters.length > 0}
+        {#if wallPosters.length > 0 && !DEBUG_DISABLE_WALL}
             {@const postersPerWall = 2} <!-- Max. 2 Poster pro Wand -->
             {@const neededWalls = Math.ceil(wallPosters.length / postersPerWall)}
             {@const wallCount = Math.min(neededWalls, 6)} <!-- Max. 6 Wände (komplettes Hexagon) -->
@@ -380,6 +410,7 @@
         {/if}
 
         <!-- Freistehende Exhibit-Booths: Innerer Kreis (max 7) + Dreiecks-Ecken (je 3) -->
+        {#if !DEBUG_DISABLE_BOOTH}
         {#each boothProjects as project, i}
             {@const boothCount = boothProjects.length}
             {@const boothSize = boothCount > 6 ? 'small' : (boothCount > 3 ? 'medium' : 'medium')}
@@ -445,6 +476,7 @@
                 platformId={platform.id}
             />
         {/each}
+        {/if}
     {:else if shouldRenderContent}
         <!-- Fallback: Alte ExhibitStand-Komponente für Projekte ohne PlatformContent -->
         {#each projects as project, i}
