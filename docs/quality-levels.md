@@ -1,0 +1,298 @@
+# Quality Levels - Detaillierte Übersicht
+
+Dieses Dokument beschreibt die drei Qualitätsstufen des CI-Verse Performance-Systems und ihre Auswirkungen auf die 3D-Darstellung.
+
+---
+
+## Übersicht
+
+| Eigenschaft | 🔥 High | ⚡ Medium | 🌿 Low |
+|-------------|---------|----------|--------|
+| **Zielgruppe** | Dedizierte GPUs | Integrierte GPUs | Schwache Hardware |
+| **Icon** | 🔥 | ⚡ | 🌿 |
+| **Label** | Beste Grafik | Ausgewogen | Performance |
+| **Beschreibung** | Volle Effekte, Schatten & Beleuchtung | Gute Grafik, reduzierte Effekte | Einfache Grafik, schnellste Ladezeit |
+
+---
+
+## Materialien
+
+| Einstellung | 🔥 High | ⚡ Medium | 🌿 Low |
+|-------------|---------|----------|--------|
+| `usePBRMaterials` | ✅ `true` | ✅ `true` | ❌ `false` |
+| `useEmissive` | ✅ `true` | ✅ `true` | ❌ `false` |
+
+### Erklärung
+
+- **`usePBRMaterials`**: Verwendet `MeshStandardMaterial` (physikalisch-basiertes Rendering) statt `MeshBasicMaterial`
+  - High/Medium: Realistische Lichtreflexionen, Metallic- und Roughness-Eigenschaften
+  - Low: Einfache flache Farben ohne Lichtinteraktion
+
+- **`useEmissive`**: Aktiviert leuchtende/selbstleuchtende Materialien
+  - High/Medium: Glüheffekte auf Plattformen und Objekten
+  - Low: Keine Emissive-Eigenschaften → weniger Shader-Komplexität
+
+---
+
+## Schatten
+
+| Einstellung | 🔥 High | ⚡ Medium | 🌿 Low |
+|-------------|---------|----------|--------|
+| `enableShadows` | ✅ `true` | ❌ `false` | ❌ `false` |
+
+### Erklärung
+
+- **`enableShadows`**: Aktiviert `castShadow` und `receiveShadow` auf Meshes
+  - High: Vollständige Echtzeit-Schatten (teuerste GPU-Operation)
+  - Medium/Low: Keine Schatten → deutliche Performance-Verbesserung
+
+---
+
+## Beleuchtung
+
+| Einstellung | 🔥 High | ⚡ Medium | 🌿 Low |
+|-------------|---------|----------|--------|
+| `maxSpotlights` | `6` | `3` | `0` |
+| `useHemisphereLight` | ✅ `true` | ✅ `true` | ❌ `false` |
+
+### Erklärung
+
+- **`maxSpotlights`**: Maximale Anzahl dynamischer Spotlights pro Szene
+  - High: 6 Spotlights für volle Akzentbeleuchtung
+  - Medium: 3 Spotlights (reduziert)
+  - Low: Keine Spotlights → nur Ambient + Directional Light
+
+- **`useHemisphereLight`**: Atmosphärisches Himmelslicht für weiche Übergänge
+  - High/Medium: Aktiviert für natürliche Lichtstimmung
+  - Low: Deaktiviert → einfacheres Beleuchtungsmodell
+
+---
+
+## Geometrie
+
+| Einstellung | 🔥 High | ⚡ Medium | 🌿 Low |
+|-------------|---------|----------|--------|
+| `geometryDetail` | `'high'` | `'medium'` | `'low'` |
+| **Segment-Multiplikator** | `1.0` (100%) | `0.6` (60%) | `0.3` (30%) |
+
+### Erklärung
+
+- **`geometryDetail`**: Bestimmt die Polygon-Anzahl aller Geometrien
+  - Beispiel: Ein Zylinder mit 32 Basis-Segmenten:
+    - High: 32 Segmente
+    - Medium: ~19 Segmente
+    - Low: ~10 Segmente
+
+### Spezifische Geometrie-Anpassungen
+
+| Objekt | High | Medium | Low |
+|--------|------|--------|-----|
+| Kugeln (z.B. Oktaeder-Enden) | 16 Segmente | 16 Segmente | 8 Segmente |
+| Point Lights pro Plattform | ✅ Aktiviert | ✅ Aktiviert | ❌ Deaktiviert |
+
+---
+
+## Effekte
+
+| Einstellung | 🔥 High | ⚡ Medium | 🌿 Low |
+|-------------|---------|----------|--------|
+| `enableFog` | ✅ `true` | ✅ `true` | ❌ `false` |
+| `enableParticles` | ✅ `true` | ❌ `false` | ❌ `false` |
+| `enableAnimations` | ✅ `true` | ✅ `true` | ❌ `false` |
+| `enableGlowRings` | ✅ `true` | ✅ `true` | ❌ `false` |
+| `enableEnergyEffects` | ✅ `true` | ✅ `true` | ❌ `false` |
+| `lightBridgeQuality` | `'high'` | `'medium'` | `'low'` |
+
+### Erklärung
+
+- **`enableFog`**: Volumetrischer Nebel für Tiefenwirkung
+  - High/Medium: Atmosphärischer Nebel unter den Plattformen
+  - Low: Kein Nebel → weniger Fragment-Shader-Berechnungen
+
+- **`enableParticles`**: Partikel-Effekte (z.B. beim Transport)
+  - High: Volle Partikel-Effekte
+  - Medium/Low: Keine Partikel → GPU-Entlastung
+
+- **`enableAnimations`**: Objekt- und Kamera-Animationen
+  - High/Medium: Sanfte Übergänge und Bewegungen
+  - Low: **Keine Animationen** → sofortige Zustandsänderungen
+
+- **`enableGlowRings`**: Leuchtende Ringe um Plattformen
+  - High/Medium: Sichtbare Glow-Ringe
+  - Low: Keine Glow-Ringe (Shader-basiert!)
+
+- **`enableEnergyEffects`**: EnergyFloor + EnergyBeam auf dem Marktplatz
+  - High/Medium: Animierte Energie-Ströme zum Oktaeder
+  - Low: **Deaktiviert** (komplexe Shader!)
+
+### LightBridge-Qualität (Lichtlinien)
+
+| Ebene | High | Medium | Low |
+|-------|------|--------|-----|
+| **Äußerer diffuser Glow** | ✅ Sichtbar | ❌ Nicht sichtbar | ❌ Nicht sichtbar |
+| **Mittlerer Glow** | ✅ Sichtbar | ✅ Sichtbar | ❌ Nicht sichtbar |
+| **Kern-Linie** | ✅ Sichtbar | ✅ Sichtbar | ✅ Sichtbar |
+
+- High: 3-Layer-Glow (Kern + Glow + äußerer Glow)
+- Medium: 2-Layer-Glow (Kern + Glow)
+- Low: Nur Kern-Linie (minimale Darstellung)
+
+---
+
+## Rendering
+
+| Einstellung | 🔥 High | ⚡ Medium | 🌿 Low |
+|-------------|---------|----------|--------|
+| `pixelRatio` | `devicePixelRatio` (max 2.0) | `1.0` | `0.5` |
+| `antialias` | ✅ `true` | ✅ `true` | ❌ `false` |
+
+### Erklärung
+
+- **`pixelRatio`**: Canvas-Auflösung relativ zum Display
+  - High: Native Auflösung (z.B. 2.0 auf Retina-Displays)
+  - Medium: Feste 1:1 Auflösung
+  - Low: **Halbe Auflösung** → 75% weniger Pixel zu berechnen!
+
+- **`antialias`**: Kantenglättung (Anti-Aliasing)
+  - High/Medium: Geglättete Kanten
+  - Low: Keine Glättung → schnelleres Rendering
+
+---
+
+## Kamera
+
+| Einstellung | 🔥 High | ⚡ Medium | 🌿 Low |
+|-------------|---------|----------|--------|
+| `cameraFlightSpeed` | `'normal'` | `'normal'` | `'instant'` |
+| `cameraSmoothTime` | `1.5` | `0.9` | `0.4` |
+
+### Erklärung
+
+- **`cameraFlightSpeed`**: Geschwindigkeit bei Plattform-Wechsel
+  - High/Medium: Normale Fluganimation (2-3 Sekunden)
+  - Low: **Sofortiger Sprung** → keine Zwischen-Frames
+
+- **`cameraSmoothTime`**: Glättung der Kamera-Bewegung
+  - High: 1.5 → Sehr weiche, cinematische Bewegung
+  - Medium: 0.9 → Mittlere Glättung
+  - Low: 0.4 → Direkte, reaktive Kamera (weniger Interpolation)
+
+---
+
+## Transparenz-Handling
+
+| Komponente | High/Medium | Low |
+|------------|-------------|-----|
+| `MesseWall` | Transparente Materialien | Opake Materialien |
+| `ReceptionWall` | Transparente Materialien | Opake Materialien |
+| `InteractionPillar` | Transparente Materialien | Opake Materialien |
+
+Bei Low-Qualität wird auf `opacity < 1.0` verzichtet, um Alpha-Blending-Kosten zu sparen.
+
+---
+
+## Automatische Hardware-Erkennung
+
+Der `performanceStore` erkennt automatisch die Hardware-Kapazitäten:
+
+### GPU-Erkennung
+
+| GPU-Typ | Erkennungsmerkmale | Standard-Qualität |
+|---------|-------------------|-------------------|
+| **Dediziert** | NVIDIA, AMD (nicht integriert) | High |
+| **Integriert** | Intel, Mesa, Mali, Adreno, SwiftShader | Medium |
+
+### Weitere Faktoren
+
+| Faktor | Bedingung | Aktion |
+|--------|-----------|--------|
+| RAM < 4GB | `navigator.deviceMemory < 4` | Low-Qualität |
+| Touch-Device | `'ontouchstart' in window` | Medium-Qualität |
+
+### Auto-Downgrade bei schlechter FPS
+
+- Überwacht die letzten 10 FPS-Messungen
+- Bei Durchschnitt < 20 FPS: Automatisches Downgrade
+  - high → medium
+  - medium → low
+
+---
+
+## Komponenten-Nutzung
+
+### So prüfst du die Qualität in Komponenten:
+
+```svelte
+<script lang="ts">
+    import { performanceStore } from '$lib/logic/performanceStore.svelte';
+    
+    // Qualitätsstufe direkt
+    let isLow = $derived(performanceStore.qualityLevel === 'low');
+    
+    // Einzelne Settings
+    let enableAnimations = $derived(performanceStore.settings.enableAnimations);
+    let usePBRMaterials = $derived(performanceStore.settings.usePBRMaterials);
+    let maxSpotlights = $derived(performanceStore.settings.maxSpotlights);
+</script>
+
+<!-- Bedingte Darstellung -->
+{#if performanceStore.qualityLevel !== 'low'}
+    <ExpensiveEffect />
+{/if}
+
+<!-- Material-Auswahl -->
+{#if usePBRMaterials}
+    <T.MeshStandardMaterial color="#ffffff" />
+{:else}
+    <T.MeshBasicMaterial color="#ffffff" />
+{/if}
+```
+
+### Segment-Anzahl anpassen:
+
+```typescript
+// Basis-Segmente mit Qualitäts-Multiplikator
+const segments = performanceStore.getSegments(32); 
+// High: 32, Medium: 19, Low: 10
+```
+
+---
+
+## LocalStorage-Persistenz
+
+Die gewählte Qualitätsstufe wird im Browser gespeichert:
+
+- **Key**: `ci-verse-quality`
+- **Werte**: `'high'` | `'medium'` | `'low'`
+
+Bei erneutem Besuch wird die gespeicherte Einstellung geladen, sofern vorhanden.
+
+---
+
+## Zusammenfassung: Was wird bei jedem Level deaktiviert?
+
+### Medium (vs High)
+
+- ❌ Schatten
+- ❌ Partikel
+- ❌ Äußerer LightBridge-Glow
+- ⬇️ Reduzierte Spotlights (6 → 3)
+- ⬇️ Feste pixelRatio (1.0)
+- ⬇️ Schnellere Kamera-Glättung
+
+### Low (vs Medium)
+
+- ❌ PBR-Materialien → BasicMaterial
+- ❌ Emissive-Effekte
+- ❌ Hemisphere Light
+- ❌ Alle Spotlights
+- ❌ Nebel
+- ❌ Animationen (sofortiger Kamera-Sprung!)
+- ❌ Glow-Ringe
+- ❌ Energie-Effekte (EnergyFloor/Beam)
+- ❌ LightBridge-Glow (nur Kern)
+- ❌ Antialias
+- ❌ Transparenz in Wänden/Pillars
+- ⬇️ Halbe Auflösung (pixelRatio: 0.5)
+- ⬇️ Minimale Geometrie (30%)
+- ⬇️ Direkte Kamera-Reaktion
