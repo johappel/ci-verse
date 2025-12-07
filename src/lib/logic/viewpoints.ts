@@ -7,6 +7,7 @@
 
 import type { ProjectData } from '$lib/types/project';
 import { platforms, getCameraY } from './platforms';
+import { performanceStore } from './performanceStore.svelte';
 import { 
     getBoothProjectsForPlatform, 
     getWallPostersForPlatform, 
@@ -410,8 +411,8 @@ function getLeitlinieViewPoint(
 /**
  * ViewPoint für InfoHexagon (Plattform-Zentrum)
  * 
- * Verwendet die Landing-Konfiguration der Plattform, damit der
- * Landepunkt (beim Transport) und der Center-ViewPoint (C-Taste) identisch sind.
+ * Verwendet die Landing-Konfiguration aus config.json (via performanceStore),
+ * damit der Landepunkt (beim Transport) und der Center-ViewPoint (C-Taste) identisch sind.
  * 
  * Für nicht-Marktplatz-Plattformen zeigt die Kamera zur Titel-Seite des InfoHexagons.
  */
@@ -423,10 +424,13 @@ export function getCenterViewPoint(platformId: string): ViewPoint | null {
     const py = platform.y;
     const pz = platform.z;
 
-    // Landing-Konfiguration aus Plattform-Definition verwenden
-    const landing = platform.landing || {
-        offset: [0, 10, 18],           // Default: vor der Plattform
-        lookAtOffset: [1, 3, 0]        // Default: zur Mitte schauen
+    // Landing-Konfiguration aus config.json (via performanceStore) holen
+    // Fällt automatisch auf Default-Werte zurück wenn config.json nicht geladen
+    const landingConfig = performanceStore.getLandingPoint(platformId);
+    
+    const landing = {
+        offset: landingConfig.offset,
+        lookAtOffset: landingConfig.lookAtOffset
     };
 
     // Kamera-Position: Plattform-Position + Landing-Offset

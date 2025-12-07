@@ -45,6 +45,18 @@ export interface PerformanceSettings {
     cameraSmoothTime: number;        // Standard-Glättung für Kamera (0.3 = direkt, 1.5 = weich)
 }
 
+// Landepunkt-Konfiguration
+export interface LandingPointConfig {
+    offset: [number, number, number];
+    lookAtOffset: [number, number, number];
+}
+
+export interface LandingPointsConfig {
+    B_platforms: LandingPointConfig;
+    Q_platforms: LandingPointConfig;
+    S_platform: LandingPointConfig;
+}
+
 // Config-Interface für JSON-Datei
 interface ConfigJSON {
     qualityPresets: Record<QualityLevel, {
@@ -66,6 +78,7 @@ interface ConfigJSON {
     }>;
     geometrySegments: Record<'high' | 'medium' | 'low', number>;
     autoDowngrade: { enabled: boolean; fpsThreshold: number; measurementCount: number };
+    landingPoints?: LandingPointsConfig;
 }
 
 // Helper: Sichere devicePixelRatio
@@ -165,10 +178,20 @@ export let GEOMETRY_SEGMENTS: Record<'high' | 'medium' | 'low', number> = {
     low: 0.3
 };
 
+// Default-Landepunkte (werden aus config.json überschrieben)
+const DEFAULT_LANDING_POINTS: LandingPointsConfig = {
+    B_platforms: { offset: [-15, 8, -9], lookAtOffset: [0, 3, 0] },
+    Q_platforms: { offset: [-15, 10, -9], lookAtOffset: [0, 3, 0] },
+    S_platform: { offset: [12, 10, 18], lookAtOffset: [-20, 3, -12] }
+};
+
 class PerformanceStore {
     // Reaktiver State
     qualityLevel = $state<QualityLevel>('medium');
     settings = $state<PerformanceSettings>(getDefaultPresets().medium);
+    
+    // Landepunkt-Konfiguration (aus config.json)
+    landingPoints = $state<LandingPointsConfig>(DEFAULT_LANDING_POINTS);
     
     // Geladene Presets (aus config.json oder Fallback)
     private presets: Record<QualityLevel, PerformanceSettings> = getDefaultPresets();
@@ -279,6 +302,12 @@ class PerformanceStore {
             // Auto-Downgrade Einstellungen
             if (config.autoDowngrade) {
                 this.autoDowngradeConfig = { ...config.autoDowngrade };
+            }
+            
+            // Landepunkte übernehmen
+            if (config.landingPoints) {
+                this.landingPoints = { ...config.landingPoints };
+                console.log('[Performance] Landepunkte aus config.json geladen');
             }
             
             // Aktuelles Level neu anwenden mit geladenen Presets
@@ -475,6 +504,21 @@ class PerformanceStore {
     getSegments(baseSegments: number): number {
         const multiplier = GEOMETRY_SEGMENTS[this.settings.geometryDetail];
         return Math.max(3, Math.round(baseSegments * multiplier));
+    }
+    
+    /**
+     * Gibt die Landepunkt-Konfiguration für eine Plattform zurück
+     */
+    getLandingPoint(platformId: string): LandingPointConfig {
+        if (platformId === 'S') {
+            return this.landingPoints.S_platform;
+        } else if (platformId.startsWith('B')) {
+            return this.landingPoints.B_platforms;
+        } else if (platformId.startsWith('Q')) {
+            return this.landingPoints.Q_platforms;
+        }
+        // Fallback
+        return this.landingPoints.B_platforms;
     }
 }
 

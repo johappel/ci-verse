@@ -74,6 +74,39 @@ Standardmäßig sind die Energy-Effekte im Low-Mode deaktiviert. Um sie zu aktiv
 }
 ```
 
+### Landepunkte konfigurieren
+
+Die Landepunkte bestimmen, wo die Kamera beim Betreten einer Plattform positioniert wird:
+
+```json
+"landingPoints": {
+  "B_platforms": {
+    "_comment": "Bildungsplattformen (B1, B2, B3)",
+    "offset": [-15, 8, -9],      // [x, y, z] Offset von Plattform-Mitte
+    "lookAtOffset": [0, 3, 0]    // Wohin die Kamera schaut
+  },
+  "Q_platforms": {
+    "_comment": "Querschnittsplattformen (Q1, Q2, Q3)",
+    "offset": [-15, 10, -9],     // Etwas höher wegen höherer Plattformen
+    "lookAtOffset": [0, 3, 0]
+  },
+  "S_platform": {
+    "_comment": "Marktplatz - schaut zum NexusTerminal",
+    "offset": [12, 10, 18],
+    "lookAtOffset": [-20, 3, -12]
+  }
+}
+```
+
+**Parameter:**
+- `offset`: Position der Kamera relativ zur Plattform-Mitte `[x, y, z]`
+- `lookAtOffset`: Blickziel relativ zur Plattform-Mitte `[x, y, z]`
+
+**Hinweise:**
+- Größerer Y-Wert im Offset = Kamera ist höher
+- Negativer X-Wert = Kamera ist links vom Zentrum
+- Das InfoHexagon steht immer im Zentrum `[0, 0, 0]` der Plattform
+
 ### Fallback-Verhalten
 
 Falls die `config.json` nicht geladen werden kann (z.B. Netzwerkfehler), verwendet der `performanceStore` eingebaute Fallback-Werte, die den Standard-Presets entsprechen.

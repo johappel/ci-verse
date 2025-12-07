@@ -115,5 +115,27 @@
     "enabled": true,
     "fpsThreshold": 20,
     "measurementCount": 5
+  },
+  
+  "landingPoints": {
+    "_comment": "Landepunkte beim Betreten einer Plattform (Kamera-Position relativ zum InfoHexagon)",
+    
+    "B_platforms": {
+      "_comment": "Bildungsplattformen (B1, B2, B3)",
+      "offset": [-15, 8, -9],
+      "lookAtOffset": [0, 3, 0]
+    },
+    
+    "Q_platforms": {
+      "_comment": "Querschnittsplattformen (Q1, Q2, Q3) - etwas höher",
+      "offset": [-15, 10, -9],
+      "lookAtOffset": [0, 3, 0]
+    },
+    
+    "S_platform": {
+      "_comment": "Marktplatz - schaut zum NexusTerminal",
+      "offset": [12, 10, 18],
+      "lookAtOffset": [-20, 3, -12]
+    }
   }
 }
