@@ -44,6 +44,19 @@
     // Farben aus Content-Daten (statisch)
     const platformColor = platformContent?.color ?? platform.color;
     const platformGlowColor = platformContent?.glowColor ?? platform.glowColor;
+    
+    // Abgedunkelte Version der Plattform-Farbe für den Boden
+    // Multipliziert RGB-Werte mit 0.25 für deutlich dunklere Darstellung
+    function darkenColor(hex: string, factor: number = 0.25): string {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        const dr = Math.floor(r * factor);
+        const dg = Math.floor(g * factor);
+        const db = Math.floor(b * factor);
+        return `#${dr.toString(16).padStart(2, '0')}${dg.toString(16).padStart(2, '0')}${db.toString(16).padStart(2, '0')}`;
+    }
+    const darkPlatformColor = darkenColor(platformColor);
 
     // Referenzen für Spotlight-Targets (je Spot ein eigenes Target)
     let spotTargets: (Object3D | undefined)[] = $state(Array(6).fill(undefined));
@@ -157,7 +170,7 @@
     position={[platform.x, platform.y, platform.z]}
     userData={{ isPlatform: true, platformId: platform.id }}
 >
-    <!-- Hexagonale Plattform-Basis (6-seitiger Zylinder) - ABGEDUNKELT -->
+    <!-- Hexagonale Plattform-Basis (6-seitiger Zylinder) -->
     <T.Mesh
         onpointerdown={handlePointerDown}
         onpointerup={handlePointerUp}
@@ -168,12 +181,9 @@
     >
         <!-- Plattform ist jetzt 3 Einheiten dick (begehbar) -->
         <T.CylinderGeometry args={[platform.size, platform.size, 3, 6]} />
-        <T.MeshStandardMaterial
-            color={platformColor}
-            metalness={0.4}
-            roughness={0.8}
-            emissive={platformColor}
-            emissiveIntensity={0.05}
+        <!-- Abgedunkelte individuelle Plattform-Farbe -->
+        <T.MeshBasicMaterial
+            color={darkPlatformColor}
         />
     </T.Mesh>
 
@@ -459,12 +469,12 @@
         />
     {/if}
 
-    <!-- Ein zentrales Ambient-Licht für die ganze Plattform -->
+    <!-- Ein zentrales Ambient-Licht für die ganze Plattform - reduziert für bessere Glow-Wirkung -->
     <T.PointLight
         position={[0, 10, 0]}
         color={platformGlowColor}
         intensity={15}
         distance={platform.size * 2}
-        decay={1.5}
+        decay={1.8}
     />
 </T.Group>

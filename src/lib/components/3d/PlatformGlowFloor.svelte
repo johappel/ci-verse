@@ -1,8 +1,9 @@
 <script lang="ts">
     /**
-     * PlatformGlowFloor - 6 diffuse Glow-Spots auf dem Plattform-Boden
+     * PlatformGlowFloor - 6 diffuse Glow-Spots + Lampen an Traverse
      * 
      * Shader mit UV-Koordinaten für weiche Glows
+     * Plus: Kegel-Lampen an hexagonaler Traverse
      */
     import { T } from '@threlte/core';
     import { ShaderMaterial, Color, AdditiveBlending, DoubleSide } from 'three';
@@ -19,11 +20,26 @@
         spotCount = 6
     }: Props = $props();
 
-    // Shader Material für weiche Glow-Spots
+    // Lampen-Positionen (Hexagon-Muster)
+    const spotRadius = 0.55; // Etwas kleiner für kürzere Traverse
+    const lampHeight = 13; // Höhe über Plattform
+    const lamps = Array.from({ length: 6 }, (_, i) => {
+        const angle = (i / 6) * Math.PI * 2;
+        return {
+            x: Math.cos(angle) * platformSize * spotRadius,
+            z: Math.sin(angle) * platformSize * spotRadius,
+            angle: angle
+        };
+    });
+
+    // Warmweiße Lichtfarbe für alle Lampen und Boden-Glows
+    const lightColor = '#fff8e0';
+
+    // Shader Material für weiche Glow-Spots - WARMWEISS
     const glowMaterial = new ShaderMaterial({
         uniforms: {
-            uColor: { value: new Color(glowColor) },
-            uIntensity: { value: 0.6 }
+            uColor: { value: new Color(lightColor) },
+            uIntensity: { value: 0.65 }
         },
         vertexShader: `
             varying vec2 vUv;
@@ -80,20 +96,90 @@
         transparent: true,
         depthWrite: false,
         blending: AdditiveBlending,
-        side: DoubleSide
+        side: DoubleSide,
+        polygonOffset: true,
+        polygonOffsetFactor: -1,
+        polygonOffsetUnits: -1
     });
 
-    // Color updaten
-    $effect(() => {
-        glowMaterial.uniforms.uColor.value = new Color(glowColor);
-    });
+    // Farbe ist fix warmweiß - kein Update nötig
 </script>
 
-<!-- Debug: Teste ob überhaupt was gerendert wird -->
+<!-- Boden-Glows - höher über der Plattform für bessere Sichtbarkeit -->
 <T.Mesh 
     rotation.x={-Math.PI / 2} 
-    position.y={1.6}
+    position.y={1.8}
     material={glowMaterial}
+    renderOrder={100}
 >
     <T.PlaneGeometry args={[platformSize * 2, platformSize * 2]} />
 </T.Mesh>
+
+<!-- Hexagonale Traverse (Ring) - fast schwarz -->
+<T.Mesh position.y={lampHeight} rotation.x={Math.PI / 2}>
+    <T.TorusGeometry args={[platformSize * spotRadius, 0.12, 6, 6]} />
+    <T.MeshBasicMaterial color="#0f0f0f" />
+</T.Mesh>
+
+<!-- 6 Lampen an der Traverse -->
+{#each lamps as lamp}
+    <!-- Aufhängung (vertikale Stange) -->
+    <T.Mesh position={[lamp.x, lampHeight - 0.4, lamp.z]}>
+        <T.CylinderGeometry args={[0.06, 0.06, 0.8, 8]} />
+        <T.MeshBasicMaterial color="#0f0f0f" />
+    </T.Mesh>
+    
+    <!-- Lampen-Kegel (hängt unter der Traverse) -->
+    <T.Mesh position={[lamp.x, lampHeight - 1.0, lamp.z]}>
+        <T.ConeGeometry args={[0.5, 0.7, 8]} />
+        <T.MeshBasicMaterial color="#111111" />
+    </T.Mesh>
+    
+    <!-- Leuchtende Linse (emissive Scheibe an Unterseite) - WARMWEISS -->
+    <T.Mesh 
+        position.x={lamp.x}
+        position.y={lampHeight - 1.32}
+        position.z={lamp.z}
+        rotation.x={-Math.PI / 2}
+    >
+        <T.CircleGeometry args={[0.35, 16]} />
+        <T.MeshBasicMaterial 
+            color="#fff8e0"
+            side={DoubleSide}
+        />
+    </T.Mesh>
+    
+    <!-- Glow-Ring nach unten (sichtbar von oben) - WARMWEISS -->
+    <T.Mesh 
+        position.x={lamp.x}
+        position.y={lampHeight - 1.40}
+        position.z={lamp.z}
+        rotation.x={-Math.PI / 2}
+    >
+        <T.RingGeometry args={[0.35, 0.8, 16]} />
+        <T.MeshBasicMaterial 
+            color="#fff8e0"
+            transparent={true}
+            opacity={0.3}
+            blending={AdditiveBlending}
+            depthWrite={false}
+        />
+    </T.Mesh>
+    
+    <!-- Glow-Ring nach oben (sichtbar von unten) - WARMWEISS -->
+    <T.Mesh 
+        position.x={lamp.x}
+        position.y={lampHeight - 1.41}
+        position.z={lamp.z}
+        rotation.x={Math.PI / 2}
+    >
+        <T.RingGeometry args={[0.35, 0.8, 16]} />
+        <T.MeshBasicMaterial 
+            color="#fff8e0"
+            transparent={true}
+            opacity={0.3}
+            blending={AdditiveBlending}
+            depthWrite={false}
+        />
+    </T.Mesh>
+{/each}
