@@ -100,7 +100,7 @@
                             emissive={project.display?.color ?? '#666'}
                             emissiveIntensity={isHovered ? 0.5 : 0.1}
                             metalness={0.2}
-                            roughness={0.5}
+                            roughness={0.8}
                         />
                     </T.Mesh>
 

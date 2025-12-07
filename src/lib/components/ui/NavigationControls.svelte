@@ -5,7 +5,8 @@
 	import { getBoothProjectsForPlatform, getWallPostersForPlatform, getMarketplaceContent, getPlatformContent } from '$lib/data/mockProjects';
 	import { performanceStore } from '$lib/logic/performanceStore.svelte';
 	import QualityDialog from './QualityDialog.svelte';
-	import {GaugeIcon} from  'lucide-svelte'
+	import HelpDialog from './HelpDialog.svelte';
+	import { GaugeIcon, HelpCircleIcon, HomeIcon, ChevronUpIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, CircleDotIcon, SkipBackIcon, SkipForwardIcon, ChevronsLeftIcon, ChevronsRightIcon } from 'lucide-svelte';
 	import type { ProjectData } from '$lib/types/project';
 	
 	// Kamera-Referenz wird von außen gesetzt
@@ -22,13 +23,15 @@
 	
 	// Plattform-Tour State
 	const platformTourOrder = ['S', 'B1', 'B2', 'B3', 'Q1', 'Q2', 'Q3'] as const;
-	let currentPlatformTourIndex = $state(-1); // -1 = noch nicht gestartet
 	
 	// Aktuelle Plattform-ID - gecacht für Performance (separates Signal!)
 	let currentPlatformId = $derived(worldStore.currentPlatform);
 	
 	// Quality-Dialog State
 	let isQualityDialogOpen = $state(false);
+	
+	// Help-Dialog State
+	let isHelpDialogOpen = $state(false);
 	
 	// Draggable Panel Position
 	let panelX = $state(0);  // Offset von Mitte
@@ -40,7 +43,7 @@
 	
 	// Bewegungs-Geschwindigkeiten
 	const MOVE_SPEED = 2;      // Vorwärts/Rückwärts
-	const ROTATE_SPEED = 0.3; // Drehung in Radians (erhöht von 0.03)
+	const ROTATE_SPEED = 0.3;  // Drehung in Radians
 	
 	// Keyboard-Listener
 	$effect(() => {
@@ -53,7 +56,8 @@
 			
 			const key = e.key.toLowerCase();
 			
-			if (['w', 's', 'a', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'h', 'home', 'c', 'n', 'p'].includes(key)) {
+			// Alle relevanten Tasten
+			if (['w', 's', 'a', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'h', 'home', 'c', 'n', 'p', 'b', 'o', 'x', 'f1'].includes(key)) {
 				e.preventDefault();
 				activeKeys.add(key);
 				activeKeys = activeKeys; // Trigger reactivity
@@ -66,9 +70,21 @@
 				} else if (key === 'n') {
 					// N = Nächstes Poster
 					goToNextPoster();
+				} else if (key === 'b') {
+					// B = Letztes/Vorheriges Poster
+					goToPreviousPoster();
 				} else if (key === 'p') {
 					// P = Nächste Plattform
 					goToNextPlatform();
+				} else if (key === 'o') {
+					// O = Vorherige Plattform
+					goToPreviousPlatform();
+				} else if (key === 'x') {
+					// X = Quality-Einstellungen
+					isQualityDialogOpen = true;
+				} else if (key === 'f1') {
+					// F1 = Hilfe
+					isHelpDialogOpen = true;
 				} else {
 					handleMovement(key);
 				}
@@ -103,36 +119,30 @@
 		};
 	});
 	
-	// Kamera-Bewegung (A = rechts drehen, D = links drehen - intuitiver!)
+	// Kamera-Bewegung
 	function handleMovement(key: string) {
-		// Schnelle Reaktion für Tastatur-Steuerung
 		const currentSmoothTime = cameraControls?.smoothTime > 0.3 ? cameraControls.smoothTime : 1;
 		cameraControls!.smoothTime = 0.1;
 		
 		switch (key) {
 			case 'w':
 			case 'arrowup':
-				// Vorwärts (in Blickrichtung)
 				cameraControls.forward(MOVE_SPEED, true);
 				break;
 			case 's':
 			case 'arrowdown':
-				// Rückwärts
 				cameraControls.forward(-MOVE_SPEED, true);
 				break;
 			case 'a':
 			case 'arrowleft':
-				// A = Kamera dreht nach RECHTS (Blick bewegt sich nach links)
 				cameraControls.rotate(ROTATE_SPEED, 0, true);
 				break;
 			case 'd':
 			case 'arrowright':
-				// D = Kamera dreht nach LINKS (Blick bewegt sich nach rechts)
 				cameraControls.rotate(-ROTATE_SPEED, 0, true);
 				break;
 		}
 		
-		// Verzögert zurücksetzen, damit die Bewegung erst abgeschlossen wird
 		setTimeout(() => {
 			if (cameraControls) {
 				cameraControls.smoothTime = currentSmoothTime;
@@ -159,7 +169,6 @@
 		
 		const viewPoint = getCenterViewPoint(currentPlatformId);
 		if (viewPoint) {
-			// SmoothTime basierend auf Quality-Level
 			cameraControls.smoothTime = performanceStore.settings.cameraSmoothTime;
 			cameraControls.setLookAt(
 				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
@@ -167,56 +176,63 @@
 				true
 			);
 			
-			// Poster-Index zurücksetzen wenn zum Zentrum navigiert wird
+			// Poster-Index zurücksetzen
 			currentPosterIndex = -1;
 		}
 	}
 	
 	// ============================================
-	// PLATTFORM-TOUR (Play-Button)
+	// PLATTFORM-TOUR
 	// ============================================
 	
-	// Aktueller Index in der Plattform-Tour basierend auf aktueller Plattform
+	// Aktueller Index in der Plattform-Tour
 	let currentPlatformIndex = $derived(
 		platformTourOrder.indexOf(currentPlatformId as typeof platformTourOrder[number])
 	);
 	
-	// Nächste Plattform in der Tour
+	// Nächste Plattform
 	let nextPlatformId = $derived.by(() => {
 		const nextIndex = (currentPlatformIndex + 1) % platformTourOrder.length;
 		return platformTourOrder[nextIndex];
 	});
 	
-	let nextPlatformName = $derived(getPlatformContent(nextPlatformId)?.short || nextPlatformId);
+	// Vorherige Plattform
+	let prevPlatformId = $derived.by(() => {
+		const prevIndex = (currentPlatformIndex - 1 + platformTourOrder.length) % platformTourOrder.length;
+		return platformTourOrder[prevIndex];
+	});
 	
-	// Zur nächsten Plattform in der Tour navigieren
+	let nextPlatformName = $derived(getPlatformContent(nextPlatformId)?.short || nextPlatformId);
+	let prevPlatformName = $derived(getPlatformContent(prevPlatformId)?.short || prevPlatformId);
+	
+	// Zur nächsten Plattform navigieren
 	function goToNextPlatform() {
 		if (worldStore.isTransporting || isInputFocused) return;
-		
-		// Poster-Index zurücksetzen
 		currentPosterIndex = -1;
-		
-		// Zur nächsten Plattform transportieren
 		worldStore.startTransport(nextPlatformId);
+	}
+	
+	// Zur vorherigen Plattform navigieren
+	function goToPreviousPlatform() {
+		if (worldStore.isTransporting || isInputFocused) return;
+		currentPosterIndex = -1;
+		worldStore.startTransport(prevPlatformId);
 	}
 	
 	// ============================================
 	// POSTER-NAVIGATION
 	// ============================================
 	
-	// Interface für einheitliche Poster-Liste
 	interface PosterTarget {
 		type: 'booth' | 'wall' | 'reception' | 'leitlinie-left' | 'leitlinie-right';
 		project?: ProjectData;
-		position: number; // Index innerhalb des Typs
-		label?: string; // Für Marktplatz-Tour
-		groupIndex?: number; // Dreieck-Gruppe (0, 1, 2, ...)
-		posInGroup?: number; // Position im Dreieck (0=A, 1=B, 2=C)
-		groupAngle?: number; // Winkel der Gruppe für Sortierung
+		position: number;
+		label?: string;
+		groupIndex?: number;
+		posInGroup?: number;
+		groupAngle?: number;
 	}
 	
-	// Berechnet Gruppen-Info für einen Booth auf der Plattform
-	// Synchron mit Platform.svelte Layout-Logik
 	function getBoothGroupInfo(boothIndex: number, boothCount: number): { groupIndex: number; posInGroup: number; groupAngle: number } {
 		const sectorSize = (2 * Math.PI) / 6;
 		const hexRotation = Math.PI / 6;
@@ -243,25 +259,18 @@
 	}
 	
 	// Alle anfahrbaren Poster/Booths der aktuellen Plattform
-	// Marktplatz (S): ReceptionWall → Leitlinien-Poster
-	// Andere Plattformen: Booths → Wall-Poster (räumlich sortiert)
-	// Tour-Reihenfolge: Dreieck 1 (A→B→C), Dreieck 2 (A→B→C), Dreieck 3 (A→B→C)
 	let allPosters = $derived.by(() => {
-		const platformId = currentPlatformId; // Nutze gecachte Plattform-ID
+		const platformId = currentPlatformId;
 		
-		// Spezielle Tour für Marktplatz
 		if (platformId === 'S') {
 			const marketplace = getMarketplaceContent();
 			const targets: PosterTarget[] = [
-				// 1. ReceptionWall
 				{ type: 'reception', position: 0, label: 'Empfang' },
-				// 2-5. Linke Wand (4 Leitlinien-Poster, startEdge=5, 2 Wände)
 				...marketplace.wallPosters.slice(0, 4).map((_, i) => ({
 					type: 'leitlinie-left' as const,
 					position: i,
 					label: `Leitlinie ${i + 1}`
 				})),
-				// 6-7. Rechte Wand (2 Leitlinien-Poster, startEdge=1, 1 Wand)
 				...marketplace.wallPosters.slice(4, 6).map((_, i) => ({
 					type: 'leitlinie-right' as const,
 					position: i,
@@ -271,12 +280,10 @@
 			return targets;
 		}
 		
-		// Standard-Tour für andere Plattformen
 		const booths = getBoothProjectsForPlatform(platformId);
 		const walls = getWallPostersForPlatform(platformId);
 		const boothCount = booths.length;
 		
-		// Booths mit Gruppen-Info versehen
 		const boothTargets: PosterTarget[] = booths.map((project, i) => {
 			const info = getBoothGroupInfo(i, boothCount);
 			return {
@@ -289,16 +296,12 @@
 			};
 		});
 		
-		// Sortieren: Erst nach Gruppen-Winkel (im Uhrzeigersinn), dann nach Position im Dreieck (A→B→C)
 		boothTargets.sort((a, b) => {
-			// Primär: Nach Gruppen-Winkel (Dreiecke im Uhrzeigersinn)
 			const angleDiff = (a.groupAngle ?? 0) - (b.groupAngle ?? 0);
 			if (Math.abs(angleDiff) > 0.01) return angleDiff;
-			// Sekundär: Nach Position im Dreieck (A=0, B=1, C=2)
 			return (a.posInGroup ?? 0) - (b.posInGroup ?? 0);
 		});
 		
-		// Wall-Poster hinzufügen (bleiben in Array-Reihenfolge, da sie schon räumlich sortiert sind)
 		const wallTargets: PosterTarget[] = walls.map(({ project }, i) => ({
 			type: 'wall' as const,
 			project,
@@ -310,47 +313,51 @@
 	
 	// Poster-Index zurücksetzen wenn Plattform wechselt
 	$effect(() => {
-		// Bei Plattformwechsel resetten
 		const _platform = currentPlatformId;
 		currentPosterIndex = -1;
 	});
 	
-	// Hat die Plattform überhaupt Poster?
 	let hasPosters = $derived(allPosters.length > 0);
+	let posterCountDisplay = $derived(`${currentPosterIndex + 2 > allPosters.length ? 1 : currentPosterIndex + 2}/${allPosters.length}`);
 	
 	// Zum nächsten Poster navigieren
 	function goToNextPoster() {
 		if (isInputFocused || !cameraControls || allPosters.length === 0) return;
 		
-		// Nächster Index (loopt am Ende)
 		currentPosterIndex = (currentPosterIndex + 1) % allPosters.length;
+		navigateToPoster(currentPosterIndex);
+	}
+	
+	// Zum vorherigen Poster navigieren
+	function goToPreviousPoster() {
+		if (isInputFocused || !cameraControls || allPosters.length === 0) return;
 		
-		const target = allPosters[currentPosterIndex];
+		currentPosterIndex = (currentPosterIndex - 1 + allPosters.length) % allPosters.length;
+		navigateToPoster(currentPosterIndex);
+	}
+	
+	// Navigation zu einem Poster (zentrale Funktion)
+	function navigateToPoster(index: number) {
+		const target = allPosters[index];
 		const platformId = currentPlatformId;
 		
 		if (!target) return;
 		
-		// Marktplatz-spezifische Navigation
 		if (target.type === 'reception') {
 			navigateToReceptionWall();
 		} else if (target.type === 'leitlinie-left' || target.type === 'leitlinie-right') {
-			// Konvertiere Position: left 0-3 = absolut 0-3, right 0-1 = absolut 4-5
 			const absoluteIndex = target.type === 'leitlinie-left' ? target.position : target.position + 4;
 			navigateToLeitlinie(absoluteIndex);
 		} else if (target.type === 'booth' && target.project) {
-			// Booth: Nutze Projekt-ID
 			navigateToBooth(target.project.id, platformId);
 		} else if (target.type === 'wall' && target.project) {
-			// Wall-Poster: Nutze Projekt-ID
 			navigateToWallPoster(target.project.id, platformId);
 		}
 	}
 	
-	// Navigation zu Marktplatz-Elementen (ReceptionWall, Leitlinien)
 	function navigateToReceptionWall() {
 		const viewPoint = getMarketplaceViewPoint('reception');
 		if (viewPoint && cameraControls) {
-			// SmoothTime basierend auf Quality-Level (schnellere Bewegung bei niedrigerer Qualität)
 			cameraControls.smoothTime = performanceStore.settings.cameraSmoothTime;
 			cameraControls.setLookAt(
 				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
@@ -363,7 +370,6 @@
 	function navigateToLeitlinie(posterIndex: number) {
 		const viewPoint = getMarketplaceViewPoint('leitlinie', posterIndex);
 		if (viewPoint && cameraControls) {
-			// SmoothTime basierend auf Quality-Level
 			cameraControls.smoothTime = performanceStore.settings.cameraSmoothTime;
 			cameraControls.setLookAt(
 				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
@@ -373,11 +379,9 @@
 		}
 	}
 	
-	// Navigation zu einem Booth (nutzt zentrale API)
 	function navigateToBooth(projectId: string, platformId: string) {
 		const viewPoint = getViewPoint(projectId, 'booth', platformId);
 		if (viewPoint && cameraControls) {
-			// SmoothTime basierend auf Quality-Level
 			cameraControls.smoothTime = performanceStore.settings.cameraSmoothTime;
 			cameraControls.setLookAt(
 				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
@@ -387,11 +391,9 @@
 		}
 	}
 	
-	// Navigation zu einem Wall-Poster (nutzt zentrale API)
 	function navigateToWallPoster(projectId: string, platformId: string) {
 		const viewPoint = getViewPoint(projectId, 'wall', platformId);
 		if (viewPoint && cameraControls) {
-			// SmoothTime basierend auf Quality-Level
 			cameraControls.smoothTime = performanceStore.settings.cameraSmoothTime;
 			cameraControls.setLookAt(
 				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
@@ -409,8 +411,7 @@
 	// Prüfe ob Taste aktiv ist
 	function isKeyActive(key: string): boolean {
 		if (key === 'h') return activeKeys.has('h') || activeKeys.has('home');
-		if (key === 'c') return activeKeys.has('c');
-		return activeKeys.has(key) || activeKeys.has(key === 'w' ? 'arrowup' : key === 's' ? 'arrowdown' : key === 'a' ? 'arrowleft' : key === 'd' ? 'arrowright' : '');
+		return activeKeys.has(key);
 	}
 	
 	// Drag & Drop Funktionen
@@ -446,10 +447,8 @@
 		}
 		
 		panelX = clientX - dragStartX;
-		// Y ist invertiert (von unten gemessen)
 		panelY = dragStartY - clientY;
 		
-		// Begrenze auf Bildschirm
 		const maxX = window.innerWidth / 2 - 100;
 		const maxY = window.innerHeight - 150;
 		panelX = Math.max(-maxX, Math.min(maxX, panelX));
@@ -464,14 +463,13 @@
 		window.removeEventListener('touchend', stopDrag);
 	}
 	
-	// Doppelklick zum Zurücksetzen
 	function resetPosition() {
 		panelX = 0;
 		panelY = 0;
 	}
 </script>
 
-<!-- Kompakte 6-Tasten Navigation - DRAGGABLE -->
+<!-- Navigation Panel - 4x3 Grid + Shortcuts -->
 <div 
 	bind:this={panelRef}
 	class="fixed z-30 select-none"
@@ -480,202 +478,245 @@
 	class:pointer-events-none={isInputFocused}
 	class:cursor-grabbing={isDragging}
 >
-	<div style="display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px; border-radius: 16px; background: rgba(0,0,0,0.2); backdrop-filter: blur(16px); box-shadow: 0 0 30px rgba(0,0,0,0.5);">
-        <!-- Drag Handle / Standort-Anzeige -->
-		<div 
-			class="w-full px-3 py-1 text-white/70 text-xs font-medium text-center cursor-grab rounded-t-lg hover:bg-white/10 transition-colors"
-			class:cursor-grabbing={isDragging}
-			onmousedown={startDrag}
-			ontouchstart={startDrag}
-			ondblclick={resetPosition}
-			title="Ziehen zum Verschieben, Doppelklick zum Zurücksetzen"
-			role="slider"
-			aria-label="Navigations-Panel verschieben"
-			aria-valuenow={panelX}
-			tabindex="0"
-		>
-			<span class="select-none" style="color: white;">{currentPlatformName}</span>
-		</div>
-		<!-- Obere Reihe: H - W - C -->
-		 <!-- Nächstes Poster + Nächste Plattform in einer Reihe -->
-		{#if hasPosters}
-			<div style="display: flex; gap: 3px; margin-top: 4px; margin-botton: 10px;">
+	<div class="nav-container">
+		<!-- Linker Bereich: Buttons -->
+		<div class="nav-buttons">
+			<!-- Drag Handle / Standort-Anzeige -->
+			<div 
+				class="nav-header"
+				class:cursor-grabbing={isDragging}
+				onmousedown={startDrag}
+				ontouchstart={startDrag}
+				ondblclick={resetPosition}
+				title="Ziehen zum Verschieben, Doppelklick zum Zurücksetzen"
+				role="slider"
+				aria-label="Navigations-Panel verschieben"
+				aria-valuenow={panelX}
+				tabindex="0"
+			>
+				<span class="select-none">{currentPlatformName}</span>
+			</div>
+			
+			<!-- Zeile 1: Home | Letztes Poster | Vorwärts | Nächstes Poster -->
+			<div class="nav-row">
+				<!-- Home -->
+				<button
+					onclick={goHome}
+					disabled={isOnMarktplatz || isTransporting}
+					class="nav-key"
+					class:nav-key-active={isKeyActive('h')}
+					class:nav-key-disabled={isOnMarktplatz || isTransporting}
+					title="Zum Marktplatz (H)"
+				>
+					<HomeIcon size={18} />
+				</button>
+				
+				<!-- Letztes Poster -->
+				<button
+					onclick={goToPreviousPoster}
+					disabled={!hasPosters}
+					class="nav-key nav-key-yellow"
+					class:nav-key-active={isKeyActive('b')}
+					class:nav-key-disabled={!hasPosters}
+					title="Letztes Poster (B)"
+				>
+					<SkipBackIcon size={18} />
+				</button>
+				
+				<!-- Vorwärts -->
+				<button
+					onmousedown={() => handleButtonPress('w')}
+					class="nav-key nav-key-green"
+					class:nav-key-active={isKeyActive('w')}
+					title="Vorwärts (W / ↑)"
+				>
+					<ChevronUpIcon size={20} strokeWidth={3} />
+				</button>
+				
 				<!-- Nächstes Poster -->
 				<button
 					onclick={goToNextPoster}
-					class="nav-key nav-key-wide"
-					title="Nächstes Poster ({currentPosterIndex + 2}/{allPosters.length})"
+					disabled={!hasPosters}
+					class="nav-key nav-key-yellow"
+					class:nav-key-active={isKeyActive('n')}
+					class:nav-key-disabled={!hasPosters}
+					title="Nächstes Poster (N)"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-					</svg>
-					<span style="font-size: 0.65rem; margin-left: 4px;">
-						{currentPosterIndex + 2 > allPosters.length ? 1 : currentPosterIndex + 2}/{allPosters.length}
-					</span>
+					<SkipForwardIcon size={18} />
 				</button>
-				
-				<!-- Nächste Plattform (Skip-Forward Icon) -->
-				<button
-					onclick={goToNextPlatform}
-					disabled={isTransporting}
-					class="nav-key nav-key-play"
-					class:nav-key-disabled={isTransporting}
-					title="Zur nächsten Plattform: {nextPlatformName}"
-				>
-					<!-- Skip-Forward Icon -->
-					<svg class="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
-						<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
-					</svg>
-				</button>
+			</div>
+			
+			<!-- Zeile 2: Quality | Links | Zentrum | Rechts -->
+			<div class="nav-row">
+				<!-- Quality Settings -->
 				<button
 					onclick={() => isQualityDialogOpen = true}
-					class="nav-key nav-key-rocket"
-					title="Grafik-Einstellungen ({performanceStore.qualityLevel === 'high' ? 'Hoch' : performanceStore.qualityLevel === 'medium' ? 'Mittel' : 'Niedrig'})"
+					class="nav-key"
+					class:nav-key-active={isKeyActive('x')}
+					title="Grafik-Einstellungen (X)"
 				>
-					<span style="font-size: 1.1rem;"><GaugeIcon /></span>
+					<GaugeIcon size={18} />
+				</button>
+				
+				<!-- Links drehen -->
+				<button
+					onmousedown={() => handleButtonPress('a')}
+					class="nav-key nav-key-green"
+					class:nav-key-active={isKeyActive('a')}
+					title="Nach links drehen (A / ←)"
+				>
+					<ChevronLeftIcon size={20} strokeWidth={3} />
+				</button>
+				
+				<!-- Zentrum -->
+				<button
+					onclick={goToCenter}
+					class="nav-key nav-key-orange"
+					class:nav-key-active={isKeyActive('c')}
+					title="Zum Zentrum (C)"
+				>
+					<CircleDotIcon size={18} />
+				</button>
+				
+				<!-- Rechts drehen -->
+				<button
+					onmousedown={() => handleButtonPress('d')}
+					class="nav-key nav-key-green"
+					class:nav-key-active={isKeyActive('d')}
+					title="Nach rechts drehen (D / →)"
+				>
+					<ChevronRightIcon size={20} strokeWidth={3} />
 				</button>
 			</div>
-		{:else}
-			<!-- Nur Plattform-Button wenn keine Poster vorhanden -->
-			<div style="display: flex; gap: 12px; margin-top: 4px;">
+			
+			<!-- Zeile 3: Hilfe | Letzte Plattform | Rückwärts | Nächste Plattform -->
+			<div class="nav-row">
+				<!-- Hilfe -->
+				<button
+					onclick={() => isHelpDialogOpen = true}
+					class="nav-key"
+					class:nav-key-active={isKeyActive('f1')}
+					title="Hilfe (F1)"
+				>
+					<HelpCircleIcon size={18} />
+				</button>
+				
+				<!-- Letzte Plattform -->
+				<button
+					onclick={goToPreviousPlatform}
+					disabled={isTransporting}
+					class="nav-key"
+					class:nav-key-active={isKeyActive('o')}
+					class:nav-key-disabled={isTransporting}
+					title="Zur vorherigen Plattform: {prevPlatformName} (O)"
+				>
+					<ChevronsLeftIcon size={18} />
+				</button>
+				
+				<!-- Rückwärts -->
+				<button
+					onmousedown={() => handleButtonPress('s')}
+					class="nav-key nav-key-green"
+					class:nav-key-active={isKeyActive('s')}
+					title="Rückwärts (S / ↓)"
+				>
+					<ChevronDownIcon size={20} strokeWidth={3} />
+				</button>
+				
+				<!-- Nächste Plattform -->
 				<button
 					onclick={goToNextPlatform}
 					disabled={isTransporting}
-					class="nav-key nav-key-play"
+					class="nav-key"
+					class:nav-key-active={isKeyActive('p')}
 					class:nav-key-disabled={isTransporting}
-					title="Zur nächsten Plattform: {nextPlatformName}"
+					title="Zur nächsten Plattform: {nextPlatformName} (P)"
 				>
-					<!-- Skip-Forward Icon -->
-					<svg class="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
-						<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
-					</svg>
+					<ChevronsRightIcon size={18} />
 				</button>
 			</div>
-		{/if}
-		<div style="display: flex; gap: 12px;">
-			<!-- H = Home -->
-			<button
-				onclick={goHome}
-				disabled={isOnMarktplatz || isTransporting}
-				class="nav-key {isKeyActive('h') ? 'nav-key-active' : ''}"
-				class:nav-key-disabled={isOnMarktplatz || isTransporting}
-				title="Zum Marktplatz (H)"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-				</svg>
-			</button>
-			
-			<!-- W = Vorwärts -->
-			<button
-				onmousedown={() => handleButtonPress('w')}
-				class="nav-key {isKeyActive('w') ? 'nav-key-active' : ''}"
-				title="Vorwärts (W / ↑)"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
-				</svg>
-			</button>
-			
-			<!-- C = Center/Circle -->
-			<button
-				onclick={goToCenter}
-				class="nav-key {isKeyActive('c') ? 'nav-key-active' : ''}"
-				title="Zurück zum Zentrum (C)"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-					<circle cx="12" cy="12" r="9" />
-					<circle cx="12" cy="12" r="3" />
-				</svg>
-			</button>
 		</div>
-		
-		<!-- Untere Reihe: A - S - D -->
-		<div style="display: flex; gap: 12px;">
-			<!-- A = Links drehen -->
-			<button
-				onmousedown={() => handleButtonPress('a')}
-				class="nav-key {isKeyActive('a') ? 'nav-key-active' : ''}"
-				title="Blick nach links (A / ←)"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-				</svg>
-			</button>
-			
-			<!-- S = Rückwärts -->
-			<button
-				onmousedown={() => handleButtonPress('s')}
-				class="nav-key {isKeyActive('s') ? 'nav-key-active' : ''}"
-				title="Rückwärts (S / ↓)"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-				</svg>
-			</button>
-			
-			<!-- D = Rechts drehen -->
-			<button
-				onmousedown={() => handleButtonPress('d')}
-				class="nav-key {isKeyActive('d') ? 'nav-key-active' : ''}"
-				title="Blick nach rechts (D / →)"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-				</svg>
-			</button>
-		</div>
-		
-		<!-- Rocket-Button für Grafik-Einstellungen -->
-		<!-- <div style="display: flex; justify-content: center; margin-top: 4px;">
-			<button
-				onclick={() => isQualityDialogOpen = true}
-				class="nav-key nav-key-rocket"
-				title="Grafik-Einstellungen ({performanceStore.qualityLevel === 'high' ? 'Hoch' : performanceStore.qualityLevel === 'medium' ? 'Mittel' : 'Niedrig'})"
-			>
-				<span style="font-size: 1.1rem;"><GaugeIcon /></span>
-			</button>
-		</div> -->
-		
-		
 	</div>
 </div>
 
 <!-- Quality Dialog -->
 <QualityDialog bind:isOpen={isQualityDialogOpen} />
 
+<!-- Help Dialog -->
+<HelpDialog bind:isOpen={isHelpDialogOpen} />
+
 <style>
-	/* Schicke gläserne Navigations-Tasten */
+	.nav-container {
+		display: flex;
+		gap: 12px;
+		padding: 8px;
+		border-radius: 16px;
+		background: rgba(0, 0, 0, 0.25);
+		backdrop-filter: blur(16px);
+		box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+	}
+	
+	.nav-buttons {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		/* Breite fixieren auf Button-Grid: 4 Buttons à 2.5rem + 3 Gaps à 4px */
+		width: calc(4 * 2.5rem + 3 * 4px);
+	}
+	
+	.nav-header {
+		padding: 6px 8px;
+		text-align: center;
+		color: white;
+		font-size: 0.75rem;
+		font-weight: 500;
+		cursor: grab;
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		transition: background 0.15s;
+		width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		line-height: 1.3;
+		box-sizing: border-box;
+	}
+	
+	.nav-header:hover {
+		background: rgba(255, 255, 255, 0.1);
+	}
+	
+	.nav-row {
+		display: flex;
+		gap: 4px;
+	}
+	
+	/* Basis-Tasten */
 	.nav-key {
-		width: 2.75rem;
-		height: 2.75rem;
-		border-radius: 0.75rem;
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 0.6rem;
 		
-		/* Gläserner Effekt */
 		background: linear-gradient(
 			145deg,
-			rgba(255, 255, 255, 0.15) 0%,
-			rgba(255, 255, 255, 0.05) 50%,
-			rgba(0, 0, 0, 0.1) 100%
+			rgba(255, 255, 255, 0.12) 0%,
+			rgba(255, 255, 255, 0.04) 50%,
+			rgba(0, 0, 0, 0.08) 100%
 		);
 		backdrop-filter: blur(8px);
 		
-		/* Gläserner Rand */
-		border: 1px solid rgba(255, 255, 255, 0.3);
+		border: 1px solid rgba(255, 255, 255, 0.25);
 		box-shadow: 
-			0 2px 8px rgba(0, 0, 0, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.3),
-			inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+			0 2px 6px rgba(0, 0, 0, 0.25),
+			inset 0 1px 0 rgba(255, 255, 255, 0.2);
 		
-		/* Layout */
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		
-		/* Text/Icon */
 		color: white;
 		
-		/* Interaktion */
 		transition: all 0.15s ease;
 		cursor: pointer;
 	}
@@ -683,23 +724,22 @@
 	.nav-key:hover:not(.nav-key-disabled) {
 		background: linear-gradient(
 			145deg,
-			rgba(255, 255, 255, 0.25) 0%,
-			rgba(255, 255, 255, 0.1) 50%,
-			rgba(0, 0, 0, 0.05) 100%
+			rgba(255, 255, 255, 0.2) 0%,
+			rgba(255, 255, 255, 0.08) 50%,
+			rgba(0, 0, 0, 0.04) 100%
 		);
-		border-color: rgba(255, 255, 255, 0.5);
+		border-color: rgba(255, 255, 255, 0.4);
 		transform: translateY(-1px);
 		box-shadow: 
-			0 4px 12px rgba(0, 0, 0, 0.4),
-			inset 0 1px 0 rgba(255, 255, 255, 0.4),
-			inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+			0 4px 10px rgba(0, 0, 0, 0.35),
+			inset 0 1px 0 rgba(255, 255, 255, 0.3);
 	}
 	
 	.nav-key:active:not(.nav-key-disabled) {
 		transform: translateY(1px) scale(0.95);
 		box-shadow: 
-			0 1px 4px rgba(0, 0, 0, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			0 1px 3px rgba(0, 0, 0, 0.2),
+			inset 0 1px 0 rgba(255, 255, 255, 0.15);
 	}
 	
 	.nav-key-active {
@@ -711,9 +751,8 @@
 		);
 		border-color: rgba(96, 165, 250, 0.7);
 		box-shadow: 
-			0 0 15px rgba(96, 165, 250, 0.5),
-			0 2px 8px rgba(0, 0, 0, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.3);
+			0 0 12px rgba(96, 165, 250, 0.5),
+			0 2px 6px rgba(0, 0, 0, 0.2);
 	}
 	
 	.nav-key-disabled {
@@ -721,15 +760,32 @@
 		cursor: not-allowed;
 	}
 	
-	/* Breiter Button für "Nächstes Poster" */
-	.nav-key-wide {
-		width: auto;
-		padding: 0 0.75rem;
-		min-width: 5rem;
+	/* Gelbe Tasten (Poster + Vorwärts) */
+	.nav-key-yellow {
+		background: linear-gradient(
+			145deg,
+			rgba(250, 204, 21, 0.25) 0%,
+			rgba(234, 179, 8, 0.15) 50%,
+			rgba(202, 138, 4, 0.2) 100%
+		);
+		border-color: rgba(250, 204, 21, 0.5);
 	}
 	
-	/* Play-Button für Plattform-Tour (grüner Akzent) */
-	.nav-key-play {
+	.nav-key-yellow:hover:not(.nav-key-disabled) {
+		background: linear-gradient(
+			145deg,
+			rgba(250, 204, 21, 0.4) 0%,
+			rgba(234, 179, 8, 0.25) 50%,
+			rgba(202, 138, 4, 0.3) 100%
+		);
+		border-color: rgba(250, 204, 21, 0.7);
+		box-shadow: 
+			0 0 12px rgba(250, 204, 21, 0.4),
+			0 4px 10px rgba(0, 0, 0, 0.3);
+	}
+	
+	/* Grüne Tasten (Plattform + Rückwärts) */
+	.nav-key-green {
 		background: linear-gradient(
 			145deg,
 			rgba(74, 222, 128, 0.25) 0%,
@@ -739,7 +795,7 @@
 		border-color: rgba(74, 222, 128, 0.5);
 	}
 	
-	.nav-key-play:hover:not(.nav-key-disabled) {
+	.nav-key-green:hover:not(.nav-key-disabled) {
 		background: linear-gradient(
 			145deg,
 			rgba(74, 222, 128, 0.4) 0%,
@@ -748,37 +804,35 @@
 		);
 		border-color: rgba(74, 222, 128, 0.7);
 		box-shadow: 
-			0 0 15px rgba(74, 222, 128, 0.4),
-			0 4px 12px rgba(0, 0, 0, 0.4),
-			inset 0 1px 0 rgba(255, 255, 255, 0.4);
+			0 0 12px rgba(74, 222, 128, 0.4),
+			0 4px 10px rgba(0, 0, 0, 0.3);
 	}
 	
-	/* Rocket-Button für Grafik-Einstellungen (orange Akzent) */
-	.nav-key-rocket {
+	/* Orange Taste (Zentrum) */
+	.nav-key-orange {
 		background: linear-gradient(
 			145deg,
-			rgba(251, 146, 60, 0.25) 0%,
-			rgba(234, 88, 12, 0.15) 50%,
-			rgba(194, 65, 12, 0.2) 100%
+			rgba(251, 146, 60, 0.3) 0%,
+			rgba(234, 88, 12, 0.2) 50%,
+			rgba(194, 65, 12, 0.25) 100%
 		);
-		border-color: rgba(251, 146, 60, 0.5);
+		border-color: rgba(251, 146, 60, 0.6);
 	}
 	
-	.nav-key-rocket:hover {
+	.nav-key-orange:hover:not(.nav-key-disabled) {
 		background: linear-gradient(
 			145deg,
-			rgba(251, 146, 60, 0.4) 0%,
-			rgba(234, 88, 12, 0.25) 50%,
-			rgba(194, 65, 12, 0.3) 100%
+			rgba(251, 146, 60, 0.45) 0%,
+			rgba(234, 88, 12, 0.3) 50%,
+			rgba(194, 65, 12, 0.35) 100%
 		);
-		border-color: rgba(251, 146, 60, 0.7);
+		border-color: rgba(251, 146, 60, 0.8);
 		box-shadow: 
-			0 0 15px rgba(251, 146, 60, 0.4),
-			0 4px 12px rgba(0, 0, 0, 0.4),
-			inset 0 1px 0 rgba(255, 255, 255, 0.4);
+			0 0 15px rgba(251, 146, 60, 0.5),
+			0 4px 10px rgba(0, 0, 0, 0.3);
 	}
 	
-	/* Keyboard-Indicator bei aktivem Fokus */
+	/* Keyboard Focus */
 	.nav-key:focus-visible {
 		outline: 2px solid rgba(96, 165, 250, 0.8);
 		outline-offset: 2px;

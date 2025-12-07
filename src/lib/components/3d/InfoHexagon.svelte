@@ -198,7 +198,7 @@
                     position={[0, height * 0.28, 0.02]}
                 />
                 <!-- Titel -->
-                {@const titleFontSize = side.aspect.title.length > 12 ? 0.24 : 0.30}
+                {@const titleFontSize = side.aspect.title.length > 12 ? 0.20 : 0.30}
                 <Text
                     text={side.aspect.title}
                     fontSize={titleFontSize}
@@ -224,7 +224,7 @@
                 />
             {:else}
                 <!-- Titel-Seite: Vollständiger Plattform-Name + Description -->
-                {@const nameFontSize = platformName.length > 25 ? 0.26 : platformName.length > 18 ? 0.30 : 0.36}
+                {@const nameFontSize = platformName.length > 25 ? 0.20 : platformName.length > 18 ? 0.30 : 0.36}
                 
                 <!-- Icon/Emoji oben -->
                 <Text
