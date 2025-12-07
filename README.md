@@ -74,10 +74,37 @@ pnpm preview      # → http://localhost:4173
 | [dialog-components.md](./docs/dialog-components.md) | UI-Dialog-Pattern & GlassDialog |
 | [marketplace-guide.md](./docs/marketplace-guide.md) | Marktplatz, Terminals & Partner |
 | [platform-guide.md](./docs/platform-guide.md) | Anleitung: Neue Plattform hinzufügen |
+| [quality-levels.md](./docs/quality-levels.md) | Performance-Stufen & Konfiguration |
 | [svelte-stores.md](./docs/svelte-stores.md) | State Management |
 | [wp-setup.md](./docs/wp-setup.md) | WordPress Integration |
 | [Roadmap.md](./docs/Roadmap.md) | Entwicklungs-History & Nächste Schritte |
 | [3D-Improvements.md](./docs/3D-Improvements.md) | Performance-Optimierungen & Shader-Warmup |
+
+## ⚙️ Konfiguration
+
+### `/static/config.json` - Zentrale Einstellungen
+
+Alle Qualitäts- und Performance-Einstellungen sind in einer zentralen JSON-Datei konfigurierbar:
+
+```json
+{
+  "qualityPresets": {
+    "high": { ... },
+    "medium": { ... },
+    "low": { ... }
+  },
+  "geometrySegments": { "high": 1.0, "medium": 0.6, "low": 0.3 },
+  "autoDowngrade": { "enabled": true, "fpsThreshold": 20 }
+}
+```
+
+**Wichtige Einstellungen pro Preset:**
+- `materials.usePBRMaterials` - Physikalisch-basiertes Rendering
+- `effects.enableEnergyEffects` - EnergyFloor + EnergyBeam
+- `effects.enableAnimations` - Kamera-Animationen
+- `camera.smoothTime` - Kamera-Glättung in Sekunden
+
+➡️ Siehe [quality-levels.md](./docs/quality-levels.md) für vollständige Dokumentation.
 
 ## 🛠️ Tech-Stack
 

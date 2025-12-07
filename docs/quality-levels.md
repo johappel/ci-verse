@@ -4,6 +4,82 @@ Dieses Dokument beschreibt die drei Qualitätsstufen des CI-Verse Performance-Sy
 
 ---
 
+## Zentrale Konfiguration: `/static/config.json`
+
+> **NEU seit v2.1.1**: Alle Qualitäts-Einstellungen sind zentral in einer JSON-Datei konfigurierbar!
+
+Die Datei `/static/config.json` enthält alle Performance-Einstellungen und wird beim Start der Anwendung geladen. Änderungen werden nach einem Seiten-Reload wirksam (kein Build erforderlich).
+
+### Aufbau der config.json
+
+```json
+{
+  "_comment": "Beschreibung der Datei",
+  
+  "qualityPresets": {
+    "high": { /* Einstellungen für High-Qualität */ },
+    "medium": { /* Einstellungen für Medium-Qualität */ },
+    "low": { /* Einstellungen für Low-Qualität */ }
+  },
+  
+  "geometrySegments": {
+    "high": 1.0,    // 100% der Basis-Segmente
+    "medium": 0.6,  // 60%
+    "low": 0.3      // 30%
+  },
+  
+  "autoDowngrade": {
+    "enabled": true,
+    "fpsThreshold": 20,
+    "measurementCount": 5
+  }
+}
+```
+
+### Struktur eines Quality-Presets
+
+Jedes Preset (high, medium, low) hat folgende Kategorien:
+
+| Kategorie | Einstellungen |
+|-----------|---------------|
+| `materials` | `usePBRMaterials`, `useEmissive` |
+| `shadows` | `enableShadows` |
+| `lighting` | `maxSpotlights`, `useHemisphereLight` |
+| `geometry` | `geometryDetail` ("high" / "medium" / "low") |
+| `effects` | `enableFog`, `enableParticles`, `enableAnimations`, `enableGlowRings`, `enableEnergyEffects`, `lightBridgeQuality` |
+| `rendering` | `pixelRatio` (Zahl oder "auto"), `antialias` |
+| `camera` | `flightSpeed` ("normal" / "fast" / "instant"), `smoothTime` |
+
+### Beispiel: EnergyFloor im Low-Mode aktivieren
+
+Standardmäßig sind die Energy-Effekte im Low-Mode deaktiviert. Um sie zu aktivieren:
+
+```json
+"low": {
+  "effects": {
+    "enableEnergyEffects": true,  // ← Auf true setzen
+    // ... andere Einstellungen
+  }
+}
+```
+
+### Beispiel: Kamera-Geschwindigkeit anpassen
+
+```json
+"high": {
+  "camera": {
+    "flightSpeed": "normal",  // normal | fast | instant
+    "smoothTime": 1.5         // Sekunden für Kamera-Glättung
+  }
+}
+```
+
+### Fallback-Verhalten
+
+Falls die `config.json` nicht geladen werden kann (z.B. Netzwerkfehler), verwendet der `performanceStore` eingebaute Fallback-Werte, die den Standard-Presets entsprechen.
+
+---
+
 ## Übersicht
 
 | Eigenschaft | 🔥 High | ⚡ Medium | 🌿 Low |
