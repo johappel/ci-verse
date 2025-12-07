@@ -100,6 +100,81 @@
 		}
 	});
 
+	// ============================================
+	// BENCHMARK: Kamera-Bewegung für Performance-Test
+	// ============================================
+	$effect(() => {
+		if (performanceStore.isBenchmarking && cameraControls) {
+			console.log('[Benchmark] Starte Kamera-Bewegung...');
+			
+			const currentPlatform = platforms[worldStore.currentPlatform];
+			if (!currentPlatform) return;
+			
+			// Kreisförmige Kamera-Fahrt um die aktuelle Plattform
+			const centerX = currentPlatform.x;
+			const centerY = currentPlatform.y + 10;
+			const centerZ = currentPlatform.z;
+			const radius = currentPlatform.size * 0.8;
+			
+			let startTime = performance.now();
+			const duration = 3000; // 3 Sekunden
+			let animationId: number;
+			
+			function animateBenchmark() {
+				if (!performanceStore.isBenchmarking) {
+					cancelAnimationFrame(animationId);
+					return;
+				}
+				
+				const elapsed = performance.now() - startTime;
+				const progress = elapsed / duration;
+				
+				if (progress < 1) {
+					// Kreisbewegung (360 Grad in 3 Sekunden)
+					const angle = progress * Math.PI * 2;
+					const camX = centerX + Math.cos(angle) * radius;
+					const camZ = centerZ + Math.sin(angle) * radius;
+					
+					// Auf/Ab-Bewegung für zusätzlichen GPU-Stress
+					const camY = centerY + Math.sin(progress * Math.PI * 4) * 5;
+					
+					// Kamera bewegen (ohne smoothTime für echte Stress-Messung)
+					cameraControls!.setLookAt(
+						camX, camY, camZ,
+						centerX, currentPlatform.y + 3, centerZ,
+						false // Keine Animation = direkter Sprung pro Frame
+					);
+					
+					animationId = requestAnimationFrame(animateBenchmark);
+				}
+			}
+			
+			// Speichere original smoothTime
+			const originalSmoothTime = cameraControls.smoothTime;
+			cameraControls.smoothTime = 0;
+			
+			animateBenchmark();
+			
+			// Cleanup: Kamera zurücksetzen wenn Benchmark endet
+			return () => {
+				cancelAnimationFrame(animationId);
+				cameraControls!.smoothTime = originalSmoothTime;
+				
+				// Kamera zurück zur Startposition
+				const landing = currentPlatform.landing || { offset: [0, 12, -35], lookAtOffset: [0, 3, 0] };
+				cameraControls!.setLookAt(
+					currentPlatform.x + landing.offset[0],
+					currentPlatform.y + landing.offset[1],
+					currentPlatform.z + landing.offset[2],
+					currentPlatform.x + landing.lookAtOffset[0],
+					currentPlatform.y + landing.lookAtOffset[1],
+					currentPlatform.z + landing.lookAtOffset[2],
+					true
+				);
+			};
+		}
+	});
+
 	// Transport-Animation wenn sich die Plattform ändert
 	// Die Kamera fliegt auf Höhe der Lichtlinien (Oktaeder-Höhe Y+15)
 	// Im Low-Mode: Sofortiger Sprung statt Animation

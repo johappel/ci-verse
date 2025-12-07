@@ -1,7 +1,8 @@
 <script lang="ts">
-    import { T } from '@threlte/core';
+    import { T, useTask } from '@threlte/core';
     import { interactivity } from '@threlte/extras';
     import { worldStore } from '$lib/logic/store.svelte';
+    import { performanceStore } from '$lib/logic/performanceStore.svelte';
     import { platforms, connections } from '$lib/logic/platforms';
     // Vollständige Platform.svelte aktivieren
     import Platform from './Platform.svelte';
@@ -11,6 +12,11 @@
 
     // Aktiviere Interaktivität für diese Komponente und alle Kinder
     interactivity();
+
+    // FPS-Messung in jedem Frame
+    useTask(() => {
+        performanceStore.recordFrame();
+    });
 
     // S-Plattform (Marktplatz) separat
     const sPlatform = platforms['S'];

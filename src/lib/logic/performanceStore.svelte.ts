@@ -535,6 +535,31 @@ class PerformanceStore {
         // Fallback
         return this.landingPoints.B_platforms;
     }
+    
+    // ========== BENCHMARK-SYSTEM ==========
+    
+    // Benchmark-Status (öffentlich, damit Scene.svelte darauf reagieren kann)
+    isBenchmarking = $state(false);
+    
+    /**
+     * Startet den Benchmark-Modus
+     * Die Kamera wird in Scene.svelte bewegt
+     */
+    startBenchmark() {
+        console.log('[Performance] Benchmark gestartet');
+        this.isBenchmarking = true;
+        // Reset FPS-History für frische Messung
+        this.fpsHistory = [];
+        this.frameTimestamps = [];
+    }
+    
+    /**
+     * Stoppt den Benchmark-Modus
+     */
+    stopBenchmark() {
+        console.log('[Performance] Benchmark gestoppt');
+        this.isBenchmarking = false;
+    }
 }
 
 // Singleton-Export

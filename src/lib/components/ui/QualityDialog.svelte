@@ -10,6 +10,12 @@
     
     let { isOpen = $bindable(false) }: { isOpen: boolean } = $props();
     
+    // Benchmark-Status
+    let isBenchmarking = $state(false);
+    let benchmarkProgress = $state(0);
+    let benchmarkResult = $state<{ minFPS: number; avgFPS: number; maxFPS: number } | null>(null);
+    let benchmarkFPSHistory: number[] = [];
+    
     // Stability delay - verhindert sofortiges Schließen
     let isStable = $state(false);
     
@@ -63,9 +69,76 @@
     function selectQuality(level: QualityLevel) {
         console.log('[QualityDialog] Setting quality to:', level);
         performanceStore.setQuality(level);
+        benchmarkResult = null; // Reset Benchmark bei Qualitätswechsel
         console.log('[QualityDialog] After set - qualityLevel:', performanceStore.qualityLevel);
         console.log('[QualityDialog] After set - enableGlowRings:', performanceStore.settings.enableGlowRings);
     }
+    
+    // Benchmark starten
+    async function startBenchmark() {
+        if (isBenchmarking) return;
+        
+        isBenchmarking = true;
+        benchmarkProgress = 0;
+        benchmarkResult = null;
+        benchmarkFPSHistory = [];
+        
+        const duration = 3000; // 3 Sekunden
+        const startTime = performance.now();
+        
+        // FPS während des Benchmarks sammeln
+        const collectFPS = () => {
+            if (!isBenchmarking) return;
+            
+            const elapsed = performance.now() - startTime;
+            benchmarkProgress = Math.min(100, (elapsed / duration) * 100);
+            
+            // Aktuelle FPS aufzeichnen
+            benchmarkFPSHistory.push(performanceStore.currentFPS);
+            
+            if (elapsed < duration) {
+                requestAnimationFrame(collectFPS);
+            } else {
+                // Benchmark abgeschlossen
+                finishBenchmark();
+            }
+        };
+        
+        // Starte Kamera-Bewegung via performanceStore
+        performanceStore.startBenchmark();
+        
+        // Warte kurz, dann starte FPS-Sammlung
+        await new Promise(r => setTimeout(r, 100));
+        collectFPS();
+    }
+    
+    function finishBenchmark() {
+        isBenchmarking = false;
+        benchmarkProgress = 100;
+        
+        // Stoppe Kamera-Bewegung
+        performanceStore.stopBenchmark();
+        
+        if (benchmarkFPSHistory.length > 0) {
+            // Erste paar Messungen ignorieren (Aufwärmphase)
+            const validFPS = benchmarkFPSHistory.slice(5);
+            if (validFPS.length > 0) {
+                benchmarkResult = {
+                    minFPS: Math.min(...validFPS),
+                    avgFPS: Math.round(validFPS.reduce((a, b) => a + b, 0) / validFPS.length),
+                    maxFPS: Math.max(...validFPS)
+                };
+            }
+        }
+    }
+    
+    // Empfehlung basierend auf Benchmark
+    let recommendation = $derived.by((): QualityLevel | null => {
+        if (!benchmarkResult) return null;
+        if (benchmarkResult.avgFPS >= 50) return 'high';
+        if (benchmarkResult.avgFPS >= 30) return 'medium';
+        return 'low';
+    });
     
     function closeDialog() {
         isOpen = false;
@@ -195,6 +268,111 @@
                     <span style="color: #22d3ee; font-family: monospace;">
                         {performanceStore.currentFPS} FPS
                     </span>
+                </div>
+                
+                <!-- Benchmark Button & Results -->
+                <div style="
+                    margin-bottom: 1rem;
+                    padding: 0.75rem;
+                    background: rgba(0, 0, 0, 0.3);
+                    border-radius: 0.5rem;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                ">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                        <button
+                            onclick={startBenchmark}
+                            disabled={isBenchmarking}
+                            style="
+                                flex: 1;
+                                padding: 0.5rem 1rem;
+                                border-radius: 0.375rem;
+                                border: none;
+                                background: {isBenchmarking ? 'rgba(96, 165, 250, 0.3)' : 'rgba(96, 165, 250, 0.8)'};
+                                color: white;
+                                font-weight: 500;
+                                cursor: {isBenchmarking ? 'wait' : 'pointer'};
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 0.5rem;
+                            "
+                        >
+                            {#if isBenchmarking}
+                                <span style="animation: spin 1s linear infinite;">⏳</span>
+                                Test läuft... {Math.round(benchmarkProgress)}%
+                            {:else}
+                                🎯 Performance testen
+                            {/if}
+                        </button>
+                    </div>
+                    
+                    {#if isBenchmarking}
+                        <!-- Progress Bar -->
+                        <div style="
+                            height: 4px;
+                            background: rgba(255, 255, 255, 0.1);
+                            border-radius: 2px;
+                            overflow: hidden;
+                        ">
+                            <div style="
+                                height: 100%;
+                                width: {benchmarkProgress}%;
+                                background: linear-gradient(90deg, #60a5fa, #22d3ee);
+                                transition: width 0.1s;
+                            "></div>
+                        </div>
+                    {:else if benchmarkResult}
+                        <!-- Benchmark Results -->
+                        <div style="
+                            display: grid;
+                            grid-template-columns: repeat(3, 1fr);
+                            gap: 0.5rem;
+                            text-align: center;
+                            font-size: 0.75rem;
+                        ">
+                            <div>
+                                <div style="color: rgba(255, 255, 255, 0.5);">Min</div>
+                                <div style="color: {benchmarkResult.minFPS < 20 ? '#ef4444' : benchmarkResult.minFPS < 30 ? '#facc15' : '#4ade80'}; font-weight: 600; font-family: monospace;">
+                                    {benchmarkResult.minFPS} FPS
+                                </div>
+                            </div>
+                            <div>
+                                <div style="color: rgba(255, 255, 255, 0.5);">Durchschnitt</div>
+                                <div style="color: {benchmarkResult.avgFPS < 20 ? '#ef4444' : benchmarkResult.avgFPS < 30 ? '#facc15' : '#4ade80'}; font-weight: 600; font-family: monospace; font-size: 1rem;">
+                                    {benchmarkResult.avgFPS} FPS
+                                </div>
+                            </div>
+                            <div>
+                                <div style="color: rgba(255, 255, 255, 0.5);">Max</div>
+                                <div style="color: {benchmarkResult.maxFPS < 20 ? '#ef4444' : benchmarkResult.maxFPS < 30 ? '#facc15' : '#4ade80'}; font-weight: 600; font-family: monospace;">
+                                    {benchmarkResult.maxFPS} FPS
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {#if recommendation}
+                            <div style="
+                                margin-top: 0.5rem;
+                                padding: 0.5rem;
+                                background: rgba(96, 165, 250, 0.15);
+                                border-radius: 0.25rem;
+                                text-align: center;
+                                font-size: 0.75rem;
+                                color: #60a5fa;
+                            ">
+                                💡 Empfohlen: <strong>{recommendation === 'high' ? 'Beste Grafik' : recommendation === 'medium' ? 'Ausgewogen' : 'Performance'}</strong>
+                            </div>
+                        {/if}
+                    {:else}
+                        <p style="
+                            font-size: 0.75rem;
+                            color: rgba(255, 255, 255, 0.4);
+                            margin: 0;
+                            text-align: center;
+                        ">
+                            Teste die Performance mit einer Kamera-Fahrt
+                        </p>
+                    {/if}
                 </div>
                 
                 <!-- Quality Options -->
