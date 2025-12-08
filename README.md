@@ -185,8 +185,8 @@ Y=25    ·    ·    ·    ·[Q2 Europa]·    ·    ·
                               
 Y=20    ·[Q1 Forschung]·    ·    ·[Q3 Digital]·
                               
-Y=8    [B1 Kita]·····[S Marktplatz]·····[B3 Erwachsene]
-                         [B2 Schule]
+Y=8    [B1 Schule]·····[S Marktplatz]·····[B3 Erwachsene]
+                         [B2 Gemeinde]
 ```
 
 ## 🔄 Nächste Schritte

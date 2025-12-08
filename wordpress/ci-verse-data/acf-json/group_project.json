@@ -41,8 +41,8 @@
             "label": "Kurzer Teaser (Poster)",
             "name": "project_teaser",
             "type": "text",
-            "maxlength": 60,
-            "instructions": "Kurzer Teaser für die Poster-Darstellung auf der Messewand (max. 60 Zeichen)."
+            "maxlength": 270,
+            "instructions": "Kurzer Teaser für die Poster-Darstellung auf der Messewand (max. 260 Zeichen)."
         },
         {
             "key": "field_project_description",
@@ -50,8 +50,8 @@
             "name": "project_description",
             "type": "textarea",
             "rows": 3,
-            "maxlength": 500,
-            "instructions": "Ausführliche Beschreibung für den Detail-Dialog (max. 500 Zeichen). Wird anstelle des Teasers im Projektdetails angezeigt."
+            "maxlength": 1000,
+            "instructions": "Ausführliche Beschreibung für den Detail-Dialog (max. 1000 Zeichen). Wird anstelle des Teasers im Projektdetails angezeigt."
         },
         {
             "key": "field_project_tab_zuordnung",
@@ -67,8 +67,8 @@
             "name": "project_departments",
             "type": "checkbox",
             "choices": {
-                "B1": "B1 - Kita",
-                "B2": "B2 - Schule",
+                "B1": "B1 - Schule",
+                "B2": "B2 - Gemeinde",
                 "B3": "B3 - Erwachsene",
                 "Q1": "Q1 - Forschung",
                 "Q2": "Q2 - Europa",
@@ -87,8 +87,8 @@
             "name": "project_related_departments",
             "type": "checkbox",
             "choices": {
-                "B1": "B1 - Kita",
-                "B2": "B2 - Schule",
+                "B1": "B1 - Schule",
+                "B2": "B2 - Gemeinde",
                 "B3": "B3 - Erwachsene",
                 "Q1": "Q1 - Forschung",
                 "Q2": "Q2 - Europa",
@@ -108,12 +108,12 @@
             "name": "project_perspectives",
             "type": "checkbox",
             "choices": {
-                "education": "📖 Religiöse Bildung",
+                "education": "📖 Religiöse Bildung im Wandel",
                 "justice": "⚖️ Bildungsgerechtigkeit",
                 "sustainability": "🌱 Nachhaltigkeit",
                 "diversity": "🌈 Differenzsensibilität",
-                "digitality": "💻 Digitalität",
-                "structure": "🏗️ Strukturveränderungen"
+                "digitality": "💻 Digitalität und KI",
+                "structure": "🏗️ Kirchlicher Strukturwandel"
             },
             "layout": "horizontal",
             "wrapper": {
@@ -152,7 +152,7 @@
                 "both": "✨ Both (Beides)"
             },
             "layout": "horizontal",
-            "default_value": "booth",
+            "default_value": "wall",
             "instructions": "Legt fest, wie das Projekt auf der Plattform angezeigt wird."
         },
         {
@@ -205,7 +205,7 @@
                 "landscape": "🖼️ Landscape (1200×800px)",
                 "square": "⬜ Quadratisch (1000×1000px)"
             },
-            "default_value": "portrait",
+            "default_value": "square",
             "instructions": "Format des Poster-Bildes für optimale Darstellung."
         },
         {
@@ -234,6 +234,6 @@
     "instruction_placement": "label",
     "hide_on_screen": "",
     "active": true,
-    "description": "Felder für CI-Verse Projekte",
+    "description": "Felder für CI Projekte",
     "show_in_rest": 0
 }

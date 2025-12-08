@@ -39,9 +39,9 @@ Draufsicht (X-Z-Ebene):
     Y=20, x=-15                 Y=20, x=15
                         
                         
-   [B1 Kita]    [S Markt]    [B3 Erwachsene]
+   [B1 Schule]    [S Markt]    [B3 Erwachsene]
    Y=8, x=-20   Y=8, x=0     Y=8, x=20
-                [B2 Schule]
+                [B2 Gemeinde]
                 Y=8, z=15
 ```
 

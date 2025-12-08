@@ -97,7 +97,7 @@ export const mockProjects: ProjectData[] = [
     {
         id: 'p1',
         title: 'Religionspädagogik in der Kita',
-        slug: 'rpi-kita',
+        slug: 'relimentar',
         externalUrl: 'https://relimentar.de',
         departments: ['B1'],
         perspectives: ['justice', 'sustainability'],

@@ -9,12 +9,12 @@
             "type": "select",
             "required": 1,
             "choices": {
-                "B1": "B1 - Frühkindliche Bildung",
-                "B2": "B2 - Schule & Jugend",
-                "B3": "B3 - Erwachsenenbildung",
-                "Q1": "Q1 - Forschung",
-                "Q2": "Q2 - Europa & Internationales",
-                "Q3": "Q3 - Digitalisierung"
+                "B1": "B1 - Bildung in der Schule",
+                "B2": "B2 - Bildung im Kontext von Gemeinde",
+                "B3": "B3 - Erwachsenen und Familienbildung",
+                "Q1": "Q1 - Evangelische Bildungsberichterstattung und Empirische Bildungsforschung",
+                "Q2": "Q2 - Evangelische Bildungsverantwortung in Europa",
+                "Q3": "Q3 - Digitalität und Künstliche Intelligenz in der Bildung"
             },
             "default_value": "",
             "return_format": "value",
@@ -29,7 +29,7 @@
             "name": "platform_title",
             "type": "text",
             "required": 1,
-            "placeholder": "z.B. Frühkindliche Bildung"
+            "placeholder": "z.B. Bildung in der Schule"
         },
         {
             "key": "field_platform_short",
@@ -37,7 +37,7 @@
             "name": "platform_short",
             "type": "text",
             "required": 1,
-            "placeholder": "z.B. Kita",
+            "placeholder": "z.B. Schule",
             "maxlength": 15
         },
         {

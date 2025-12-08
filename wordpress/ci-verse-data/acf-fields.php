@@ -28,11 +28,11 @@ function civerse_register_acf_fields() {
                 'type' => 'select',
                 'required' => 1,
                 'choices' => [
-                    'B1' => 'B1 - Frühkindliche Bildung',
-                    'B2' => 'B2 - Schule & Jugend',
-                    'B3' => 'B3 - Erwachsenenbildung',
-                    'Q1' => 'Q1 - Forschung',
-                    'Q2' => 'Q2 - Europa & Internationales',
+                    'B1' => 'B1 - Bildung in der Schule',
+                    'B2' => 'B2 - Bildung im Kontext von Gemeinde',
+                    'B3' => 'B3 - Erwachsenen und Familienbildung',
+                    'Q1' => 'Q1 - Evangelische Bildungsberichterstattung und Empirische Bildungsforschung',
+                    'Q2' => 'Q2 - Evangelische Bildungsverantwortung in Europa',
                     'Q3' => 'Q3 - Digitalisierung',
                 ],
             ],
@@ -42,7 +42,7 @@ function civerse_register_acf_fields() {
                 'name' => 'platform_title',
                 'type' => 'text',
                 'required' => 1,
-                'placeholder' => 'z.B. Frühkindliche Bildung',
+                'placeholder' => 'z.B. Bildung in der Schule',
             ],
             [
                 'key' => 'field_platform_short',
@@ -50,7 +50,7 @@ function civerse_register_acf_fields() {
                 'name' => 'platform_short',
                 'type' => 'text',
                 'required' => 1,
-                'placeholder' => 'z.B. Kita',
+                'placeholder' => 'z.B. Schule',
                 'maxlength' => 15,
             ],
             [
@@ -683,104 +683,5 @@ function civerse_register_acf_fields() {
         ],
     ]);
 
-    // =========================================================================
-    // PARTNER-EINRICHTUNGEN (Nexus Terminal) - DEPRECATED (Merged into Marketplace)
-    // =========================================================================
-    /*
-    acf_add_local_field_group([
-        'key' => 'group_partners',
-        'title' => 'Partner-Einrichtungen (Nexus Terminal)',
-        'fields' => [
-            [
-                'key' => 'field_partners_info',
-                'label' => 'Partner-Netzwerk',
-                'type' => 'message',
-                'message' => 'Partner-Einrichtungen erscheinen im Nexus Terminal auf dem Marktplatz als animierter "Fahrplan" mit Verbindungen zu anderen Institutionen.',
-            ],
-            [
-                'key' => 'field_partner_connections',
-                'label' => 'Partner-Verbindungen',
-                'name' => 'partner_connections',
-                'type' => 'repeater',
-                'layout' => 'block',
-                'button_label' => 'Partner hinzufügen',
-                'sub_fields' => [
-                    [
-                        'key' => 'field_partner_id',
-                        'label' => 'Partner ID',
-                        'name' => 'id',
-                        'type' => 'text',
-                        'required' => 1,
-                        'placeholder' => 'z.B. ekd, bmbf, eu',
-                        'wrapper' => ['width' => '20'],
-                    ],
-                    [
-                        'key' => 'field_partner_name',
-                        'label' => 'Vollständiger Name',
-                        'name' => 'name',
-                        'type' => 'text',
-                        'required' => 1,
-                        'placeholder' => 'z.B. Evangelische Kirche in Deutschland',
-                        'wrapper' => ['width' => '40'],
-                    ],
-                    [
-                        'key' => 'field_partner_short_name',
-                        'label' => 'Kurzname (für Anzeige)',
-                        'name' => 'shortName',
-                        'type' => 'text',
-                        'required' => 1,
-                        'placeholder' => 'z.B. EKD Hannover',
-                        'wrapper' => ['width' => '40'],
-                    ],
-                    [
-                        'key' => 'field_partner_category',
-                        'label' => 'Kategorie',
-                        'name' => 'category',
-                        'type' => 'select',
-                        'choices' => [
-                            'ministry' => '🏛️ Ministerium',
-                            'church' => '⛪ Kirchliche Einrichtung',
-                            'university' => '🎓 Universität',
-                            'institute' => '🔬 Institut',
-                            'international' => '🌍 International',
-                            'association' => '🤝 Verband/Gesellschaft',
-                        ],
-                        'wrapper' => ['width' => '30'],
-                    ],
-                    [
-                        'key' => 'field_partner_color',
-                        'label' => 'Primärfarbe',
-                        'name' => 'color',
-                        'type' => 'color_picker',
-                        'default_value' => '#3b82f6',
-                        'wrapper' => ['width' => '20'],
-                    ],
-                    [
-                        'key' => 'field_partner_url',
-                        'label' => 'Website URL',
-                        'name' => 'url',
-                        'type' => 'url',
-                        'required' => 1,
-                        'wrapper' => ['width' => '50'],
-                    ],
-                    [
-                        'key' => 'field_partner_logo',
-                        'label' => 'Logo',
-                        'name' => 'logoUrl',
-                        'type' => 'image',
-                        'return_format' => 'url',
-                        'preview_size' => 'thumbnail',
-                        'wrapper' => ['width' => '50'],
-                        'instructions' => 'Logo für die Anzeige im Nexus Terminal',
-                    ],
-                ],
-            ],
-        ],
-        'location' => [
-            [
-                ['param' => 'options_page', 'operator' => '==', 'value' => 'civerse-marketplace-settings'],
-            ],
-        ],
-    ]);
-    */
+    
 }

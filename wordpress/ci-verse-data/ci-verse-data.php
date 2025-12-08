@@ -1,139 +1,38 @@
 <?php
 /**
  * Plugin Name: CI-Verse Data
- * Description: Custom Post Types und REST API für die CI-Verse 3D-Bildungslandschaft
- * Version: 1.0.0
- * Author: Comenius-Institut
+ * Description: REST API für die CI-Verse 3D-Bildungslandschaft. CPTs und Fields werden über ACF Pro verwaltet.
+ * Version: 2.0.0
+ * Author: Joachim Happel
+ * Author URI: https://joachimhappel.de
  * Text Domain: ci-verse
+ * Requires Plugins: advanced-custom-fields-pro
  */
 
 if (!defined('ABSPATH')) exit;
 
-// ACF Felder laden
-require_once plugin_dir_path(__FILE__) . 'acf-fields.php';
-
 // ============================================================================
-// CUSTOM POST TYPES
+// ACF OPTIONS PAGE (muss per PHP registriert werden)
 // ============================================================================
 
-add_action('init', 'civerse_register_post_types');
+add_action('acf/init', 'civerse_register_options_page');
 
-function civerse_register_post_types() {
+function civerse_register_options_page() {
+    if (!function_exists('acf_add_options_page')) return;
     
-    // CPT: Plattformen
-    register_post_type('civerse_platform', [
-        'labels' => [
-            'name' => 'Plattformen',
-            'singular_name' => 'Plattform',
-            'add_new' => 'Neue Plattform',
-            'add_new_item' => 'Neue Plattform hinzufügen',
-            'edit_item' => 'Plattform bearbeiten',
-            'menu_name' => 'Plattformen',
-        ],
-        'public' => false,
-        'show_ui' => true,
-        'show_in_menu' => 'civerse-settings',
-        'show_in_rest' => true,
-        'supports' => ['title'],
-        'menu_icon' => 'dashicons-location',
+    acf_add_options_page([
+        'page_title' => 'Marktplatz Einstellungen',
+        'menu_title' => 'CI-Verse Marktplatz',
+        'menu_slug' => 'civerse-marketplace-settings',
+        'capability' => 'manage_options',
+        'position' => 33,
+        'icon_url' => 'dashicons-store',
+        'redirect' => false,
+        'post_id' => 'civerse_marketplace',
+        'autoload' => true,
+        'update_button' => 'Marktplatz speichern',
+        'updated_message' => 'Marktplatz-Einstellungen gespeichert.',
     ]);
-
-    // CPT: Projekte
-    register_post_type('civerse_project', [
-        'labels' => [
-            'name' => 'Projekte',
-            'singular_name' => 'Projekt',
-            'add_new' => 'Neues Projekt',
-            'add_new_item' => 'Neues Projekt hinzufügen',
-            'edit_item' => 'Projekt bearbeiten',
-            'menu_name' => 'Projekte',
-        ],
-        'public' => false,
-        'show_ui' => true,
-        'show_in_menu' => 'civerse-settings',
-        'show_in_rest' => true,
-        'supports' => ['title', 'thumbnail'],
-        'menu_icon' => 'dashicons-portfolio',
-    ]);
-
-    // CPT: Personal
-    register_post_type('civerse_staff', [
-        'labels' => [
-            'name' => 'Personal',
-            'singular_name' => 'Mitarbeiter',
-            'add_new' => 'Neue Person',
-            'add_new_item' => 'Neue Person hinzufügen',
-            'edit_item' => 'Person bearbeiten',
-            'menu_name' => 'Personal',
-        ],
-        'public' => false,
-        'show_ui' => true,
-        'show_in_menu' => 'civerse-settings',
-        'show_in_rest' => true,
-        'supports' => ['title', 'thumbnail'],
-        'menu_icon' => 'dashicons-groups',
-    ]);
-}
-
-// ============================================================================
-// ADMIN MENU
-// ============================================================================
-
-add_action('admin_menu', 'civerse_admin_menu');
-
-function civerse_admin_menu() {
-    add_menu_page(
-        'CI-Verse',
-        'CI-Verse',
-        'manage_options',
-        'civerse-settings',
-        'civerse_settings_page',
-        'dashicons-building',
-        30
-    );
-    
-    add_submenu_page(
-        'civerse-settings',
-        'API Export',
-        'API Export',
-        'manage_options',
-        'civerse-api',
-        'civerse_api_page'
-    );
-}
-
-function civerse_settings_page() {
-    $api_url = rest_url('civerse/v1/world');
-    ?>
-    <div class="wrap">
-        <h1>CI-Verse Einstellungen</h1>
-        <div class="card" style="max-width: 600px; padding: 20px;">
-            <h2>Willkommen bei CI-Verse</h2>
-            <p>Verwalten Sie hier die Inhalte für die 3D-Bildungslandschaft:</p>
-            <ul>
-                <li><strong>Plattformen</strong> - Die 6 Themen-Inseln (B1-B3, Q1-Q3)</li>
-                <li><strong>Projekte</strong> - Alle Projekte und Initiativen</li>
-                <li><strong>Personal</strong> - Mitarbeiter und Ansprechpartner</li>
-                <li><strong>Marktplatz</strong> - Zentrale S-Plattform mit Institut, News, Events</li>
-            </ul>
-            <p><a href="<?php echo esc_url($api_url); ?>" target="_blank" class="button button-primary">API Endpoint testen</a></p>
-        </div>
-    </div>
-    <?php
-}
-
-function civerse_api_page() {
-    $api_url = rest_url('civerse/v1/world');
-    ?>
-    <div class="wrap">
-        <h1>API Export</h1>
-        <div class="card" style="max-width: 800px; padding: 20px;">
-            <h2>REST API Endpoint</h2>
-            <p><code style="background: #f0f0f0; padding: 10px; display: block;"><?php echo esc_url($api_url); ?></code></p>
-            <p><a href="<?php echo esc_url($api_url); ?>" target="_blank" class="button">JSON anzeigen</a></p>
-        </div>
-    </div>
-    <?php
 }
 
 // ============================================================================
@@ -169,13 +68,13 @@ function civerse_get_partner_connections() {
     
     return array_map(function($partner) {
         return [
-            'id' => $partner['id'],
-            'name' => $partner['name'],
-            'shortName' => $partner['shortName'],
+            'id' => $partner['id'] ?? '',
+            'name' => $partner['name'] ?? '',
+            'shortName' => $partner['shortName'] ?? '',
             'logoUrl' => is_array($partner['logoUrl']) ? $partner['logoUrl']['url'] : ($partner['logoUrl'] ?? ''),
             'color' => $partner['color'] ?? '#3b82f6',
-            'url' => $partner['url'],
-            'category' => $partner['category'],
+            'url' => $partner['url'] ?? '',
+            'category' => $partner['category'] ?? '',
         ];
     }, $partners);
 }
@@ -199,13 +98,13 @@ function civerse_get_marketplace() {
                 }
             }
             return [
-                'id' => 's-' . sanitize_title($stand['title']),
-                'title' => $stand['title'],
-                'type' => $stand['type'],
-                'icon' => $stand['icon'],
-                'description' => $stand['description'],
+                'id' => 's-' . sanitize_title($stand['title'] ?? 'stand'),
+                'title' => $stand['title'] ?? '',
+                'type' => $stand['type'] ?? 'info',
+                'icon' => $stand['icon'] ?? '',
+                'description' => $stand['description'] ?? '',
                 'display' => [
-                    'color' => $stand['color'],
+                    'color' => $stand['color'] ?? '#64748b',
                     'logoUrl' => $stand['logo']['url'] ?? '',
                     'bannerImage' => $stand['banner']['url'] ?? '',
                 ],
@@ -217,10 +116,10 @@ function civerse_get_marketplace() {
         }, $stands),
         'wallPosters' => array_map(function($poster) {
             return [
-                'id' => 'leitlinie-' . $poster['perspective'],
-                'title' => $poster['title'],
+                'id' => 'leitlinie-' . ($poster['perspective'] ?? 'unknown'),
+                'title' => $poster['title'] ?? '',
                 'imageUrl' => $poster['image']['url'] ?? '',
-                'perspective' => $poster['perspective'],
+                'perspective' => $poster['perspective'] ?? '',
             ];
         }, $wallPosters),
     ];
@@ -228,6 +127,15 @@ function civerse_get_marketplace() {
 
 function civerse_get_platforms() {
     $platforms = [];
+    
+    // Alle Projekte holen für automatische Zuordnung
+    $all_projects = get_posts([
+        'post_type' => 'civerse_project',
+        'posts_per_page' => -1,
+        'orderby' => 'title',
+        'order' => 'ASC',
+    ]);
+
     $posts = get_posts([
         'post_type' => 'civerse_platform',
         'posts_per_page' => -1,
@@ -240,31 +148,44 @@ function civerse_get_platforms() {
         if (!$id) continue;
         
         $aspects = get_field('platform_aspects', $post->ID) ?: [];
-        $wall_posters = get_field('platform_wall_posters', $post->ID) ?: [];
-        $booth_projects = get_field('platform_booth_projects', $post->ID) ?: [];
+        
+        // Projekte automatisch zuordnen basierend auf 'project_departments'
+        $wall_posters = [];
+        $booth_projects = [];
+
+        foreach ($all_projects as $p) {
+            $p_id = get_field('project_id', $p->ID);
+            $departments = get_field('project_departments', $p->ID) ?: [];
+            $display_type = get_field('project_display_type', $p->ID) ?: 'booth';
+
+            if (in_array($id, $departments)) {
+                if ($display_type === 'wall' || $display_type === 'both') {
+                    $wall_posters[] = $p_id;
+                }
+                if ($display_type === 'booth' || $display_type === 'both') {
+                    $booth_projects[] = $p_id;
+                }
+            }
+        }
         
         $platforms[$id] = [
             'id' => $id,
-            'title' => get_field('platform_title', $post->ID),
-            'short' => get_field('platform_short', $post->ID),
-            'description' => get_field('platform_description', $post->ID),
+            'title' => get_field('platform_title', $post->ID) ?: $post->post_title,
+            'short' => get_field('platform_short', $post->ID) ?: $id,
+            'description' => get_field('platform_description', $post->ID) ?: '',
             'color' => get_field('platform_color', $post->ID) ?: '#64748b',
             'glowColor' => get_field('platform_glow_color', $post->ID) ?: '#94a3b8',
             'aspects' => array_map(function($aspect, $index) use ($id) {
                 return [
                     'id' => strtolower($id) . '-a' . ($index + 1),
-                    'title' => $aspect['title'],
-                    'icon' => $aspect['icon'],
-                    'description' => $aspect['description'],
+                    'title' => $aspect['title'] ?? '',
+                    'icon' => $aspect['icon'] ?? '',
+                    'description' => $aspect['description'] ?? '',
                     'contentUrl' => $aspect['content_url'] ?? null,
                 ];
             }, $aspects, array_keys($aspects)),
-            'wallPosters' => array_map(function($p) {
-                return get_field('project_id', $p->ID);
-            }, $wall_posters),
-            'boothProjects' => array_map(function($p) {
-                return get_field('project_id', $p->ID);
-            }, $booth_projects),
+            'wallPosters' => $wall_posters,
+            'boothProjects' => $booth_projects,
         ];
     }
     
@@ -287,25 +208,27 @@ function civerse_get_projects() {
         }, $staff_posts);
         
         $poster_image = get_field('project_poster_image', $post->ID);
+        $logo = get_field('project_logo', $post->ID);
         $screenshot = get_field('project_screenshot', $post->ID);
         
         $projects[] = [
-            'id' => get_field('project_id', $post->ID),
+            'id' => get_field('project_id', $post->ID) ?: 'p' . $post->ID,
             'title' => $post->post_title,
             'slug' => $post->post_name,
-            'externalUrl' => get_field('project_external_url', $post->ID),
+            'externalUrl' => get_field('project_external_url', $post->ID) ?: '',
             'departments' => get_field('project_departments', $post->ID) ?: [],
             'relatedDepartments' => get_field('project_related_departments', $post->ID) ?: [],
             'perspectives' => get_field('project_perspectives', $post->ID) ?: [],
             'targetGroups' => get_field('project_target_groups', $post->ID) ?: [],
             'displayType' => get_field('project_display_type', $post->ID) ?: 'booth',
             'staff' => $staff_ids,
-            'shortTeaser' => get_field('project_teaser', $post->ID),
-            'description' => get_field('project_description', $post->ID),
+            'shortTeaser' => get_field('project_teaser', $post->ID) ?: '',
+            'description' => get_field('project_description', $post->ID) ?: '',
             'display' => [
-                'slogan' => get_field('project_slogan', $post->ID),
+                'slogan' => get_field('project_slogan', $post->ID) ?: '',
                 'posterImage' => $poster_image['url'] ?? '',
                 'posterImageFormat' => get_field('project_poster_image_format', $post->ID) ?: 'portrait',
+                'logoUrl' => $logo['url'] ?? '',
                 'color' => get_field('project_color', $post->ID) ?: '#3b82f6',
                 'screenshotUrl' => $screenshot['url'] ?? '',
             ],
@@ -326,34 +249,15 @@ function civerse_get_staff() {
     
     foreach ($posts as $post) {
         $staff[] = [
-            'id' => get_field('staff_id', $post->ID),
+            'id' => get_field('staff_id', $post->ID) ?: 'm' . $post->ID,
             'name' => $post->post_title,
             'avatarUrl' => get_the_post_thumbnail_url($post->ID, 'thumbnail') ?: '',
-            'role' => get_field('staff_role', $post->ID),
-            'email' => get_field('staff_email', $post->ID),
+            'role' => get_field('staff_role', $post->ID) ?: '',
+            'email' => get_field('staff_email', $post->ID) ?: '',
         ];
     }
     
     return $staff;
-}
-
-// ============================================================================
-// ACF OPTIONS PAGE
-// ============================================================================
-
-add_action('acf/init', 'civerse_acf_options_page');
-
-function civerse_acf_options_page() {
-    if (!function_exists('acf_add_options_page')) return;
-    
-    acf_add_options_page([
-        'page_title' => 'Marktplatz Einstellungen',
-        'menu_title' => 'Marktplatz',
-        'menu_slug' => 'civerse-marketplace-settings',
-        'parent_slug' => 'civerse-settings',
-        'post_id' => 'civerse_marketplace',
-        'capability' => 'manage_options',
-    ]);
 }
 
 // ============================================================================
@@ -369,3 +273,120 @@ add_action('rest_api_init', function() {
         return $value;
     });
 }, 15);
+
+// ============================================================================
+// ADMIN HINWEISE
+// ============================================================================
+
+add_action('admin_notices', function() {
+    if (!class_exists('ACF')) {
+        echo '<div class="notice notice-error"><p><strong>CI-Verse Data:</strong> Dieses Plugin benötigt ACF Pro. Bitte installieren und aktivieren Sie ACF Pro.</p></div>';
+    }
+});
+
+// ============================================================================
+// FRONTEND APP HOSTING unter /ci-verse
+// ============================================================================
+
+// Rewrite Rule für /ci-verse
+add_action('init', 'civerse_add_rewrite_rules');
+
+function civerse_add_rewrite_rules() {
+    // Hauptroute /ci-verse
+    add_rewrite_rule('^ci-verse/?$', 'index.php?civerse_app=1', 'top');
+    // Alle Unterrouten /ci-verse/...
+    add_rewrite_rule('^ci-verse/(.*)$', 'index.php?civerse_app=1&civerse_path=$matches[1]', 'top');
+}
+
+// Query Vars registrieren
+add_filter('query_vars', function($vars) {
+    $vars[] = 'civerse_app';
+    $vars[] = 'civerse_path';
+    return $vars;
+});
+
+// Template für die App
+add_action('template_redirect', 'civerse_app_template');
+
+function civerse_app_template() {
+    $is_app = get_query_var('civerse_app');
+    if (!$is_app) return;
+    
+    $path = get_query_var('civerse_path', '');
+    $build_dir = plugin_dir_path(__FILE__) . 'build/';
+    $build_url = plugin_dir_url(__FILE__) . 'build/';
+    
+    // Statische Assets direkt ausliefern (_app/, assets/)
+    if (preg_match('/^_app\//', $path) || preg_match('/^assets\//', $path)) {
+        $file_path = $build_dir . $path;
+        if (file_exists($file_path)) {
+            civerse_serve_static_file($file_path);
+            exit;
+        }
+    }
+    
+    // Für alle anderen Routen: index.html ausliefern (SPA-Routing)
+    $index_file = $build_dir . 'index.html';
+    if (file_exists($index_file)) {
+        // Base-Path in der HTML anpassen
+        $html = file_get_contents($index_file);
+        
+        // Relativen Pfad zu absolutem WordPress-Pfad ändern
+        $html = str_replace('href="./', 'href="' . $build_url, $html);
+        $html = str_replace('src="./', 'src="' . $build_url, $html);
+        $html = str_replace('href="_app/', 'href="' . $build_url . '_app/', $html);
+        $html = str_replace('src="_app/', 'src="' . $build_url . '_app/', $html);
+        
+        header('Content-Type: text/html; charset=utf-8');
+        echo $html;
+        exit;
+    }
+    
+    // Fallback: 404
+    status_header(404);
+    echo '<h1>CI-Verse App nicht gefunden</h1>';
+    echo '<p>Bitte den Build-Ordner in das Plugin-Verzeichnis kopieren.</p>';
+    echo '<p>Erwartet: <code>' . esc_html($build_dir) . '</code></p>';
+    exit;
+}
+
+// Statische Dateien mit korrektem MIME-Type ausliefern
+function civerse_serve_static_file($file_path) {
+    $extension = pathinfo($file_path, PATHINFO_EXTENSION);
+    
+    $mime_types = [
+        'js' => 'application/javascript',
+        'css' => 'text/css',
+        'json' => 'application/json',
+        'png' => 'image/png',
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'gif' => 'image/gif',
+        'svg' => 'image/svg+xml',
+        'webp' => 'image/webp',
+        'woff' => 'font/woff',
+        'woff2' => 'font/woff2',
+        'ttf' => 'font/ttf',
+        'ico' => 'image/x-icon',
+        'webmanifest' => 'application/manifest+json',
+    ];
+    
+    $content_type = $mime_types[$extension] ?? 'application/octet-stream';
+    
+    header('Content-Type: ' . $content_type);
+    header('Content-Length: ' . filesize($file_path));
+    header('Cache-Control: public, max-age=31536000, immutable'); // 1 Jahr Cache für immutable Assets
+    
+    readfile($file_path);
+}
+
+// Flush Rewrite Rules bei Plugin-Aktivierung
+register_activation_hook(__FILE__, function() {
+    civerse_add_rewrite_rules();
+    flush_rewrite_rules();
+});
+
+// Flush Rewrite Rules bei Plugin-Deaktivierung
+register_deactivation_hook(__FILE__, function() {
+    flush_rewrite_rules();
+});

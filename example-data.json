@@ -175,8 +175,8 @@
   "platforms": {
     "B1": {
       "id": "B1",
-      "title": "Frühkindliche Bildung",
-      "short": "Kita",
+      "title": "Bildung in der Schule",
+      "short": "Schule",
       "description": "Religiöse Bildung für Kinder von 0-6 Jahren",
       "color": "#fcd34d",
       "glowColor": "#fde68a",
@@ -190,8 +190,8 @@
     },
     "B2": {
       "id": "B2",
-      "title": "Schule & Jugend",
-      "short": "Schule",
+      "title": "Bildung im Kontext von Gemeinde",
+      "short": "Gemeinde",
       "description": "Bildungsangebote für Schule und Jugendarbeit",
       "color": "#fb923c",
       "glowColor": "#fdba74",
@@ -205,8 +205,8 @@
     },
     "B3": {
       "id": "B3",
-      "title": "Erwachsenenbildung",
-      "short": "Erwachsene",
+      "title": "Erwachsenen und Familienbildung",
+      "short": "Erwachsene und Familien",
       "description": "Fortbildung und Lebenslanges Lernen",
       "color": "#f87171",
       "glowColor": "#fca5a5",
@@ -220,7 +220,7 @@
     },
     "Q1": {
       "id": "Q1",
-      "title": "Forschung",
+      "title": "Evangelische Bildungsberichterstattung und Empirische Bildungsforschung",
       "short": "Forschung",
       "description": "Wissenschaftliche Studien und Publikationen",
       "color": "#a78bfa",
@@ -235,7 +235,7 @@
     },
     "Q2": {
       "id": "Q2",
-      "title": "Europa & Internationales",
+      "title": "Evangelische Bildungsverantwortung in Europa",
       "short": "Europa",
       "description": "Internationale Kooperationen und EU-Projekte",
       "color": "#fbbf24",
@@ -252,7 +252,7 @@
       "id": "Q3",
       "title": "Digitalisierung",
       "short": "Digital",
-      "description": "Digitale Transformation und E-Learning",
+      "description": "Digitale Transformation und KI in der Bildung",
       "color": "#22d3ee",
       "glowColor": "#67e8f9",
       "aspects": [
