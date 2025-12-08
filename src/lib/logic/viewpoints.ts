@@ -393,7 +393,7 @@ function getLeitlinieViewPoint(
     const worldPosterZ = pz + wallZ + offsetWorldZ;
 
     const cameraY = getCameraY(py);
-    const viewDistance = 5;
+    const viewDistance = 6;
     const normalX = sinR;
     const normalZ = cosR;
 
