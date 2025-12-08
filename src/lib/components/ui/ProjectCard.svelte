@@ -64,7 +64,7 @@
                 {/if}
                 
                 <p style="color: #cbd5e1; font-size: 13px; line-height: 1.6; margin: 0 0 16px 0; flex: 1;">
-                    {project.shortTeaser || "Keine Beschreibung verfügbar."}
+                    {project.description || project.shortTeaser || "Keine Beschreibung verfügbar."}
                 </p>
 
                 {#if project.externalUrl}

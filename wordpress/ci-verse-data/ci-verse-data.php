@@ -301,6 +301,7 @@ function civerse_get_projects() {
             'displayType' => get_field('project_display_type', $post->ID) ?: 'booth',
             'staff' => $staff_ids,
             'shortTeaser' => get_field('project_teaser', $post->ID),
+            'description' => get_field('project_description', $post->ID),
             'display' => [
                 'slogan' => get_field('project_slogan', $post->ID),
                 'posterImage' => $poster_image['url'] ?? '',

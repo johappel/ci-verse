@@ -40,7 +40,8 @@ export interface ProjectData {
     targetGroups: TargetGroup[];
     displayType: 'booth' | 'wall' | 'both';  // Wie wird das Projekt angezeigt?
     staff: string[]; // IDs
-    shortTeaser?: string;
+    shortTeaser?: string;      // Kurzer Teaser für Poster-Darstellung
+    description?: string;      // Ausführliche Beschreibung für Detail-Dialog
     display?: ProjectDisplay;
     // Legacy (für Abwärtskompatibilität)
     screenshotUrl?: string;

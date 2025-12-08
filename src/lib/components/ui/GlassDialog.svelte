@@ -172,8 +172,8 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(2px);
-            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         "></div>
         
         <!-- Dialog Box -->

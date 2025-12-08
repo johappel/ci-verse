@@ -38,11 +38,20 @@
         },
         {
             "key": "field_project_teaser",
-            "label": "Kurzbeschreibung",
+            "label": "Kurzer Teaser (Poster)",
             "name": "project_teaser",
+            "type": "text",
+            "maxlength": 60,
+            "instructions": "Kurzer Teaser für die Poster-Darstellung auf der Messewand (max. 60 Zeichen)."
+        },
+        {
+            "key": "field_project_description",
+            "label": "Beschreibung",
+            "name": "project_description",
             "type": "textarea",
-            "rows": 2,
-            "maxlength": 270
+            "rows": 3,
+            "maxlength": 500,
+            "instructions": "Ausführliche Beschreibung für den Detail-Dialog (max. 500 Zeichen). Wird anstelle des Teasers im Projektdetails angezeigt."
         },
         {
             "key": "field_project_tab_zuordnung",

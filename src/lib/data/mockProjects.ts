@@ -104,7 +104,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['0-3', '4-6'],
         displayType: 'booth',
         staff: ['m1', 'm2'],
-        shortTeaser: 'Religiöse Bildung für die Kleinsten - spielerisch, respektvoll, entwicklungsgerecht.',
+        shortTeaser: 'Religiöse Bildung für die Kleinsten',
+        description: 'Religiöse Bildung für die Kleinsten - spielerisch, respektvoll, entwicklungsgerecht. Das Projekt unterstützt Erzieher*innen bei der Integration religiöser Themen in den Kita-Alltag.',
         display: {
             slogan: 'Glaube entdecken von Anfang an',
             posterImage: 'https://picsum.photos/seed/kita-poster/800/1200',
@@ -122,7 +123,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['adults', 'employees'],
         displayType: 'both',
         staff: ['m3'],
-        shortTeaser: 'Moderne Tools für die Gemeindearbeit - effizient, transparent und zukunftsorientiert.',
+        shortTeaser: 'Gemeinde digital gestalten',
+        description: 'Moderne Tools für die Gemeindearbeit - effizient, transparent und zukunftsorientiert. Von Mitgliederverwaltung bis Kommunikationsplattformen bieten wir praxiserprobte Lösungen.',
         display: {
             slogan: 'Gemeinde digital gestalten',
             posterImage: 'https://picsum.photos/seed/digital-poster/800/1200',
@@ -140,7 +142,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: [],
         displayType: 'wall',
         staff: ['m1'],
-        shortTeaser: 'Evidenzbasierte Forschung zur evangelischen Bildungslandschaft in Deutschland.',
+        shortTeaser: 'Wissen schafft Bildung',
+        description: 'Evidenzbasierte Forschung zur evangelischen Bildungslandschaft in Deutschland. Die Forschungsstelle analysiert Trends, erstellt Statistiken und liefert wissenschaftliche Grundlagen für bildungspolitische Entscheidungen.',
         display: {
             slogan: 'Wissen schafft Bildung',
             posterImage: 'https://picsum.photos/seed/research-poster/1200/800',
@@ -159,7 +162,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees'],
         displayType: 'booth',
         staff: ['m2', 'm4'],
-        shortTeaser: 'Systematische Qualitätsentwicklung für evangelische Kindertageseinrichtungen.',
+        shortTeaser: 'Qualität, die Kinder stärkt',
+        description: 'Systematische Qualitätsentwicklung für evangelische Kindertageseinrichtungen. Mit praxisnahen Instrumenten und Begleitung unterstützen wir Teams bei der kontinuierlichen Verbesserung ihrer pädagogischen Arbeit.',
         display: {
             slogan: 'Qualität, die Kinder stärkt',
             posterImage: 'https://picsum.photos/seed/quali-poster/800/1200',
@@ -178,7 +182,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['11-14', '15-18'],
         displayType: 'both',
         staff: ['m3', 'm5'],
-        shortTeaser: 'Die digitale Begleitung für die Konfirmandenzeit - interaktiv und jugendgerecht.',
+        shortTeaser: 'Konfi goes digital',
+        description: 'Die digitale Begleitung für die Konfirmandenzeit - interaktiv und jugendgerecht. Mit Quiz-Elementen, Gruppenaufgaben und direkter Kommunikation macht die App die Konfi-Zeit lebendig.',
         display: {
             slogan: 'Konfi goes digital',
             posterImage: 'https://picsum.photos/seed/konfi-poster/800/1200',
@@ -196,7 +201,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['adults', 'volunteers'],
         displayType: 'booth',
         staff: ['m4'],
-        shortTeaser: 'Qualifizierung und Wertschätzung für ehrenamtlich Engagierte.',
+        shortTeaser: 'Ehrenamt verdient Bildung',
+        description: 'Qualifizierung und Wertschätzung für ehrenamtlich Engagierte. Die Akademie bietet maßgeschneiderte Fortbildungen, Vernetzungsmöglichkeiten und Anerkennung für freiwilliges Engagement in Kirche und Gesellschaft.',
         display: {
             slogan: 'Ehrenamt verdient Bildung',
             posterImage: 'https://picsum.photos/seed/ehrenamt-poster/800/1200',
@@ -215,7 +221,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['4-6', '7-10'],
         displayType: 'wall',
         staff: ['m1', 'm6'],
-        shortTeaser: 'Biblische Geschichten spielerisch entdecken - ein Konzept aus den USA.',
+        shortTeaser: 'Spielend Gott entdecken',
+        description: 'Biblische Geschichten spielerisch entdecken - ein Konzept aus den USA. Godly Play fördert religiöses Erleben durch offene Erzählformen, Materialien zum Anfassen und Raum für eigene Deutungen.',
         display: {
             slogan: 'Spielend Gott entdecken',
             posterImage: 'https://picsum.photos/seed/godly-poster/800/1200',
@@ -233,7 +240,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['7-10', '11-14', '15-18', 'employees'],
         displayType: 'both',
         staff: ['m5', 'm6'],
-        shortTeaser: 'Unterstützung und Begleitung in schulischen Krisensituationen.',
+        shortTeaser: 'Da sein, wenn es zählt',
+        description: 'Unterstützung und Begleitung in schulischen Krisensituationen. Das Netzwerk verbindet Schulseelsorger*innen, bietet Supervision, Fortbildungen und entwickelt gemeinsam Standards für seelsorgerliche Begleitung.',
         display: {
             slogan: 'Da sein, wenn es zählt',
             posterImage: 'https://picsum.photos/seed/seelsorge-poster/800/1200',
@@ -252,7 +260,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['seniors'],
         displayType: 'booth',
         staff: ['m4', 'm3'],
-        shortTeaser: 'Digitale Teilhabe für die ältere Generation ermöglichen.',
+        shortTeaser: 'Nie zu alt für Neues',
+        description: 'Digitale Teilhabe für die ältere Generation ermöglichen. Mit geduldiger Begleitung, seniorengerechten Materialien und lokalen Lerngruppen erschließen wir die digitale Welt für Menschen im Ruhestand.',
         display: {
             slogan: 'Nie zu alt für Neues',
             posterImage: 'https://picsum.photos/seed/senioren-poster/800/1200',
@@ -270,7 +279,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees'],
         displayType: 'wall',
         staff: ['m1'],
-        shortTeaser: 'Interaktive Karte aller evangelischen Bildungseinrichtungen.',
+        shortTeaser: 'Bildung sichtbar machen',
+        description: 'Interaktive Karte aller evangelischen Bildungseinrichtungen. Der Bildungsatlas macht die Vielfalt protestantischer Bildungsarbeit sichtbar und unterstützt Vernetzung und Kooperation.',
         display: {
             slogan: 'Bildung sichtbar machen',
             posterImage: 'https://picsum.photos/seed/atlas-poster/1200/800',
@@ -289,7 +299,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees'],
         displayType: 'booth',
         staff: ['m5'],
-        shortTeaser: 'Umfangreiche Materialsammlung für den Religionsunterricht.',
+        shortTeaser: 'Material für guten Unterricht',
+        description: 'Umfangreiche Materialsammlung für den Religionsunterricht. Lehrkräfte finden hier erprobte Unterrichtsentwürfe, kreative Medien und didaktische Hilfen für alle Schulstufen.',
         display: {
             slogan: 'Material für guten Unterricht',
             posterImage: 'https://picsum.photos/seed/material-poster/800/1200',
@@ -307,7 +318,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['young-adults', 'employees'],
         displayType: 'wall',
         staff: ['m6', 'm1'],
-        shortTeaser: 'Europäische Zusammenarbeit in der religiösen Bildung.',
+        shortTeaser: 'Bildung ohne Grenzen',
+        description: 'Europäische Zusammenarbeit in der religiösen Bildung. Das Erasmus+ Projekt bringt Partner aus verschiedenen Ländern zusammen, um gemeinsame Standards und Best Practices zu entwickeln.',
         display: {
             slogan: 'Bildung ohne Grenzen',
             posterImage: 'https://picsum.photos/seed/erasmus-poster/1200/800',
@@ -326,7 +338,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['adults', 'employees'],
         displayType: 'booth',
         staff: ['m6'],
-        shortTeaser: 'Interreligiöser und interkonfessioneller Dialog in der Bildung.',
+        shortTeaser: 'Vielfalt verbindet',
+        description: 'Interreligiöser und interkonfessioneller Dialog in der Bildung. Das Projekt fördert Begegnung, gegenseitiges Verstehen und respektvolles Miteinander zwischen den Konfessionen und Religionen.',
         display: {
             slogan: 'Vielfalt verbindet',
             posterImage: 'https://picsum.photos/seed/oekumene-poster/800/800',
@@ -345,7 +358,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees'],
         displayType: 'booth',
         staff: ['m3'],
-        shortTeaser: 'Praktische Anwendung von KI-Tools in der Bildungsarbeit.',
+        shortTeaser: 'KI verstehen und nutzen',
+        description: 'Praktische Anwendung von KI-Tools in der Bildungsarbeit. In Workshops und Webinaren lernen Teilnehmende, wie sie ChatGPT & Co. sinnvoll und verantwortungsvoll für ihre Arbeit nutzen können.',
         display: {
             slogan: 'KI verstehen und nutzen',
             posterImage: 'https://picsum.photos/seed/ki-poster/800/1200',
@@ -363,7 +377,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees'],
         displayType: 'both',
         staff: ['m3', 'm4'],
-        shortTeaser: 'Beratung und Unterstützung bei Datenschutzfragen.',
+        shortTeaser: 'Sicher digital arbeiten',
+        description: 'Beratung und Unterstützung bei Datenschutzfragen. Das Helpdesk bietet konkrete Hilfe bei DSGVO-Anforderungen, erstellt Mustervorlagen und schult Verantwortliche in Gemeinden und Einrichtungen.',
         display: {
             slogan: 'Sicher digital arbeiten',
             posterImage: 'https://picsum.photos/seed/dsgvo-poster/800/1200',
@@ -381,7 +396,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['Religionspädagog*innen', 'Wissenschaftler*innen', 'Praxiserprobte'],
         displayType: 'wall',
         staff: ['m4'],
-        shortTeaser: 'rpi-virtuell ist eine digitale Plattform für Lehr- und Fachkräfte, Wissenschaft und Praxis der religionsbezogenen Bildung, die eine kuratierte Materialiensammlung, die Möglichkeit zum Austausch und zur Vernetzung in Communities sowie regelmäßige Updates bietet.',
+        shortTeaser: 'Digitalität in der Religionspädagogik',
+        description: 'rpi-virtuell ist eine digitale Plattform für Lehr- und Fachkräfte, Wissenschaft und Praxis der religionsbezogenen Bildung, die eine kuratierte Materialiensammlung, die Möglichkeit zum Austausch und zur Vernetzung in Communities sowie regelmäßige Updates bietet.',
         display: {
             slogan: 'Digitalität in der Religionspädagogik',
             posterImage: '/assets/images/rpi-dechow-lohrer-dekt-2023.png',
@@ -399,7 +415,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees'],
         displayType: 'booth',
         staff: ['m3'],
-        shortTeaser: 'Experimentierräume für digitale Innovation in der Bildungsarbeit.',
+        shortTeaser: 'Zukunft ausprobieren',
+        description: 'Experimentierräume für digitale Innovation in der Bildungsarbeit. Hier werden neue Technologien erprobt und für den Einsatz in Gemeinden und Einrichtungen aufbereitet.',
         display: {
             slogan: 'Zukunft ausprobieren',
             posterImage: 'https://picsum.photos/seed/labs-poster/800/1200',
@@ -417,7 +434,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees'],
         displayType: 'wall',
         staff: ['m3', 'm4'],
-        shortTeaser: 'Sichere und datenschutzkonforme Cloud-Lösungen für kirchliche Einrichtungen.',
+        shortTeaser: 'In der Cloud, geerdet',
+        description: 'Sichere und datenschutzkonforme Cloud-Lösungen für kirchliche Einrichtungen. Wir bieten Beratung, Implementierung und Support für moderne IT-Infrastruktur.',
         display: {
             slogan: 'In der Cloud, geerdet',
             posterImage: 'https://picsum.photos/seed/cloud-poster/1200/800',
@@ -436,7 +454,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees', 'adults'],
         displayType: 'booth',
         staff: ['m3'],
-        shortTeaser: 'Professionelle Online-Fortbildungen und virtuelle Veranstaltungen.',
+        shortTeaser: 'Lernen ohne Grenzen',
+        description: 'Professionelle Online-Fortbildungen und virtuelle Veranstaltungen. Die Plattform ermöglicht interaktive Webinare, Kurse und Konferenzen für die kirchliche Bildungsarbeit.',
         display: {
             slogan: 'Lernen ohne Grenzen',
             posterImage: 'https://picsum.photos/seed/webinar-poster/800/1200',
@@ -454,7 +473,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees'],
         displayType: 'wall',
         staff: ['m4'],
-        shortTeaser: 'Digitale Bildungsmedien für alle zugänglich machen.',
+        shortTeaser: 'Teilhabe digital',
+        description: 'Digitale Bildungsmedien für alle zugänglich machen. Das Projekt entwickelt Standards und bietet praktische Hilfen zur barrierefreien Gestaltung von Webseiten, Dokumenten und Videos.',
         display: {
             slogan: 'Teilhabe digital',
             posterImage: 'https://picsum.photos/seed/access-poster/800/1200',
@@ -472,7 +492,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees', 'young-adults'],
         displayType: 'booth',
         staff: ['m3', 'm5'],
-        shortTeaser: 'Seelsorge und Verkündigung in sozialen Netzwerken.',
+        shortTeaser: 'Nah bei den Menschen',
+        description: 'Seelsorge und Verkündigung in sozialen Netzwerken. Das Projekt begleitet Mitarbeitende beim professionellen Einsatz von Instagram, TikTok und anderen Plattformen für die kirchliche Arbeit.',
         display: {
             slogan: 'Nah bei den Menschen',
             posterImage: 'https://picsum.photos/seed/social-poster/800/1200',
@@ -490,7 +511,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees', 'young-adults'],
         displayType: 'both',
         staff: ['m3'],
-        shortTeaser: 'Virtuelle Realität für spirituelle Erfahrungen und Kirchenpädagogik.',
+        shortTeaser: 'Räume neu erleben',
+        description: 'Virtuelle Realität für spirituelle Erfahrungen und Kirchenpädagogik. Das innovative Projekt ermöglicht virtuelle Kirchenbegehungen, immersive Bibelgeschichten und neue Zugänge zum Glauben.',
         display: {
             slogan: 'Räume neu erleben',
             posterImage: 'https://picsum.photos/seed/vr-poster/800/1200',
@@ -508,7 +530,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees'],
         displayType: 'wall',
         staff: ['m3', 'm6'],
-        shortTeaser: 'Professionelle Podcast-Produktion für kirchliche und pädagogische Inhalte.',
+        shortTeaser: 'Hörbar Glauben',
+        description: 'Professionelle Podcast-Produktion für kirchliche und pädagogische Inhalte. Das Studio bietet Technik, Beratung und Schulungen für eigene Audio-Formate.',
         display: {
             slogan: 'Hörbar Glauben',
             posterImage: 'https://picsum.photos/seed/podcast-poster/800/800',
@@ -527,7 +550,8 @@ export const mockProjects: ProjectData[] = [
         targetGroups: ['employees', 'young-adults'],
         displayType: 'booth',
         staff: ['m3'],
-        shortTeaser: 'Programmier-Workshops und digitale Kompetenzen für kirchliche Mitarbeitende.',
+        shortTeaser: 'Code mit Sinn',
+        description: 'Programmier-Workshops und digitale Kompetenzen für kirchliche Mitarbeitende. Von Grundlagen bis Webentwicklung bieten wir praxisnahe Kurse für alle Erfahrungsstufen.',
         display: {
             slogan: 'Code mit Sinn',
             posterImage: 'https://picsum.photos/seed/coding-poster/800/1200',
