@@ -393,22 +393,21 @@ function getLeitlinieViewPoint(
     const worldPosterZ = pz + wallZ + offsetWorldZ;
 
     const cameraY = getCameraY(py);
-    const viewDistance = 4;
+    const viewDistance = 5;
     const normalX = sinR;
     const normalZ = cosR;
 
-    const cameraYOffset = 0.5; // Kamera höher als Poster-Mitte
-    const cameraXOffset = 1.5; // Kamera etwas seitlich versetzt
+    const cameraYOffset = 1.0; // Kamera höher als Poster-Mitte
     
 
     return {
         camera: {
-            x: worldPosterX + normalX * viewDistance-cameraXOffset,
+            x: worldPosterX + normalX * viewDistance,
             y: cameraY-cameraYOffset,
             z: worldPosterZ + normalZ * viewDistance
         },
         target: {
-            x: worldPosterX-cameraXOffset,
+            x: worldPosterX,
             y: cameraY-cameraYOffset,
             z: worldPosterZ
         },
