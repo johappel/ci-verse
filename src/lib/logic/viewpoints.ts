@@ -164,16 +164,17 @@ function getBoothViewPoint(
     // Banner-Höhe
     const boothHeight = 3.5; // Aus ExhibitBooth.svelte (s.height)
     const bannerCenterY = py + 3.5 + boothHeight / 2 + 0.3;
+    const cameraYOffset = 0.5; // Kamera niedrieger als Poster-Mitte
 
     return {
         camera: {
             x: worldBoothX + worldOffsetX,
-            y: bannerCenterY,
+            y: bannerCenterY-cameraYOffset,
             z: worldBoothZ + worldOffsetZ
         },
         target: {
             x: worldBoothX,
-            y: bannerCenterY,
+            y: bannerCenterY-cameraYOffset,
             z: worldBoothZ
         },
         distance: viewDistance
@@ -392,19 +393,23 @@ function getLeitlinieViewPoint(
     const worldPosterZ = pz + wallZ + offsetWorldZ;
 
     const cameraY = getCameraY(py);
-    const viewDistance = 8;
+    const viewDistance = 4;
     const normalX = sinR;
     const normalZ = cosR;
 
+    const cameraYOffset = 0.5; // Kamera höher als Poster-Mitte
+    const cameraXOffset = 1.5; // Kamera etwas seitlich versetzt
+    
+
     return {
         camera: {
-            x: worldPosterX + normalX * viewDistance,
-            y: cameraY,
+            x: worldPosterX + normalX * viewDistance-cameraXOffset,
+            y: cameraY-cameraYOffset,
             z: worldPosterZ + normalZ * viewDistance
         },
         target: {
-            x: worldPosterX,
-            y: cameraY,
+            x: worldPosterX-cameraXOffset,
+            y: cameraY-cameraYOffset,
             z: worldPosterZ
         },
         distance: viewDistance
