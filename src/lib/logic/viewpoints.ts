@@ -164,16 +164,20 @@ function getBoothViewPoint(
     // Banner-Höhe
     const boothHeight = 3.5; // Aus ExhibitBooth.svelte (s.height)
     const bannerCenterY = py + 3.5 + boothHeight / 2 + 0.3;
+    
+    // Kamera etwas höher für bessere Sicht auf flachen Bildschirmen
+    const cameraYOffset = 1.5; // Kamera höher als Poster-Mitte
+    const targetYOffset = -0.5; // Blickziel leicht unter Poster-Mitte
 
     return {
         camera: {
             x: worldBoothX + worldOffsetX,
-            y: bannerCenterY,
+            y: bannerCenterY + cameraYOffset,
             z: worldBoothZ + worldOffsetZ
         },
         target: {
             x: worldBoothX,
-            y: bannerCenterY,
+            y: bannerCenterY + targetYOffset,
             z: worldBoothZ
         },
         distance: viewDistance
@@ -255,20 +259,27 @@ function getWallViewPoint(
     const worldPosterZ = pz + wallZ + offsetWorldZ;
 
     // Kamera-Position
-    const cameraY = getCameraY(py);
+    const baseCameraY = getCameraY(py);
     const viewDistance = 6;
     const normalX = sinR;
     const normalZ = cosR;
+    
+    // Poster-Mitte (Wand-Höhe berücksichtigen) - wallHeight bereits oben definiert
+    const posterCenterY = py + 1.5 + wallHeight / 2; // Wand startet bei Y+1.5
+    
+    // Kamera etwas höher für bessere Sicht auf flachen Bildschirmen
+    const cameraYOffset = 2.0; // Kamera höher als Poster-Mitte
+    const targetYOffset = -1.0; // Blickziel leicht unter Poster-Mitte
 
     return {
         camera: {
             x: worldPosterX + normalX * viewDistance,
-            y: cameraY,
+            y: posterCenterY + cameraYOffset,
             z: worldPosterZ + normalZ * viewDistance
         },
         target: {
             x: worldPosterX,
-            y: cameraY,
+            y: posterCenterY + targetYOffset,
             z: worldPosterZ
         },
         distance: viewDistance
@@ -392,16 +403,20 @@ function getLeitlinieViewPoint(
     const viewDistance = 8;
     const normalX = sinR;
     const normalZ = cosR;
+    
+    // Offset für bessere Sichtbarkeit auf kurzen Bildschirmen
+    const cameraYOffset = 1.5;  // Kamera höher als Poster-Mitte
+    const targetYOffset = -0.5; // Blickziel leicht unter Poster-Mitte
 
     return {
         camera: {
             x: worldPosterX + normalX * viewDistance,
-            y: cameraY,
+            y: cameraY + cameraYOffset,
             z: worldPosterZ + normalZ * viewDistance
         },
         target: {
             x: worldPosterX,
-            y: cameraY,
+            y: cameraY + targetYOffset,
             z: worldPosterZ
         },
         distance: viewDistance
