@@ -1,13 +1,141 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Comenius Institut</title>
+		<style>
+			/* Dunkler wabernder Hintergrund vor JS-Laden - verhindert weißen Flash */
+			html, body {
+				background-color: #0f172a;
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+			}
+			/* Wabernder Gradient-Hintergrund */
+			.initial-loader {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 99999;
+				background: linear-gradient(
+					-45deg,
+					#0f172a,
+					#1e1b4b,
+					#0c1929,
+					#1a1a2e,
+					#0f172a
+				);
+				background-size: 400% 400%;
+				animation: gradient-wave 8s ease infinite;
+			}
+			@keyframes gradient-wave {
+				0% { background-position: 0% 50%; }
+				50% { background-position: 100% 50%; }
+				100% { background-position: 0% 50%; }
+			}
+			/* Subtile Nebel-Schichten */
+			.initial-loader::before,
+			.initial-loader::after {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				pointer-events: none;
+			}
+			.initial-loader::before {
+				background: radial-gradient(
+					ellipse 80% 50% at 50% 100%,
+					rgba(96, 165, 250, 0.1) 0%,
+					transparent 60%
+				);
+				animation: pulse-glow 4s ease-in-out infinite;
+			}
+			.initial-loader::after {
+				background: radial-gradient(
+					ellipse 60% 40% at 30% 70%,
+					rgba(139, 92, 246, 0.08) 0%,
+					transparent 50%
+				),
+				radial-gradient(
+					ellipse 50% 30% at 70% 60%,
+					rgba(34, 211, 238, 0.06) 0%,
+					transparent 50%
+				);
+				animation: drift 12s ease-in-out infinite;
+			}
+			@keyframes pulse-glow {
+				0%, 100% { opacity: 0.5; transform: scale(1); }
+				50% { opacity: 1; transform: scale(1.05); }
+			}
+			@keyframes drift {
+				0%, 100% { transform: translate(0, 0); }
+				33% { transform: translate(2%, -1%); }
+				66% { transform: translate(-1%, 2%); }
+			}
+			/* Ladeindikator in der Mitte */
+			.loader-spinner {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 1rem;
+			}
+			.loader-spinner .ring {
+				width: 50px;
+				height: 50px;
+				border: 3px solid rgba(96, 165, 250, 0.2);
+				border-top-color: #60a5fa;
+				border-radius: 50%;
+				animation: spin 1s linear infinite;
+			}
+			.loader-spinner .text {
+				color: rgba(255, 255, 255, 0.5);
+				font-family: system-ui, sans-serif;
+				font-size: 0.875rem;
+				letter-spacing: 0.05em;
+			}
+			@keyframes spin {
+				to { transform: rotate(360deg); }
+			}
+			/* Verstecke Loader sobald App geladen */
+			.initial-loader.hidden {
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.5s ease;
+			}
+		</style>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
+		<!-- Initialer Loader - wabernder Hintergrund mit Spinner -->
+		<div class="initial-loader" id="initial-loader">
+			<div class="loader-spinner">
+				<div class="ring"></div>
+				<div class="text">Lädt...</div>
+			</div>
+		</div>
 		<div style="display: contents">%sveltekit.body%</div>
 		<!-- Portal target for modals/dialogs (rendered above everything) -->
 		<div id="portal-root"></div>
+		<script>
+			// Verstecke initialen Loader sobald SvelteKit bereit ist
+			if (document.getElementById('initial-loader')) {
+				// Kurze Verzögerung um sicherzustellen dass App gerendert ist
+				requestAnimationFrame(() => {
+					const loader = document.getElementById('initial-loader');
+					if (loader) loader.classList.add('hidden');
+					// Entferne nach Fade-Out
+					setTimeout(() => loader?.remove(), 300);
+				});
+			}
+		</script>
 	</body>
 </html>
