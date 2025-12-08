@@ -25,6 +25,7 @@
         "enableGlowRings": true,
         "enableEnergyFloor": true,
         "enableEnergyEffects": true,
+        "enableShuttleTrain": true,
         "lightBridgeQuality": "high"
       },
       "rendering": {
@@ -60,6 +61,7 @@
         "enableGlowRings": true,
         "enableEnergyFloor": true,
         "enableEnergyEffects": true,
+        "enableShuttleTrain": true,
         "lightBridgeQuality": "medium"
       },
       "rendering": {
@@ -95,6 +97,7 @@
         "enableGlowRings": false,
         "enableEnergyFloor": true,
         "enableEnergyEffects": false,
+        "enableShuttleTrain": false,
         "lightBridgeQuality": "low"
       },
       "rendering": {

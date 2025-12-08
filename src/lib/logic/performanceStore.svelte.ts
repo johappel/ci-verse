@@ -36,6 +36,7 @@ export interface PerformanceSettings {
     enableGlowRings: boolean;        // Plattform-Leucht-Ringe
     enableEnergyFloor: boolean;      // EnergyFloor auf Marktplatz (Energie-Ströme am Boden)
     enableEnergyEffects: boolean;    // EnergyBeam auf Marktplatz (vertikaler Strahl)
+    enableShuttleTrain: boolean;     // Animierter Zug am NexusTerminal
     lightBridgeQuality: 'high' | 'medium' | 'low';  // Lichtlinien-Qualität
     
     // Rendern
@@ -74,6 +75,7 @@ interface ConfigJSON {
             enableGlowRings: boolean;
             enableEnergyFloor?: boolean;
             enableEnergyEffects: boolean;
+            enableShuttleTrain?: boolean;
             lightBridgeQuality: 'high' | 'medium' | 'low';
         };
         rendering: { pixelRatio: number | 'auto'; antialias: boolean };
@@ -107,6 +109,7 @@ function convertPreset(preset: ConfigJSON['qualityPresets'][QualityLevel]): Perf
         enableGlowRings: preset.effects.enableGlowRings,
         enableEnergyFloor: preset.effects.enableEnergyFloor ?? preset.effects.enableEnergyEffects,
         enableEnergyEffects: preset.effects.enableEnergyEffects,
+        enableShuttleTrain: preset.effects.enableShuttleTrain ?? true,
         lightBridgeQuality: preset.effects.lightBridgeQuality,
         pixelRatio: preset.rendering.pixelRatio === 'auto' ? getDevicePixelRatio() : preset.rendering.pixelRatio,
         antialias: preset.rendering.antialias,
@@ -131,6 +134,7 @@ function getDefaultPresets(): Record<QualityLevel, PerformanceSettings> {
             enableGlowRings: true,
             enableEnergyFloor: true,
             enableEnergyEffects: true,
+            enableShuttleTrain: true,
             lightBridgeQuality: 'high',
             pixelRatio: getDevicePixelRatio(),
             antialias: true,
@@ -150,6 +154,7 @@ function getDefaultPresets(): Record<QualityLevel, PerformanceSettings> {
             enableGlowRings: true,
             enableEnergyFloor: true,
             enableEnergyEffects: true,
+            enableShuttleTrain: true,
             lightBridgeQuality: 'medium',
             pixelRatio: 1.0,
             antialias: true,
@@ -169,6 +174,7 @@ function getDefaultPresets(): Record<QualityLevel, PerformanceSettings> {
             enableGlowRings: false,
             enableEnergyFloor: true,     // Floor bleibt an (weniger GPU-Last)
             enableEnergyEffects: false,  // Beam deaktiviert für maximale Performance
+            enableShuttleTrain: false,   // Zug deaktiviert für maximale Performance
             lightBridgeQuality: 'low',
             pixelRatio: 0.5,
             antialias: false,

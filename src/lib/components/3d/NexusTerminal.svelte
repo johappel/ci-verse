@@ -16,6 +16,7 @@
     import DepartureBoard from './DepartureBoard.svelte';
     import { partnerConnections } from '$lib/data/mockProjects';
     import { worldStore } from '$lib/logic/store.svelte';
+    import { performanceStore } from '$lib/logic/performanceStore.svelte';
     import type { PartnerConnection, TrainStatus } from '$lib/types/project';
 
     interface Props {
@@ -200,6 +201,7 @@
     <!-- ========== ZUG ========== -->
     <!-- Position: Auf den Gleisen (Z=trackZ, Y=0.8 über Boden) -->
     <!-- Der ShuttleTrain bewegt sich intern auf Z, wir rotieren die ganze Gruppe um 90° -->
+    {#if performanceStore.settings.enableShuttleTrain}
     <T.Group position={[0, 0.8, trackZ]} rotation.y={Math.PI / 2}>
         <ShuttleTrain 
             partner={currentPartner}
@@ -207,6 +209,7 @@
             progress={trainProgress}
         />
     </T.Group>
+    {/if}
 
     <!-- ========== TERMINAL-SCHILD (klickbar) ========== -->
     {@const terminalWorldPos = {
