@@ -26,8 +26,6 @@
     import TransportPortal from './TransportPortal.svelte';
     import { worldStore } from '$lib/logic/store.svelte';
     import { performanceStore } from '$lib/logic/performanceStore.svelte';
-    import { getMarketplaceContent } from '$lib/data/mockProjects';
-    import { mockProjects } from '$lib/data/mockProjects';
     import type { ProjectData, Department, Perspective, TargetGroup } from '$lib/types/project';
 
     interface Props {
@@ -52,12 +50,12 @@
     let enableEnergyBeam = $derived(performanceStore.settings.enableEnergyEffects);
     let enableGlowRings = $derived(performanceStore.settings.enableGlowRings);
 
-    // Marketplace-Content laden (gecacht, ändert sich nie)
-    const marketplace = getMarketplaceContent(); // NICHT $derived - statisch!
+    // Marketplace-Content aus dem Store (reaktiv auf Datenladung)
+    let marketplace = $derived(worldStore.getMarketplaceContent());
 
-    // Farben aus Content-Daten (statisch)
-    const platformColor = marketplace?.color ?? platform.color;
-    const platformGlowColor = marketplace?.glowColor ?? platform.glowColor;
+    // Farben aus Content-Daten (reaktiv)
+    let platformColor = $derived(marketplace?.color ?? platform.color);
+    let platformGlowColor = $derived(marketplace?.glowColor ?? platform.glowColor);
 
     // Performance-Settings (ändern sich selten)
     const enableAnimations = $derived(performanceStore.settings.enableAnimations);
@@ -182,9 +180,9 @@
     ];
 
     // Institution-Stand aus den Daten finden
-    let institutionStand = $derived(marketplace.stands.find(s => s.type === 'institution'));
+    let institutionStand = $derived(marketplace?.stands?.find(s => s.type === 'institution'));
     // Terminal-Stände (publications, events)
-    let terminalStands = $derived(marketplace.stands.filter(s => s.type !== 'institution'));
+    let terminalStands = $derived(marketplace?.stands?.filter(s => s.type !== 'institution') ?? []);
 
     // ========== WANDSEGMENTE FÜR LEITLINIEN ==========
     // 3 Wände mit 6 Leitlinien, Wand hinter Turm bleibt frei
@@ -192,7 +190,7 @@
     
     // Dummy-Projekte für Leitlinien-Poster erstellen
     const leitlinienProjects = $derived(
-        marketplace.wallPosters.map((poster, index) => {
+        (marketplace?.wallPosters ?? []).map((poster, index) => {
             const project: ProjectData = {
                 id: poster.id,
                 title: poster.title,

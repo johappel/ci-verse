@@ -14,12 +14,6 @@
     import { getHexagonalLayout } from '$lib/logic/layout';
     import { worldStore } from '$lib/logic/store.svelte';
     import { performanceStore } from '$lib/logic/performanceStore.svelte';
-    import { 
-        getPlatformContent, 
-        getBoothProjectsForPlatform, 
-        getWallPostersForPlatform,
-        getRelatedProjectsForPlatform 
-    } from '$lib/data/mockProjects';
     import type { Object3D, Intersection } from 'three';
 
     // ============================================
@@ -44,15 +38,15 @@
     let isCurrentPlatform = $derived(currentPlatformId === platform.id);
     let isTransportTarget = $derived(transportTargetId === platform.id);
 
-    // Plattform-Content - GECACHT, nicht reaktiv auf worldStore
-    const platformContent = getPlatformContent(platform.id);
-    const boothProjects = getBoothProjectsForPlatform(platform.id);
-    const wallPosters = getWallPostersForPlatform(platform.id);
-    const relatedProjects = getRelatedProjectsForPlatform(platform.id);
+    // Plattform-Content - von worldStore (reaktiv auf Datenladung)
+    let platformContent = $derived(worldStore.getPlatformContent(platform.id));
+    let boothProjects = $derived(worldStore.getBoothProjectsForPlatform(platform.id));
+    let wallPosters = $derived(worldStore.getWallPostersForPlatform(platform.id));
+    let relatedProjects = $derived(worldStore.getRelatedProjectsForPlatform(platform.id));
 
-    // Farben aus Content-Daten (statisch)
-    const platformColor = platformContent?.color ?? platform.color;
-    const platformGlowColor = platformContent?.glowColor ?? platform.glowColor;
+    // Farben aus Content-Daten (reaktiv auf platformContent)
+    let platformColor = $derived(platformContent?.color ?? platform.color);
+    let platformGlowColor = $derived(platformContent?.glowColor ?? platform.glowColor);
     
     // Abgedunkelte Version der Plattform-Farbe für den Boden
     // Multipliziert RGB-Werte mit 0.25 für deutlich dunklere Darstellung
@@ -65,7 +59,7 @@
         const db = Math.floor(b * factor);
         return `#${dr.toString(16).padStart(2, '0')}${dg.toString(16).padStart(2, '0')}${db.toString(16).padStart(2, '0')}`;
     }
-    const darkPlatformColor = darkenColor(platformColor);
+    let darkPlatformColor = $derived(darkenColor(platformColor));
 
     // Referenzen für Spotlight-Targets (je Spot ein eigenes Target)
     let spotTargets: (Object3D | undefined)[] = $state(Array(6).fill(undefined));

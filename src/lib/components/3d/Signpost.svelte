@@ -3,7 +3,6 @@
     import { Text, Billboard } from '@threlte/extras';
     import { Spring } from 'svelte/motion';
     import type { ProjectData } from '$lib/types/project';
-    import { getPlatformContent } from '$lib/data/mockProjects';
     import { worldStore } from '$lib/logic/store.svelte';
 
     let { 
@@ -31,7 +30,7 @@
     // Generiere Hinweistext basierend auf Heimat-Plattformen
     function getHintText(project: ProjectData): string {
         const homePlatforms = project.departments
-            .map(id => getPlatformContent(id)?.short ?? id)
+            .map(id => worldStore.getPlatformContent(id)?.short ?? id)
             .join(' & ');
         return `→ ${homePlatforms}`;
     }

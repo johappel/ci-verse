@@ -14,7 +14,6 @@
     import { Text, HTML } from '@threlte/extras';
     import ShuttleTrain from './ShuttleTrain.svelte';
     import DepartureBoard from './DepartureBoard.svelte';
-    import { partnerConnections } from '$lib/data/mockProjects';
     import { worldStore } from '$lib/logic/store.svelte';
     import { performanceStore } from '$lib/logic/performanceStore.svelte';
     import type { PartnerConnection, TrainStatus } from '$lib/types/project';
@@ -60,29 +59,36 @@
         return (t - timing.start) / duration;
     });
 
+    // Partner aus dem Store
+    let partners = $derived(worldStore.partnerConnections);
+    
     // Aktueller Partner
-    let currentPartner = $derived(partnerConnections[currentPartnerIndex]);
+    let currentPartner = $derived(partners[currentPartnerIndex] ?? null);
 
     // Animation-Loop
     useTask((delta) => {
+        if (partners.length === 0) return; // Keine Partner geladen
+        
         const prevCycle = Math.floor(cycleTime / CYCLE_DURATION);
         cycleTime += delta;
         const newCycle = Math.floor(cycleTime / CYCLE_DURATION);
         
         // Neuer Zyklus = nächster Partner
         if (newCycle > prevCycle) {
-            currentPartnerIndex = (currentPartnerIndex + 1) % partnerConnections.length;
+            currentPartnerIndex = (currentPartnerIndex + 1) % partners.length;
         }
     });
 
     // ========== FAHRPLAN ==========
     function generateSchedule() {
+        if (partners.length === 0) return [];
+        
         const now = new Date();
         const scheduleEntries = [];
         
         for (let i = 0; i < 5; i++) {
-            const partnerIdx = (currentPartnerIndex + i) % partnerConnections.length;
-            const partner = partnerConnections[partnerIdx];
+            const partnerIdx = (currentPartnerIndex + i) % partners.length;
+            const partner = partners[partnerIdx];
             
             // Fake-Zeit generieren
             const mins = (now.getMinutes() + i * 8 + 2) % 60;

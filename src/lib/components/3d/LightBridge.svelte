@@ -4,7 +4,6 @@
     import type { Platform } from '$lib/logic/platforms';
     import { worldStore } from '$lib/logic/store.svelte';
     import { performanceStore } from '$lib/logic/performanceStore.svelte';
-    import { getPlatformContent } from '$lib/data/mockProjects';
     import { Vector3, QuadraticBezierCurve3 } from 'three';
 
     let {
@@ -30,8 +29,8 @@
     let origin = $derived(currentPlatformId === from.id ? from : to);
     let destination = $derived(currentPlatformId === from.id ? to : from);
     
-    // Lade den Namen der Zielplattform
-    let destinationName = $derived(getPlatformContent(destination.id)?.title ?? destination.id);
+    // Lade den Namen der Zielplattform aus dem Store
+    let destinationName = $derived(worldStore.getPlatformContent(destination.id)?.title ?? destination.id);
 
     // ============================================
     // STATISCHE GEOMETRIE - nur einmal berechnen!

@@ -8,11 +8,7 @@
 import type { ProjectData } from '$lib/types/project';
 import { platforms, getCameraY } from './platforms';
 import { performanceStore } from './performanceStore.svelte';
-import { 
-    getBoothProjectsForPlatform, 
-    getWallPostersForPlatform, 
-    getMarketplaceContent 
-} from '$lib/data/mockProjects';
+import { worldStore } from './store.svelte';
 
 export interface ViewPoint {
     camera: { x: number; y: number; z: number };
@@ -60,7 +56,7 @@ function getBoothViewPoint(
     pz: number,
     platformSize: number
 ): ViewPoint | null {
-    const booths = getBoothProjectsForPlatform(platformId);
+    const booths = worldStore.getBoothProjectsForPlatform(platformId);
     const boothIndex = booths.findIndex(p => p.id === projectId);
     if (boothIndex === -1) return null;
 
@@ -193,7 +189,7 @@ function getWallViewPoint(
     pz: number,
     platformSize: number
 ): ViewPoint | null {
-    const walls = getWallPostersForPlatform(platformId);
+    const walls = worldStore.getWallPostersForPlatform(platformId);
     const posterIndex = walls.findIndex(w => w.project.id === projectId);
     if (posterIndex === -1) return null;
 
@@ -344,8 +340,8 @@ function getLeitlinieViewPoint(
     pz: number,
     platformSize: number
 ): ViewPoint | null {
-    const marketplace = getMarketplaceContent();
-    if (posterIndex >= marketplace.wallPosters.length) return null;
+    const marketplace = worldStore.getMarketplaceContent();
+    if (!marketplace || posterIndex >= marketplace.wallPosters.length) return null;
 
     // Linke Wände: 0-3 (startEdge=5, wallCount=2)
     // Rechte Wand: 4-5 (startEdge=1, wallCount=1)

@@ -3,19 +3,18 @@
     import { Text, Billboard, useCursor } from '@threlte/extras';
     import { worldStore } from '$lib/logic/store.svelte';
     import { platforms } from '$lib/logic/platforms';
-    import { getPlatformContent, getMarketplaceContent } from '$lib/data/mockProjects';
     import { CylinderGeometry } from 'three';
 
     // Helper: Farben aus Content-Daten holen (Fallback auf platforms.ts)
     function getPlatformColors(platformId: string): { color: string; glowColor: string } {
         if (platformId === 'S') {
-            const marketplace = getMarketplaceContent();
+            const marketplace = worldStore.getMarketplaceContent();
             return {
                 color: marketplace?.color ?? platforms['S']?.color ?? '#64748b',
                 glowColor: marketplace?.glowColor ?? platforms['S']?.glowColor ?? '#94a3b8'
             };
         }
-        const content = getPlatformContent(platformId);
+        const content = worldStore.getPlatformContent(platformId);
         const layout = platforms[platformId];
         return {
             color: content?.color ?? layout?.color ?? '#64748b',
@@ -26,20 +25,20 @@
     // Helper: Plattform-Name holen
     function getPlatformName(platformId: string): string {
         if (platformId === 'S') {
-            const marketplace = getMarketplaceContent();
+            const marketplace = worldStore.getMarketplaceContent();
             return marketplace?.title ?? 'Marktplatz';
         }
-        const content = getPlatformContent(platformId);
+        const content = worldStore.getPlatformContent(platformId);
         return content?.title ?? platformId;
     }
 
     // Helper: Plattform-Kurzname holen
     function getPlatformShortName(platformId: string): string {
         if (platformId === 'S') {
-            const marketplace = getMarketplaceContent();
+            const marketplace = worldStore.getMarketplaceContent();
             return marketplace?.short ?? 'Markt';
         }
-        const content = getPlatformContent(platformId);
+        const content = worldStore.getPlatformContent(platformId);
         return content?.short ?? platformId;
     }
 

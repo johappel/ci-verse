@@ -405,6 +405,73 @@ export class WorldStore {
     findBySlug(slug: string): ProjectData | undefined {
         return this.state.projects.find((p) => p.slug === slug);
     }
+
+    // Hilfsfunktion: Projekt nach ID finden
+    findById(id: string): ProjectData | undefined {
+        return this.state.projects.find((p) => p.id === id);
+    }
+
+    // Hilfsfunktion: Staff nach ID finden
+    findStaffById(id: string): any | undefined {
+        return this.staff.find((s) => s.id === id);
+    }
+
+    // ============================================
+    // DATA HELPER METHODS (ersetzen mockProjects-Funktionen)
+    // ============================================
+
+    /** Booth-Projekte einer Plattform (displayType: 'booth' oder 'both') */
+    getBoothProjectsForPlatform(platformId: string): ProjectData[] {
+        return this.state.projects.filter(p => 
+            p.departments.includes(platformId as Department) &&
+            (p.displayType === 'booth' || p.displayType === 'both')
+        );
+    }
+
+    /** Wall-Poster einer Plattform (displayType: 'wall' oder 'both') */
+    getWallPostersForPlatform(platformId: string): Array<{ project: ProjectData; position: number }> {
+        return this.state.projects
+            .filter(p => 
+                p.departments.includes(platformId as Department) &&
+                (p.displayType === 'wall' || p.displayType === 'both')
+            )
+            .map((project, index) => ({ project, position: index }));
+    }
+
+    /** Alle Projekte einer Plattform */
+    getProjectsForPlatform(platformId: string): ProjectData[] {
+        return this.state.projects.filter(p => 
+            p.departments.includes(platformId as Department)
+        );
+    }
+
+    /** Wegweiser-Projekte einer Plattform (relatedDepartments) */
+    getRelatedProjectsForPlatform(platformId: string): ProjectData[] {
+        return this.state.projects.filter(p => 
+            p.relatedDepartments?.includes(platformId as Department)
+        );
+    }
+
+    /** Plattform-Content nach ID (inkl. Marktplatz S) */
+    getPlatformContent(platformId: string): PlatformContent | undefined {
+        if (platformId === 'S' && this.marketplace) {
+            return {
+                id: this.marketplace.id,
+                title: this.marketplace.title,
+                short: this.marketplace.short,
+                description: this.marketplace.description,
+                color: this.marketplace.color,
+                glowColor: this.marketplace.glowColor,
+                aspects: []
+            };
+        }
+        return this.platforms[platformId];
+    }
+
+    /** Marktplatz-Content abrufen */
+    getMarketplaceContent(): MarketplaceContent | null {
+        return this.marketplace;
+    }
 }
 
 // Singleton-Export - wird sofort initialisiert, Daten werden async geladen

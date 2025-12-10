@@ -47,6 +47,19 @@ function civerse_register_rest_routes() {
         'callback' => 'civerse_get_world_data',
         'permission_callback' => '__return_true',
     ]);
+    
+    // Image Proxy - Falls CORS-Header nicht funktionieren
+    register_rest_route('civerse/v1', '/image-proxy', [
+        'methods' => 'GET',
+        'callback' => 'civerse_image_proxy',
+        'permission_callback' => '__return_true',
+        'args' => [
+            'url' => [
+                'required' => true,
+                'description' => 'Image URL to proxy',
+            ],
+        ],
+    ]);
 }
 
 function civerse_get_world_data() {
@@ -57,6 +70,42 @@ function civerse_get_world_data() {
         'projects' => civerse_get_projects(),
         'staff' => civerse_get_staff(),
     ];
+}
+
+/**
+ * Image Proxy - Fallback falls CORS-Header nicht funktionieren
+ * Proxied externe Bilder durch die REST API mit korrekten CORS-Headern
+ */
+function civerse_image_proxy($request) {
+    $image_url = $request->get_param('url');
+    
+    if (!$image_url) {
+        return new WP_Error('missing_url', 'Image URL is required');
+    }
+    
+    // Nur WordPress Uploads erlauben
+    if (strpos($image_url, home_url()) === false) {
+        return new WP_Error('invalid_url', 'Only local images are allowed');
+    }
+    
+    // Bild abrufen
+    $response = wp_safe_remote_get($image_url, [
+        'timeout' => 10,
+    ]);
+    
+    if (is_wp_error($response)) {
+        return new WP_Error('fetch_failed', 'Could not fetch image');
+    }
+    
+    // Body und Content-Type extrahieren
+    $body = wp_remote_retrieve_body($response);
+    $content_type = wp_remote_retrieve_header($response, 'content-type');
+    
+    // Response mit CORS-Headern zurückgeben
+    return new WP_REST_Response($body, 200, [
+        'Content-Type' => $content_type,
+        'Access-Control-Allow-Origin' => '*',
+    ]);
 }
 
 // ============================================================================
@@ -261,9 +310,35 @@ function civerse_get_staff() {
 }
 
 // ============================================================================
-// CORS HEADER (für lokale Entwicklung)
+// CORS HEADER (für Bilder und Uploads)
 // ============================================================================
 
+// WordPress schickt CORS-Header für wp-content/ Dateien NICHT automatisch
+// Wir müssen sie manuell hinzufügen für ALLE Anfragen
+
+if (php_sapi_name() !== 'cli') {
+    // Sehr früh, bevor WordPress Headers verarbeitet
+    if (!function_exists('wp_cache_init')) {
+        // Vor WordPress Init
+        if (!headers_sent()) {
+            header('Access-Control-Allow-Origin: *');
+            header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS');
+            header('Access-Control-Allow-Headers: Content-Type, Accept');
+        }
+    }
+}
+
+// Zusätzlich auf init Hook
+add_action('init', function() {
+    if (!headers_sent()) {
+        header('Access-Control-Allow-Origin: *', false);
+        header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS', false);
+        header('Access-Control-Allow-Headers: Content-Type, Accept', false);
+        header('Access-Control-Max-Age: 86400', false);
+    }
+}, 1);
+
+// REST API spezifische CORS-Header
 add_action('rest_api_init', function() {
     remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
     add_filter('rest_pre_serve_request', function($value) {

@@ -7,7 +7,6 @@
      */
     import { base } from '$app/paths';
     import { worldStore } from '$lib/logic/store.svelte';
-    import { partnerConnections } from '$lib/data/mockProjects';
     import GlassDialog from './GlassDialog.svelte';
     import { ExternalLink, Globe, Building2, Users, BookOpen, Landmark, GraduationCap, Network } from 'lucide-svelte';
     import type { PartnerCategory } from '$lib/types/project';
@@ -75,16 +74,16 @@
         }
     }
 
-    // Netzwerk-Statistik
+    // Netzwerk-Statistik (aus dem Store)
     const networkStats = $derived({
-        total: partnerConnections.length,
+        total: worldStore.partnerConnections.length,
         categories: {
-            ministry: partnerConnections.filter(p => p.category === 'ministry').length,
-            church: partnerConnections.filter(p => p.category === 'church').length,
-            university: partnerConnections.filter(p => p.category === 'university').length,
-            institute: partnerConnections.filter(p => p.category === 'institute').length,
-            international: partnerConnections.filter(p => p.category === 'international').length,
-            association: partnerConnections.filter(p => p.category === 'association').length
+            ministry: worldStore.partnerConnections.filter(p => p.category === 'ministry').length,
+            church: worldStore.partnerConnections.filter(p => p.category === 'church').length,
+            university: worldStore.partnerConnections.filter(p => p.category === 'university').length,
+            institute: worldStore.partnerConnections.filter(p => p.category === 'institute').length,
+            international: worldStore.partnerConnections.filter(p => p.category === 'international').length,
+            association: worldStore.partnerConnections.filter(p => p.category === 'association').length
         }
     });
 </script>

@@ -2,7 +2,6 @@
 	import { worldStore } from '$lib/logic/store.svelte';
 	import { platforms } from '$lib/logic/platforms';
 	import { getViewPoint, getMarketplaceViewPoint, getCenterViewPoint } from '$lib/logic/viewpoints';
-	import { getBoothProjectsForPlatform, getWallPostersForPlatform, getMarketplaceContent, getPlatformContent } from '$lib/data/mockProjects';
 	import { performanceStore } from '$lib/logic/performanceStore.svelte';
 	import QualityDialog from './QualityDialog.svelte';
 	import HelpDialog from './HelpDialog.svelte';
@@ -202,8 +201,8 @@
 		return platformTourOrder[prevIndex];
 	});
 	
-	let nextPlatformName = $derived(getPlatformContent(nextPlatformId)?.short || nextPlatformId);
-	let prevPlatformName = $derived(getPlatformContent(prevPlatformId)?.short || prevPlatformId);
+	let nextPlatformName = $derived(worldStore.getPlatformContent(nextPlatformId)?.short || nextPlatformId);
+	let prevPlatformName = $derived(worldStore.getPlatformContent(prevPlatformId)?.short || prevPlatformId);
 	
 	// Zur nächsten Plattform navigieren
 	function goToNextPlatform() {
@@ -263,7 +262,8 @@
 		const platformId = currentPlatformId;
 		
 		if (platformId === 'S') {
-			const marketplace = getMarketplaceContent();
+			const marketplace = worldStore.getMarketplaceContent();
+			if (!marketplace) return [];
 			const targets: PosterTarget[] = [
 				{ type: 'reception', position: 0, label: 'Empfang' },
 				...marketplace.wallPosters.slice(0, 4).map((_, i) => ({
@@ -280,8 +280,8 @@
 			return targets;
 		}
 		
-		const booths = getBoothProjectsForPlatform(platformId);
-		const walls = getWallPostersForPlatform(platformId);
+		const booths = worldStore.getBoothProjectsForPlatform(platformId);
+		const walls = worldStore.getWallPostersForPlatform(platformId);
 		const boothCount = booths.length;
 		
 		const boothTargets: PosterTarget[] = booths.map((project, i) => {
@@ -404,7 +404,7 @@
 	}
 	
 	// Aktuelle Plattform-Info
-	let currentPlatformName = $derived(getPlatformContent(currentPlatformId)?.title || 'Unbekannt');
+	let currentPlatformName = $derived(worldStore.getPlatformContent(currentPlatformId)?.title || 'Unbekannt');
 	let isOnMarktplatz = $derived(currentPlatformId === 'S');
 	let isTransporting = $derived(worldStore.isTransporting);
 	

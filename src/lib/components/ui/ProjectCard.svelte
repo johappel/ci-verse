@@ -1,7 +1,6 @@
 <script lang="ts">
     import { base } from '$app/paths';
     import { worldStore } from "$lib/logic/store.svelte";
-    import { mockStaff } from "$lib/data/mockProjects";
     import GlassDialog from "./GlassDialog.svelte";
     import { FileText, ExternalLink, Users, Target, Compass } from "lucide-svelte";
 
@@ -20,11 +19,11 @@
     let projectColor = $derived(displayData?.color || project?.color || '#3b82f6');
     let slogan = $derived(displayData?.slogan);
 
-    // Finde Staff-Details
+    // Finde Staff-Details aus dem Store
     let staffDetails = $derived(
         project
             ? project.staff
-                  .map((staffId) => mockStaff.find((s) => s.id === staffId))
+                  .map((staffId) => worldStore.findStaffById(staffId))
                   .filter((s) => s !== undefined)
             : [],
     );
