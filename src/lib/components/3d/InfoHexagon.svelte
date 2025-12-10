@@ -71,7 +71,7 @@
     // Klick auf Seite: Kamera fährt davor
     function handleSideClick(sideIndex: number) {
         const transform = getSideTransform(sideIndex);
-        const viewDistance = 10; // Weiter weg für bessere Gesamtansicht
+        const viewDistance = 7; // Weiter weg für bessere Gesamtansicht
         
         // Welt-Position des Hexagons
         const hexWorldX = platformPosition[0] + position[0];
@@ -92,14 +92,14 @@
         // Kamera steht VOR der Seite (in Richtung der Normalen, also nach außen)
         const cameraPos = {
             x: sideWorldX + normalX * viewDistance,
-            y: cameraY,
+            y: cameraY-2,
             z: sideWorldZ + normalZ * viewDistance
         };
         
         // Kamera schaut zur Mitte des Hexagons (etwas über Augenhöhe für besseren Blickwinkel)
         const lookAtPos = {
             x: hexWorldX,
-            y: cameraY + 0.5, // Leicht nach oben schauen
+            y: cameraY - 2.0, // Leicht nach oben schauen
             z: hexWorldZ
         };
         
@@ -182,9 +182,9 @@
             >
                 <T.PlaneGeometry args={[radius * 1.1, height * 0.85]} />
                 <T.MeshBasicMaterial 
-                    color={isHovered ? '#3b82f6' : '#0f172a'}
+                    color={isHovered ? '#0b82f6' : '#0f172a'}
                     transparent={enableTransparency}
-                    opacity={enableTransparency ? (isHovered ? 0.8 : 0.5) : 1.0}
+                    opacity={enableTransparency ? (isHovered ? 0.2 : 0.5) : 1.0}
                 />
             </T.Mesh>
 

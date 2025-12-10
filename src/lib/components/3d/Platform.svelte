@@ -69,11 +69,11 @@
     const enableAnimations = $derived(performanceStore.settings.enableAnimations);
     
     // DEAKTIVIERT für Performance-Test - useTask läuft für alle 6 Plattformen jeden Frame
-    // useTask((delta) => {
-    //     if (isCurrentPlatform && enableAnimations) {
-    //         octaederRotation += delta * 0.5; // Langsame Rotation
-    //     }
-    // });
+    useTask((delta) => {
+        if (isCurrentPlatform && enableAnimations) {
+            octaederRotation += delta * 0.5; // Langsame Rotation
+        }
+    });
 
     // Oktaeder-Hover-State für Lichtlinien-Aktivierung
     let oktaederHovered = $state(false);
@@ -85,8 +85,8 @@
     function onPointerLeave() { hovering = false; }
     
     // DEAKTIVIERT für Performance-Test - Spring könnte den Freeze verursachen
-    // const glowOpacity = new Spring(0.15, { stiffness: 0.4, damping: 0.7 });
-    let glowOpacity = { current: 0.15 }; // Dummy-Objekt
+    const glowOpacity = new Spring(0.15, { stiffness: 0.4, damping: 0.7 });
+    // let glowOpacity = { current: 0.15 }; // Dummy-Objekt
 
     // DEAKTIVIERT für Performance-Test - dieser $effect könnte den Freeze verursachen
     // $effect(() => {

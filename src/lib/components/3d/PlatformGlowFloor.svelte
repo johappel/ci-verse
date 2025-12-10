@@ -150,38 +150,50 @@
         <T.MeshStandardMaterial color={traverseColor} metalness={0.7} roughness={0.4} />
     </T.Mesh>
     
-    <!-- Lampen-Kegel (hängt unter der Traverse) -->
+    <!-- Lampen-Kegel (Schirm: oben spitz, unten offen) -->
     <T.Mesh position={[lamp.x, lampHeight - 1.05, lamp.z]}>
         <T.ConeGeometry args={[0.45, 0.6, 8]} />
         <T.MeshStandardMaterial color={traverseColor} metalness={0.6} roughness={0.5} />
     </T.Mesh>
     
-    <!-- Leuchtende Linse (emissive Scheibe an Unterseite) - WARMWEISS -->
+    <!-- Leuchtende Linse (emissive Scheibe an Unterseite des Schirms) - WARMWEISS -->
     <T.Mesh 
         position.x={lamp.x}
-        position.y={lampHeight - 1.32}
+        position.y={lampHeight - 1.34}
         position.z={lamp.z}
         rotation.x={-Math.PI / 2}
     >
-        <T.CircleGeometry args={[0.35, 16]} />
+        <T.CircleGeometry args={[0.42, 16]} />
         <T.MeshBasicMaterial 
             color="#fff8e0"
             side={DoubleSide}
         />
     </T.Mesh>
     
+    <!-- Leuchtende Kugel in der Mitte (hängt unter dem Schirm) -->
+    <T.Mesh 
+        position.x={lamp.x}
+        position.y={lampHeight - 1.55}
+        position.z={lamp.z}
+    >
+        <T.SphereGeometry args={[0.18, 16, 16]} />
+        <T.MeshBasicMaterial 
+            color="#fffaf0"
+        />
+    </T.Mesh>
+    
     <!-- Glow-Ring nach unten (sichtbar von oben) - WARMWEISS -->
     <T.Mesh 
         position.x={lamp.x}
-        position.y={lampHeight - 1.40}
+        position.y={lampHeight - 1.42}
         position.z={lamp.z}
         rotation.x={-Math.PI / 2}
     >
-        <T.RingGeometry args={[0.35, 0.8, 16]} />
+        <T.RingGeometry args={[0.20, 1.2, 16]} />
         <T.MeshBasicMaterial 
             color="#fff8e0"
             transparent={true}
-            opacity={0.3}
+            opacity={0.5}
             blending={AdditiveBlending}
             depthWrite={false}
         />

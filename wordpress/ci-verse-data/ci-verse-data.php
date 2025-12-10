@@ -12,6 +12,38 @@
 if (!defined('ABSPATH')) exit;
 
 // ============================================================================
+// URL CONVERSION HELPER
+// ============================================================================
+
+/**
+ * Konvertiert absolute URLs zu relativen Pfaden
+ * Damit werden URLs durch den Vite Dev-Server Proxy korrekt weitergeleitet
+ * 
+ * Beispiel:
+ *   http://ci.test/wp-content/uploads/2025/12/image.jpg
+ *   → /wp-content/uploads/2025/12/image.jpg
+ * 
+ * Funktioniert auch mit verschiedenen Domains (z.B. CDN):
+ *   https://cdn.example.com/wp-content/uploads/...
+ *   → /wp-content/uploads/...
+ */
+function civerse_to_relative_url($absolute_url) {
+    if (!$absolute_url) {
+        return '';
+    }
+    
+    // Extrahiere Pfad nach dem Domain-Teil
+    // http://example.com/path/to/file → /path/to/file
+    $parsed = parse_url($absolute_url);
+    if (isset($parsed['path'])) {
+        return $parsed['path'];
+    }
+    
+    // Fallback: return as is
+    return $absolute_url;
+}
+
+// ============================================================================
 // ACF OPTIONS PAGE (muss per PHP registriert werden)
 // ============================================================================
 
@@ -154,8 +186,8 @@ function civerse_get_marketplace() {
                 'description' => $stand['description'] ?? '',
                 'display' => [
                     'color' => $stand['color'] ?? '#64748b',
-                    'logoUrl' => $stand['logo']['url'] ?? '',
-                    'bannerImage' => $stand['banner']['url'] ?? '',
+                    'logoUrl' => civerse_to_relative_url($stand['logo']['url'] ?? ''),
+                    'bannerImage' => civerse_to_relative_url($stand['banner']['url'] ?? ''),
                 ],
                 'chatWebhook' => !empty($stand['chat_webhook']) ? $stand['chat_webhook'] : null,
                 'rssFeedUrls' => !empty($rss_feeds) ? $rss_feeds : null,
@@ -167,7 +199,7 @@ function civerse_get_marketplace() {
             return [
                 'id' => 'leitlinie-' . ($poster['perspective'] ?? 'unknown'),
                 'title' => $poster['title'] ?? '',
-                'imageUrl' => $poster['image']['url'] ?? '',
+                'imageUrl' => civerse_to_relative_url($poster['image']['url'] ?? ''),
                 'perspective' => $poster['perspective'] ?? '',
             ];
         }, $wallPosters),
@@ -275,11 +307,11 @@ function civerse_get_projects() {
             'description' => get_field('project_description', $post->ID) ?: '',
             'display' => [
                 'slogan' => get_field('project_slogan', $post->ID) ?: '',
-                'posterImage' => $poster_image['url'] ?? '',
+                'posterImage' => civerse_to_relative_url($poster_image['url'] ?? ''),
                 'posterImageFormat' => get_field('project_poster_image_format', $post->ID) ?: 'portrait',
-                'logoUrl' => $logo['url'] ?? '',
+                'logoUrl' => civerse_to_relative_url($logo['url'] ?? ''),
                 'color' => get_field('project_color', $post->ID) ?: '#3b82f6',
-                'screenshotUrl' => $screenshot['url'] ?? '',
+                'screenshotUrl' => civerse_to_relative_url($screenshot['url'] ?? ''),
             ],
         ];
     }
@@ -300,7 +332,7 @@ function civerse_get_staff() {
         $staff[] = [
             'id' => get_field('staff_id', $post->ID) ?: 'm' . $post->ID,
             'name' => $post->post_title,
-            'avatarUrl' => get_the_post_thumbnail_url($post->ID, 'thumbnail') ?: '',
+            'avatarUrl' => civerse_to_relative_url(get_the_post_thumbnail_url($post->ID, 'thumbnail') ?: ''),
             'role' => get_field('staff_role', $post->ID) ?: '',
             'email' => get_field('staff_email', $post->ID) ?: '',
         ];
@@ -310,44 +342,36 @@ function civerse_get_staff() {
 }
 
 // ============================================================================
-// CORS HEADER (für Bilder und Uploads)
+// CORS HEADER (einmalig und sauber)
 // ============================================================================
 
-// WordPress schickt CORS-Header für wp-content/ Dateien NICHT automatisch
-// Wir müssen sie manuell hinzufügen für ALLE Anfragen
-
-if (php_sapi_name() !== 'cli') {
-    // Sehr früh, bevor WordPress Headers verarbeitet
-    if (!function_exists('wp_cache_init')) {
-        // Vor WordPress Init
-        if (!headers_sent()) {
+// Entferne WordPress Standard CORS-Handler und setze eigene
+add_action('rest_api_init', function() {
+    // Entferne Standard WordPress CORS
+    remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
+    
+    // Setze eigene CORS-Header NUR EINMAL
+    add_filter('rest_pre_serve_request', function($value) {
+        // Prüfe ob Header schon gesetzt wurde
+        $headers = headers_list();
+        $cors_set = false;
+        foreach ($headers as $header) {
+            if (stripos($header, 'Access-Control-Allow-Origin') !== false) {
+                $cors_set = true;
+                break;
+            }
+        }
+        
+        // Nur setzen wenn noch nicht vorhanden
+        if (!$cors_set && !headers_sent()) {
             header('Access-Control-Allow-Origin: *');
             header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS');
             header('Access-Control-Allow-Headers: Content-Type, Accept');
         }
-    }
-}
-
-// Zusätzlich auf init Hook
-add_action('init', function() {
-    if (!headers_sent()) {
-        header('Access-Control-Allow-Origin: *', false);
-        header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS', false);
-        header('Access-Control-Allow-Headers: Content-Type, Accept', false);
-        header('Access-Control-Max-Age: 86400', false);
-    }
-}, 1);
-
-// REST API spezifische CORS-Header
-add_action('rest_api_init', function() {
-    remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
-    add_filter('rest_pre_serve_request', function($value) {
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: GET');
-        header('Access-Control-Allow-Headers: Content-Type');
+        
         return $value;
-    });
-}, 15);
+    }, 1); // Priorität 1 = sehr früh
+}, 1);
 
 // ============================================================================
 // ADMIN HINWEISE

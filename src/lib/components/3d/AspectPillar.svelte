@@ -37,7 +37,7 @@
     const { camera } = useThrelte();
     const { onPointerEnter, onPointerLeave } = useCursor('pointer');
     
-    const ACTIVATION_DISTANCE = 12;
+    const ACTIVATION_DISTANCE = 6;
     
     let isNearby = $state(false);
     let isHovered = $state(false);

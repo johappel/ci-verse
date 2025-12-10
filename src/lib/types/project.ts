@@ -24,6 +24,7 @@ export interface ProjectDisplay {
     slogan: string;
     posterImage?: string;      // Großes Bild für Messewand
     posterImageFormat?: 'portrait' | 'landscape' | 'square'; // Bildformat (default: portrait)
+    logoUrl?: string;          // Projekt-Logo
     color: string;             // Primärfarbe
     screenshotUrl?: string;    // Website-Screenshot
     icon?: string;             // Emoji oder Icon-Name
@@ -93,6 +94,8 @@ export interface MarketplaceStand {
     description: string;
     display: {
         color: string;
+        logoUrl?: string;          // Logo des Stands
+        bannerImage?: string;      // Banner-Bild
     };
     // Interaktions-Quellen (je nach Typ)
     chatWebhook?: string;          // n8n Webhook für KI-Chat (type: institution)

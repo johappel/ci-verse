@@ -17,25 +17,60 @@ import type {
 // KONFIGURATION
 // ============================================================================
 
-// Default: WordPress-Installation (Production)
-const DEFAULT_API_URL = '/wp-json/civerse/v1/world';
+// WordPress URL aus Environment oder Default
+const WP_BASE_URL = import.meta.env.VITE_WP_URL || 'http://ci.test';
+const API_URL = `${WP_BASE_URL}/wp-json/civerse/v1/world`;
 
-// Für lokale Entwicklung mit Local by Flywheel
-const DEV_API_URL = 'http://ci.test/wp-json/civerse/v1/world';
-
-// Automatische Erkennung: Dev wenn auf localhost:5173, sonst Production
 function getApiUrl(): string {
-    if (typeof window === 'undefined') {
-        // Server-Side Rendering
-        return DEFAULT_API_URL;
+    return API_URL;
+}
+
+/**
+ * Konvertiert relative Bild-URLs zu absoluten URLs
+ * Falls WordPress relative Pfade zurückgibt, füge die Base-URL hinzu
+ */
+function toAbsoluteUrl(url: string | undefined): string | undefined {
+    if (!url) return undefined;
+    if (url.startsWith('http')) return url;
+    return `${WP_BASE_URL}${url}`;
+}
+
+/**
+ * Stellt sicher, dass alle Bild-URLs absolut sind
+ */
+function normalizeImageUrls(data: WorldDataResponse): WorldDataResponse {
+    // Projects
+    data.projects = data.projects.map(project => ({
+        ...project,
+        display: project.display ? {
+            ...project.display,
+            posterImage: toAbsoluteUrl(project.display.posterImage),
+            logoUrl: toAbsoluteUrl(project.display.logoUrl),
+            screenshotUrl: toAbsoluteUrl(project.display.screenshotUrl),
+        } : undefined
+    })) as ProjectData[];
+    
+    // Marketplace
+    if (data.marketplace) {
+        data.marketplace.wallPosters = data.marketplace.wallPosters?.map(poster => ({
+            ...poster,
+            imageUrl: toAbsoluteUrl(poster.imageUrl) || '',
+        })) || [];
     }
     
-    // Client-Side: Localhost → Dev-Server, sonst WordPress-Site
-    if (window.location.hostname === 'localhost') {
-        return DEV_API_URL;
-    }
+    // Staff
+    data.staff = data.staff.map(member => ({
+        ...member,
+        avatarUrl: toAbsoluteUrl(member.avatarUrl) || '',
+    })) as StaffMember[];
     
-    return DEFAULT_API_URL;
+    // Partner Connections
+    data.partnerConnections = data.partnerConnections?.map(partner => ({
+        ...partner,
+        logoUrl: toAbsoluteUrl(partner.logoUrl) || '',
+    })) || [];
+    
+    return data;
 }
 
 // ============================================================================
@@ -92,6 +127,9 @@ export async function fetchWorldData(): Promise<WorldDataResponse> {
             if (!data.projects || !data.platforms || !data.staff) {
                 throw new Error('Invalid API response: Missing required fields');
             }
+            
+            // Normalisiere alle Bild-URLs zu absoluten URLs
+            data = normalizeImageUrls(data);
             
             console.log('✅ World Data loaded:', {
                 projects: data.projects.length,
