@@ -11,19 +11,31 @@
     import IframeDialog from "$lib/components/ui/IframeDialog.svelte";
     import PartnerDialog from "$lib/components/ui/PartnerDialog.svelte";
     import AutoBenchmark from "$lib/components/ui/AutoBenchmark.svelte";
-    import { initWorldStore, worldStore } from "$lib/logic/store.svelte";
-    import { mockProjects, getPlatformContent, getMarketplaceContent } from "$lib/data/mockProjects";
+    import { initWorldStoreWithData, worldStore } from "$lib/logic/store.svelte";
     import { platforms } from "$lib/logic/platforms";
     import { onMount } from "svelte";
     import { fade, fly } from "svelte/transition";
 
-    // Initialisiere Store sofort
-    const store = initWorldStore(mockProjects);
-    
-    // Loading State (von Scene gemeldet)
+    // Loading State (kombiniert: API-Laden + 3D-Scene)
     let isLoading = $state(true);
     let loadingProgress = $state(0);
-    let loadingMessage = $state('Starte...');
+    let loadingMessage = $state('Lade Daten...');
+    
+    // Initialisiere Store mit API-Daten
+    let store = $state<typeof worldStore | null>(null);
+    
+    onMount(async () => {
+        try {
+            loadingMessage = 'Verbinde mit WordPress...';
+            store = await initWorldStoreWithData();
+            loadingMessage = 'Daten geladen, baue 3D-Welt...';
+            loadingProgress = 20; // API-Daten = 20% des Ladevorgangs
+        } catch (error) {
+            console.error('Failed to initialize store:', error);
+            loadingMessage = 'Fehler beim Laden der Daten';
+            isLoading = false;
+        }
+    });
     
     // CameraControls Referenz (von Scene)
     let cameraControls = $state<any>(null);
@@ -49,16 +61,18 @@
 
     // Helper: Plattform-Kurzname holen
     function getPlatformName(platformId: string): string {
+        if (!store) return platformId;
+        
         if (platformId === 'S') {
-            const marketplace = getMarketplaceContent();
-            return marketplace?.short ?? 'Marktplatz';
+            return store.marketplace?.short ?? 'Marktplatz';
         }
-        const content = getPlatformContent(platformId);
-        return content?.short ?? platformId;
+        return store.platforms[platformId]?.short ?? platformId;
     }
 
-    // URL-Parameter beim Mount lesen
-    onMount(() => {
+    // URL-Parameter beim Mount lesen (NACH Store-Init)
+    $effect(() => {
+        if (!store) return; // Warte bis Store geladen
+        
         const searchParams = new URLSearchParams(window.location.search);
 
         // Deep-Link zu Projekt
@@ -172,8 +186,10 @@
         </div>
     {/if}
 
-    <!-- 3D Canvas (Vollbild) - immer rendern -->
-    <Scene onLoadingUpdate={handleLoadingUpdate} onCameraReady={handleCameraReady} />
+    <!-- 3D Canvas (Vollbild) - nur wenn Store geladen -->
+    {#if store}
+        <Scene onLoadingUpdate={handleLoadingUpdate} onCameraReady={handleCameraReady} />
+    {/if}
 
     <!-- UI Overlays (nur wenn geladen) -->
     {#if !isLoading}

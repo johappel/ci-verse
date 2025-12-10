@@ -1,4 +1,5 @@
-import type { AppState, ProjectData, Perspective, Department, PlatformAspect, PartnerConnection } from '../types/project';
+import type { AppState, ProjectData, Perspective, Department, PlatformAspect, PartnerConnection, PlatformContent, MarketplaceContent } from '../types/project';
+import { fetchWorldData } from './apiService';
 
 // Erweiterte AppState für Marketplace-Panels
 interface ExtendedAppState extends AppState {
@@ -25,6 +26,16 @@ export class WorldStore {
     currentPlatform = $state<string>('S');
     isTransporting = $state<boolean>(false);
     transportTarget = $state<string | null>(null);
+    
+    // Loading-State für API-Daten
+    isLoading = $state<boolean>(true);
+    loadError = $state<string | null>(null);
+    
+    // World-Daten (von WordPress API)
+    platforms = $state<Record<string, PlatformContent>>({});
+    marketplace = $state<MarketplaceContent | null>(null);
+    staff = $state<any[]>([]);
+    partnerConnections = $state<PartnerConnection[]>([]);
     
     // Haupt-State (weniger performance-kritisch)
     state = $state<Omit<ExtendedAppState, 'currentPlatform' | 'isTransporting' | 'transportTarget'>>({
@@ -101,8 +112,38 @@ export class WorldStore {
         }));
     });
 
-    constructor(initialData: ProjectData[]) {
-        this.state.projects = initialData;
+    constructor() {
+        // Daten werden mit loadWorldData() geladen
+    }
+    
+    // Lade alle World-Daten vom WordPress API
+    async loadWorldData() {
+        this.isLoading = true;
+        this.loadError = null;
+        
+        try {
+            const data = await fetchWorldData();
+            
+            // Daten in Store speichern
+            this.state.projects = data.projects;
+            this.platforms = data.platforms;
+            this.marketplace = data.marketplace;
+            this.staff = data.staff;
+            this.partnerConnections = data.partnerConnections;
+            
+            console.log('✅ World Data loaded into store:', {
+                projects: this.state.projects.length,
+                platforms: Object.keys(this.platforms).length,
+                staff: this.staff.length,
+                partners: this.partnerConnections.length
+            });
+            
+            this.isLoading = false;
+        } catch (error) {
+            console.error('❌ Failed to load World Data:', error);
+            this.loadError = error instanceof Error ? error.message : 'Unknown error';
+            this.isLoading = false;
+        }
     }
 
     setPerspective(perspective: Perspective) {
@@ -369,7 +410,16 @@ export class WorldStore {
 // Singleton-Export (wird in +page.svelte initialisiert)
 export let worldStore: WorldStore;
 
-export function initWorldStore(projects: ProjectData[]) {
-    worldStore = new WorldStore(projects);
+export function initWorldStore() {
+    if (!worldStore) {
+        worldStore = new WorldStore();
+    }
     return worldStore;
+}
+
+// Hilfsfunktion: Store mit WordPress-Daten initialisieren
+export async function initWorldStoreWithData() {
+    const store = initWorldStore();
+    await store.loadWorldData();
+    return store;
 }

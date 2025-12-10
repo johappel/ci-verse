@@ -7,15 +7,44 @@ Interaktive 3D-Visualisierung der Comenius-Institut Bildungslandschaft als explo
 
 ## 🚀 Quick Start
 
+### Option A: Development mit Mock-Daten
+
 ```bash
-# Development
 pnpm install
 pnpm dev          # → http://localhost:5173
-
-# Production
-pnpm build
-pnpm preview      # → http://localhost:4173
 ```
+
+### Option B: WordPress-Integration (Production-Daten)
+
+Siehe **[WordPress Integration Guide](docs/wordpress-integration.md)** für vollständige Anleitung.
+
+**Kurzanleitung:**
+
+```bash
+# 1. Environment konfigurieren
+cp .env.example .env
+# Passe WP_PLUGIN_PATH in .env an
+
+# 2. Plugin-Dateien deployen
+pnpm deploy:wp
+
+# 3. Build + Deploy zu WordPress
+pnpm build:deploy
+
+# 4. App öffnen
+# → http://ci.test/ci-verse (lädt Daten von WordPress)
+```
+
+**Verfügbare Scripts:**
+
+| Command | Beschreibung |
+|---------|--------------|
+| `pnpm dev` | Dev-Server (Mock-Daten oder WP-API) |
+| `pnpm build` | Production-Build |
+| `pnpm build:deploy` | Build + Deploy zu WordPress |
+| `pnpm deploy:wp` | Nur Plugin-Deployment |
+| `pnpm watch:wp-plugin` | Watch-Mode für Plugin-Dateien |
+| `pnpm preview` | Preview des Builds |
 
 ## ✨ Implementierte Features
 
