@@ -179,6 +179,7 @@
 	// Die Kamera fliegt auf Höhe der Lichtlinien (Oktaeder-Höhe Y+15)
 	// Im Low-Mode: Sofortiger Sprung statt Animation
 	$effect(() => {
+		if (!worldStore) return; // Warte bis Store initialisiert ist
 		console.log('[Scene $effect] Checking transport conditions...');
 		if (worldStore.isTransporting && worldStore.transportTarget && cameraControls) {
 			console.time('[Transport] Total');
@@ -322,6 +323,7 @@
 	// - Klick am Rand → Kamera bleibt innen, schaut nach außen
 	// - Klick in der Mitte → Kamera bleibt außen, schaut nach innen
 	$effect(() => {
+		if (!worldStore) return; // Warte bis Store initialisiert ist
 		const target = worldStore.state.localCameraTarget;
 		if (target && cameraControls && !worldStore.isTransporting) {
 			const currentPlatform = platforms[worldStore.currentPlatform];
@@ -372,6 +374,7 @@
 	// NEU: Direkte Kamera-Ansicht für Poster/Rollup-Klicks
 	// Verwendet exakte Welt-Koordinaten für Kamera und LookAt
 	$effect(() => {
+		if (!worldStore) return; // Warte bis Store initialisiert ist
 		const view = worldStore.state.viewTarget;
 		if (view && cameraControls && !worldStore.isTransporting) {
 			cameraControls.setLookAt(
@@ -426,7 +429,7 @@
 	
 	// Boundary aktualisieren wenn sich die Plattform ändert
 	$effect(() => {
-		if (!cameraControls) return;
+		if (!cameraControls || !worldStore) return; // Warte bis Store initialisiert ist
 		
 		// Während Transport oder Preload: keine Boundary
 		if (worldStore.isTransporting || isPreloading) {
@@ -447,11 +450,11 @@
 	};
 
 	// Reaktive Nebel-Farbe
-	let currentFogColor = $derived(fogColors[worldStore.state.activePerspective] || '#0d1117');
+	let currentFogColor = $derived(worldStore ? (fogColors[worldStore.state.activePerspective] || '#0d1117') : '#0d1117');
 
 	// Reaktive Atmosphäre (Performance-abhängig)
 	let ambientIntensity = $derived(
-		worldStore.state.activePerspective === 'digitality' ? 0.3 : 0.5
+		worldStore && worldStore.state.activePerspective === 'digitality' ? 0.3 : 0.5
 	);
 	
 	// Performance-abhängige Einstellungen

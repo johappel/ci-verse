@@ -21,13 +21,14 @@
     let loadingProgress = $state(0);
     let loadingMessage = $state('Lade Daten...');
     
-    // Initialisiere Store mit API-Daten
-    let store = $state<typeof worldStore | null>(null);
+    // Flag ob Store-Daten geladen sind
+    let isDataLoaded = $state(false);
     
     onMount(async () => {
         try {
             loadingMessage = 'Verbinde mit WordPress...';
-            store = await initWorldStoreWithData();
+            await initWorldStoreWithData();
+            isDataLoaded = true;
             loadingMessage = 'Daten geladen, baue 3D-Welt...';
             loadingProgress = 20; // API-Daten = 20% des Ladevorgangs
         } catch (error) {
@@ -61,26 +62,26 @@
 
     // Helper: Plattform-Kurzname holen
     function getPlatformName(platformId: string): string {
-        if (!store) return platformId;
+        if (!isDataLoaded) return platformId;
         
         if (platformId === 'S') {
-            return store.marketplace?.short ?? 'Marktplatz';
+            return worldStore.marketplace?.short ?? 'Marktplatz';
         }
-        return store.platforms[platformId]?.short ?? platformId;
+        return worldStore.platforms[platformId]?.short ?? platformId;
     }
 
     // URL-Parameter beim Mount lesen (NACH Store-Init)
     $effect(() => {
-        if (!store) return; // Warte bis Store geladen
+        if (!isDataLoaded) return; // Warte bis Store geladen
         
         const searchParams = new URLSearchParams(window.location.search);
 
         // Deep-Link zu Projekt
         const projectSlug = searchParams.get("project");
         if (projectSlug) {
-            const project = store.findBySlug(projectSlug);
+            const project = worldStore.findBySlug(projectSlug);
             if (project) {
-                store.selectProject(project.id);
+                worldStore.selectProject(project.id);
             }
         }
 
@@ -92,7 +93,7 @@
                 view,
             )
         ) {
-            store.setPerspective(view as any);
+            worldStore.setPerspective(view as any);
         }
     });
 </script>
@@ -187,7 +188,7 @@
     {/if}
 
     <!-- 3D Canvas (Vollbild) - nur wenn Store geladen -->
-    {#if store}
+    {#if isDataLoaded}
         <Scene onLoadingUpdate={handleLoadingUpdate} onCameraReady={handleCameraReady} />
     {/if}
 
@@ -211,7 +212,7 @@
 </main>
 
 <!-- Dialoge außerhalb des main-Containers für korrekten z-index -->
-{#if !isLoading}
+{#if !isLoading && isDataLoaded}
     <ChatModal />
     <IframeDialog />
     <PartnerDialog />

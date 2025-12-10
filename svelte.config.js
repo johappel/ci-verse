@@ -8,10 +8,11 @@ const config = {
 	kit: {
 		adapter: adapter({
 			fallback: 'index.html',
-			precompress: false
+			precompress: false,
+			strict: false
 		}),
 		paths: {
-			base: '/ci-verse'
+			base: process.env.NODE_ENV === 'production' ? '/ci-verse' : ''
 		}
 	},
 	vitePlugin: {

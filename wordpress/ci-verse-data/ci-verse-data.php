@@ -288,14 +288,33 @@ add_action('admin_notices', function() {
 // FRONTEND APP HOSTING unter /ci-verse
 // ============================================================================
 
-// Rewrite Rule für /ci-verse
+// Rewrite Rules für /ci-verse
 add_action('init', 'civerse_add_rewrite_rules');
 
 function civerse_add_rewrite_rules() {
+    // Statische Assets (_app/, assets/) - OHNE trailing slash
+    add_rewrite_rule('^ci-verse/(_app/.+\.(js|css|json|map))$', 'index.php?civerse_app=1&civerse_path=$matches[1]', 'top');
+    add_rewrite_rule('^ci-verse/(assets/.+)$', 'index.php?civerse_app=1&civerse_path=$matches[1]', 'top');
+    
+    // Root-Level-Dateien (config.json, robots.txt, etc.)
+    add_rewrite_rule('^ci-verse/(config\.json|robots\.txt|404\.html)$', 'index.php?civerse_app=1&civerse_path=$matches[1]', 'top');
+    
     // Hauptroute /ci-verse
     add_rewrite_rule('^ci-verse/?$', 'index.php?civerse_app=1', 'top');
-    // Alle Unterrouten /ci-verse/...
-    add_rewrite_rule('^ci-verse/(.*)$', 'index.php?civerse_app=1&civerse_path=$matches[1]', 'top');
+    
+    // SPA-Routen (z.B. /ci-verse/project/xyz)
+    add_rewrite_rule('^ci-verse/([^/]+)/?$', 'index.php?civerse_app=1&civerse_path=$matches[1]', 'top');
+}
+
+// Verhindere trailing slashes für Asset-URLs
+add_filter('redirect_canonical', 'civerse_no_trailing_slash_for_assets', 10, 2);
+
+function civerse_no_trailing_slash_for_assets($redirect_url, $requested_url) {
+    // Wenn es eine ci-verse Asset-Anfrage ist (endet mit .js, .css, etc.)
+    if (preg_match('/\/ci-verse\/_app\/.*\.(js|css|json|map)$/i', $requested_url)) {
+        return false; // Keine Umleitung!
+    }
+    return $redirect_url;
 }
 
 // Query Vars registrieren
@@ -313,14 +332,34 @@ function civerse_app_template() {
     if (!$is_app) return;
     
     $path = get_query_var('civerse_path', '');
+    
+    // WICHTIG: WordPress fügt trailing slashes hinzu - entfernen!
+    // Wenn die URL mit / endet UND eine Datei-Extension hat, umleiten
+    if (!empty($path) && substr($path, -1) === '/' && preg_match('/\.[a-zA-Z0-9]+\/$/', $path)) {
+        $clean_path = rtrim($path, '/');
+        wp_redirect(home_url('/ci-verse/' . $clean_path), 301);
+        exit;
+    }
+    
+    $path = rtrim($path, '/'); // Entferne trailing slash für Verarbeitung
     $build_dir = plugin_dir_path(__FILE__) . 'build/';
     $build_url = plugin_dir_url(__FILE__) . 'build/';
     
-    // Statische Assets direkt ausliefern (_app/, assets/)
-    if (preg_match('/^_app\//', $path) || preg_match('/^assets\//', $path)) {
+    // Statische Assets direkt ausliefern (_app/, assets/, root-level files)
+    if (preg_match('/^_app\//', $path) || preg_match('/^assets\//', $path) || preg_match('/^(config\.json|robots\.txt|404\.html)$/', $path)) {
         $file_path = $build_dir . $path;
-        if (file_exists($file_path)) {
+        
+        if (file_exists($file_path) && is_file($file_path)) {
             civerse_serve_static_file($file_path);
+            exit;
+        } else {
+            // Debug: Asset nicht gefunden
+            status_header(404);
+            header('Content-Type: text/plain');
+            echo "Asset not found: " . esc_html($path) . "\n";
+            echo "Looking for: " . esc_html($file_path) . "\n";
+            echo "Exists: " . (file_exists($file_path) ? 'yes' : 'no') . "\n";
+            echo "Is file: " . (is_file($file_path) ? 'yes' : 'no');
             exit;
         }
     }

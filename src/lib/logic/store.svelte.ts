@@ -407,19 +407,11 @@ export class WorldStore {
     }
 }
 
-// Singleton-Export (wird in +page.svelte initialisiert)
-export let worldStore: WorldStore;
-
-export function initWorldStore() {
-    if (!worldStore) {
-        worldStore = new WorldStore();
-    }
-    return worldStore;
-}
+// Singleton-Export - wird sofort initialisiert, Daten werden async geladen
+export const worldStore: WorldStore = new WorldStore();
 
 // Hilfsfunktion: Store mit WordPress-Daten initialisieren
 export async function initWorldStoreWithData() {
-    const store = initWorldStore();
-    await store.loadWorldData();
-    return store;
+    await worldStore.loadWorldData();
+    return worldStore;
 }
