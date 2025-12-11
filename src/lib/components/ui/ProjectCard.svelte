@@ -37,6 +37,29 @@
             window.open(project.externalUrl, '_blank');
         }
     }
+
+    // Mappings für Labels
+    const targetGroupLabels: Record<string, string> = {
+        '0-3': '0-3 Jahre',
+        '4-6': '4-6 Jahre',
+        '7-10': '7-10 Jahre',
+        '11-14': '11-14 Jahre',
+        '15-18': '15-18 Jahre',
+        'young-adults': 'Junge Erwachsene',
+        'adults': 'Erwachsene',
+        'seniors': 'Senioren',
+        'employees': 'Fachkräfte, Unterrichtende',
+        'volunteers': 'Ehrenamtliche'
+    };
+
+    const perspectiveLabels: Record<string, string> = {
+        'education': '📖 Religiöse Bildung im Wandel',
+        'justice': '⚖️ Bildungsgerechtigkeit',
+        'sustainability': '🌱 Nachhaltigkeit',
+        'diversity': '🌈 Differenzsensibilität',
+        'digitality': '💻 Digitalität und KI',
+        'structure': '🏗️ Kirchlicher Strukturwandel'
+    };
 </script>
 
 <GlassDialog
@@ -132,7 +155,7 @@
                         <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                             {#each project.targetGroups as group}
                                 <span style="padding: 3px 8px; background: rgba(30,41,59,0.5); color: #cbd5e1; font-size: 11px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05);">
-                                    {group}
+                                    {targetGroupLabels[group] || group}
                                 </span>
                             {/each}
                         </div>
@@ -151,7 +174,7 @@
                         <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                             {#each project.perspectives as persp}
                                 <span style="padding: 3px 8px; font-size: 11px; border-radius: 4px; background: {projectColor}15; color: {projectColor}; border: 1px solid {projectColor}30;">
-                                    {persp}
+                                    {perspectiveLabels[persp] || persp}
                                 </span>
                             {/each}
                         </div>
