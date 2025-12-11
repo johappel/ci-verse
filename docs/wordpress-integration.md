@@ -60,6 +60,40 @@ Die ACF-Felder werden automatisch aus `acf-json/` geladen. Du solltest nun sehen
 
 - Custom Post Types: `civerse_project`, `civerse_platform`, `civerse_staff`
 - Options Page: **CI-Verse Marktplatz** (Menü links)
+- Options Page: **CI-Verse Marktplatz** (Menü links)
+
+### ACF JSON Import (Plugin-Verzeichnis)
+
+Wenn das Plugin in WordPress installiert und aktiviert ist, werden die ACF-Definitionen automatisch geladen, sobald sich ein Verzeichnis `acf-json/` im Plugin-Ordner befindet. Standard-Pfad (wie in den Scripts genutzt):
+
+```javascript
+const WP_PLUGIN_PATH = '/wp-content/plugins/ci-verse-data';
+```
+
+Schritte zum Importieren der `acf-json`-Dateien:
+
+- 1) Plugin-Verzeichnis anlegen (falls noch nicht vorhanden) in deiner lokalen WP-Installation:
+
+```powershell
+mkdir "C:\Users\<user>\Local Sites\ci\app\public\wp-content\plugins\ci-verse-data"
+```
+
+- 2) `acf-json` kopieren (manuell oder per Script):
+
+  - Manuell: Kopiere den Ordner `wordpress/ci-verse-data/acf-json` aus dem Repo in das Plugin-Verzeichnis `.../wp-content/plugins/ci-verse-data/`.
+  - Per Script: `pnpm deploy:wp` kopiert standardmäßig auch `acf-json/` in `WP_PLUGIN_PATH` (prüfe `scripts/deploy-to-wp.js` für den konfigurierten Pfad).
+
+- 3) In WordPress: ACF automatisch synchronisieren
+
+  - Gehe zu **Custom Fields → Tools** (oder **Custom Fields → Field Groups**). Falls ACF die JSON-Dateien erkennt, erscheint unter **Custom Fields → Field Groups** ein Bereich **`Synchronize available`**.
+  - Klicke auf **Sync** neben den aufgelisteten Field Groups, um die JSON-Definitionen in die Datenbank zu importieren.
+
+- 4) Alternative: ACF-Import prüfen
+
+  - Falls die Gruppen nicht automatisch angezeigt werden, prüfe Dateiberechtigungen und Pfad (`.../wp-content/plugins/ci-verse-data/acf-json`).
+  - Du kannst außerdem die JSON-Dateien manuell über das ACF-Admin-UI importieren (Custom Fields → Tools → Import File).
+
+Hinweis: ACF Pro lädt JSON aus `/acf-json`-Ordnern automatisch, wenn sich diese im Theme- oder Plugin-Ordner befinden. Das Deploy-Script zielt auf `WP_PLUGIN_PATH` — stelle sicher, dass `WP_PLUGIN_PATH` korrekt in `scripts/deploy-to-wp.js` und `scripts/watch-wp-plugin.js` gesetzt ist.
 
 ## 🔄 Development Workflow
 
@@ -198,7 +232,7 @@ http://ci.test/wp-json/civerse/v1/world
 **Lösung:** Passe den Pfad in `scripts/deploy-to-wp.js` und `scripts/watch-wp-plugin.js` an:
 
 ```javascript
-const WP_PLUGIN_PATH = 'C:\\Users\\Joachim\\Local Sites\\ci\\app\\public\\wp-content\\plugins\\ci-verse-data';
+const WP_PLUGIN_PATH = '/wp-content/plugins/ci-verse-data';
 ```
 
 ---
@@ -246,7 +280,7 @@ const DEV_API_URL = 'http://ci.test/wp-json/civerse/v1/world';
 
 **Lösung:**
 1. Prüfe, ob `build/` Ordner existiert
-2. Prüfe, ob `C:\Users\Joachim\Local Sites\ci\app\public\wp-content\plugins\ci-verse-data\build\` existiert
+2. Prüfe, ob `/wp-content/plugins/ci-verse-data/build/` existiert
 3. Führe manuell aus:
 
 ```powershell
