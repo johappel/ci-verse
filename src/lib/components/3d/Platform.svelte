@@ -169,13 +169,14 @@
     position={[platform.x, platform.y, platform.z]}
     userData={{ isPlatform: true, platformId: platform.id }}
 >
+    {#key usePBRMaterials}
     <!-- Hexagonale Plattform-Basis (6-seitiger Zylinder) -->
     <T.Mesh
         onpointerdown={handlePointerDown}
         onpointerup={handlePointerUp}
         onpointerenter={onPointerEnter}
         onpointerleave={onPointerLeave}
-        receiveShadow
+        receiveShadow={usePBRMaterials}
         rotation.y={Math.PI / 6}
     >
         <!-- Plattform ist jetzt 3 Einheiten dick (begehbar) -->
@@ -193,6 +194,7 @@
             />
         {/if}
     </T.Mesh>
+    {/key}
 
     <!-- Dezenter Ring am Rand - leuchtet bei Hover (nur bei aktiviertem Glow) -->
     {#if enableGlowRings}

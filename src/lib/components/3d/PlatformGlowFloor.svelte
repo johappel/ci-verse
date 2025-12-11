@@ -93,7 +93,7 @@
                     float d = length(pos - spotCenter);
                     
                     // Gauss-Falloff für weichen Glow - etwas schärfer
-                    float spotSize = 0.28;
+                    float spotSize = 0.23;
                     float glow = exp(-d * d / (spotSize * spotSize));
                     
                     totalGlow += glow;

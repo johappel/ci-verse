@@ -452,11 +452,13 @@ class PerformanceStore {
     /**
      * Setzt die Qualitätsstufe
      */
-    setQuality(level: QualityLevel) {
-        console.log('[Performance] Setze Qualität auf:', level);
+    setQuality(level: QualityLevel, persist: boolean = true) {
+        console.log('[Performance] Setze Qualität auf:', level, '(persist:', persist, ')');
         this.qualityLevel = level;
         this.settings = { ...this.presets[level] };
-        this.saveSettings();
+        if (persist) {
+            this.saveSettings();
+        }
     }
     
     /**
@@ -512,10 +514,10 @@ class PerformanceStore {
             
             if (this.qualityLevel === 'high') {
                 console.log('[Performance] Auto-Downgrade: high → medium (Durchschnitt:', Math.round(avgFPS), 'FPS)');
-                this.setQuality('medium');
+                this.setQuality('medium', false);
             } else if (this.qualityLevel === 'medium') {
                 console.log('[Performance] Auto-Downgrade: medium → low (Durchschnitt:', Math.round(avgFPS), 'FPS)');
-                this.setQuality('low');
+                this.setQuality('low', false);
             }
             
             // FPS-History zurücksetzen nach Downgrade
