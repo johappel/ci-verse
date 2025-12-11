@@ -59,19 +59,23 @@
         const db = Math.floor(b * factor);
         return `#${dr.toString(16).padStart(2, '0')}${dg.toString(16).padStart(2, '0')}${db.toString(16).padStart(2, '0')}`;
     }
-    let darkPlatformColor = $derived(darkenColor(platformColor));
+    let darkPlatformColor = $derived(platformColor);
 
     // Referenzen für Spotlight-Targets (je Spot ein eigenes Target)
     let spotTargets: (Object3D | undefined)[] = $state(Array(6).fill(undefined));
 
     // Oktaeder-Rotation (animiert) - nur auf aktueller Plattform UND wenn Animationen erlaubt
     let octaederRotation = $state(0);
+    let energyPulse = $state(0);
+    let time = 0;
     const enableAnimations = $derived(performanceStore.settings.enableAnimations);
     
     // DEAKTIVIERT für Performance-Test - useTask läuft für alle 6 Plattformen jeden Frame
     useTask((delta) => {
         if (isCurrentPlatform && enableAnimations) {
             octaederRotation += delta * 0.5; // Langsame Rotation
+            time += delta * 3;
+            energyPulse = (Math.sin(time) + 1) * 0.5;
         }
     });
 
@@ -217,6 +221,7 @@
     {@const showPointLight = performanceStore.qualityLevel !== 'low'}
     
     <T.Group position.y={15}>
+        {#if usePBR}
         <!-- Oktaeder (halbtransparent, klickbar) -->
         <T.Mesh 
             rotation.y={octaederRotation}
@@ -252,7 +257,7 @@
                 metalness={0.3}
                 roughness={0.1}
                 transparent
-                opacity={0.6}
+                opacity={0.3}
                 transmission={0.3}
             />
             {:else}
@@ -262,9 +267,11 @@
             />
             {/if}
         </T.Mesh>
+        {/if}
         <!-- Innere leuchtende Kugel (der "Kern", auch klickbar) -->
         <T.Mesh 
-            rotation.y={enableAnimations ? octaederRotation * -1.5 : 0}
+            rotation.y={enableAnimations ? octaederRotation * -1.5 : 0} 
+            scale={enableAnimations ? 0.8 + energyPulse * 0.3 : 0.8}
             onclick={(e: ThreltePointerEvent) => {
                 e.stopPropagation();
                 if (platform.id !== 'S') {

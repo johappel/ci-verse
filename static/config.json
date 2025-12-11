@@ -34,7 +34,7 @@
       },
       "camera": {
         "flightSpeed": "normal",
-        "smoothTime": 1.5
+        "smoothTime": 0.9
       }
     },
     
@@ -57,7 +57,7 @@
       "effects": {
         "enableFog": true,
         "enableParticles": false,
-        "enableAnimations": true,
+        "enableAnimations": false,
         "enableGlowRings": true,
         "enableEnergyFloor": true,
         "enableEnergyEffects": true,
@@ -70,7 +70,7 @@
       },
       "camera": {
         "flightSpeed": "fast",
-        "smoothTime": 0.9
+        "smoothTime": 0.4
       }
     },
     

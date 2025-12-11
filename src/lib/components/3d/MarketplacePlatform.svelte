@@ -404,6 +404,7 @@
     <!-- ========== OKTAEDER (Navigation Hub) - jetzt mit Energie-Puls ========== -->
     <T.Group position.y={15} scale={enableAnimations ? oktaederScale : 1.0}>
         <!-- Äußerer Oktaeder - leuchtend -->
+         {#if usePBR}
         <T.Mesh 
             rotation.y={enableAnimations ? octaederRotation : 0}
             rotation.x={Math.PI / 8}
@@ -417,7 +418,7 @@
                 metalness={0.8}
                 roughness={0.2}
                 transparent
-                opacity={0.85}
+                opacity={0.45}
             />
             {:else}
             <!-- Low-Mode: Einfaches Material -->
@@ -426,7 +427,7 @@
             />
             {/if}
         </T.Mesh>
-        
+        {/if}
         <!-- Mittlerer Glow-Layer -->
         
         <!-- Innerer Kern - pulsiert hell -->

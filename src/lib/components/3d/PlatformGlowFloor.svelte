@@ -47,7 +47,7 @@
     });
 
     // Warmweiße Lichtfarbe für alle Lampen und Boden-Glows
-    const lightColor = '#fff8e0';
+    const lightColor = glowColor || '#fff8e0';
     
     // Traverse-Konfiguration
     const traverseRadius = platformSize * spotRadius;
@@ -93,7 +93,7 @@
                     float d = length(pos - spotCenter);
                     
                     // Gauss-Falloff für weichen Glow - etwas schärfer
-                    float spotSize = 0.23;
+                    float spotSize = 0.24;
                     float glow = exp(-d * d / (spotSize * spotSize));
                     
                     totalGlow += glow;
@@ -202,7 +202,7 @@
     </T.Mesh>
     
     <!-- Leuchtende Linse (emissive Scheibe an Unterseite des Schirms) - WARMWEISS -->
-    <T.Mesh 
+    <!-- <T.Mesh 
         position.x={lamp.x}
         position.y={lampHeight - 1.34}
         position.z={lamp.z}
@@ -210,10 +210,10 @@
     >
         <T.CircleGeometry args={[0.42, 16]} />
         <T.MeshBasicMaterial 
-            color="#fff8e0"
+            color={glowColor}
             side={DoubleSide}
         />
-    </T.Mesh>
+    </T.Mesh> -->
     
     <!-- Leuchtende Kugel in der Mitte (hängt unter dem Schirm) -->
     <T.Mesh 
@@ -224,14 +224,14 @@
         <T.SphereGeometry args={[0.28, isHighQuality ? 30 : 16, isHighQuality ? 30 : 16]} />
         {#if isHighQuality}
         <T.MeshStandardMaterial 
-            color="#fffaf0"
-            emissive="#fffaf0"
-            emissiveIntensity={20}
+            color={glowColor}
+            emissive={glowColor}
+            emissiveIntensity={4}
             toneMapped={false}
         />
         {:else}
         <T.MeshBasicMaterial 
-            color="#fffaf0"
+            color={glowColor}
         />
         {/if}
     </T.Mesh>
@@ -245,7 +245,7 @@
     >
         <T.RingGeometry args={[0.35, 0.8, 16]} />
         <T.MeshBasicMaterial 
-            color="#fff8e0"
+            color={glowColor}
             transparent={true}
             opacity={0.5}
             blending={AdditiveBlending}
@@ -262,7 +262,7 @@
     >
         <T.RingGeometry args={[0.35, 0.8, 16]} />
         <T.MeshBasicMaterial 
-            color="#fff8e0"
+            color={glowColor}
             transparent={true}
             opacity={0.6}
             blending={AdditiveBlending}
