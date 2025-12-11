@@ -101,6 +101,24 @@
         isNearby = distSq <= ACTIVATION_DISTANCE * ACTIVATION_DISTANCE;
     });
 
+    // Shadow Shader für Fake-Shadow
+    const shadowVertexShader = `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `;
+    const shadowFragmentShader = `
+        varying vec2 vUv;
+        void main() {
+            vec2 center = vec2(0.5);
+            float dist = distance(vUv, center) * 2.0;
+            float alpha = smoothstep(1.0, 0.0, dist);
+            gl_FragColor = vec4(0.0, 0.0, 0.0, alpha * 0.3);
+        }
+    `;
+
     // Größen-Varianten für Rollup (ausgewogene Proportionen)
     // gap = einheitlicher Abstand zwischen Text und Bild
     const sizes = {
@@ -189,6 +207,22 @@
 
 <T.Group position={position} rotation.y={rotation} scale={1.1}>
     
+    <!-- Fake Shadow (Contact Shadow) -->
+    {#if performanceStore.qualityLevel === 'high'}
+        <T.Mesh 
+            position={[0, 0.02, 0]} 
+            rotation.x={-Math.PI / 2}
+        >
+            <T.PlaneGeometry args={[s.width * 1.1, s.footDepth * 2.5]} />
+            <T.ShaderMaterial 
+                vertexShader={shadowVertexShader}
+                fragmentShader={shadowFragmentShader}
+                transparent
+                depthWrite={false}
+            />
+        </T.Mesh>
+    {/if}
+
     <!-- ========== STELLWAND-FUSS (leicht, Stützen nach beiden Seiten) ========== -->
     <T.Group>
         <!-- Linke Stütze -->

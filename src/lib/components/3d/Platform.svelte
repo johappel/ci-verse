@@ -181,9 +181,17 @@
         <!-- Plattform ist jetzt 3 Einheiten dick (begehbar) -->
         <T.CylinderGeometry args={[platform.size, platform.size, 3, 6]} />
         <!-- Abgedunkelte individuelle Plattform-Farbe -->
-        <T.MeshBasicMaterial
-            color={darkPlatformColor}
-        />
+        {#if usePBRMaterials}
+            <T.MeshStandardMaterial
+                color={darkPlatformColor}
+                roughness={0.8}
+                metalness={0.2}
+            />
+        {:else}
+            <T.MeshBasicMaterial
+                color={darkPlatformColor}
+            />
+        {/if}
     </T.Mesh>
 
     <!-- Dezenter Ring am Rand - leuchtet bei Hover (nur bei aktiviertem Glow) -->

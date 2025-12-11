@@ -340,11 +340,12 @@
 
         <T.PointLight color={neonCyan} intensity={chatGlow * 30} distance={8} decay={2} position={[0, 0, 1]} />
     </T.Group>
-
+    {#if performanceStore.qualityLevel !== 'low'}
     <!-- Boden-Markierung -->
     <T.Mesh position.y={0.01} rotation.x={-Math.PI / 2} receiveShadow>
         <T.PlaneGeometry args={[wall.width + 1, 2]} />
-        <T.MeshStandardMaterial color={primaryColor} transparent={enableTransparency} opacity={enableTransparency ? 0.3 : 1.0} />
+        <T.MeshStandardMaterial color={primaryColor} transparent={enableTransparency} opacity={enableTransparency ? 0.1 : 0.001} />
     </T.Mesh>
+    {/if}
 
 </T.Group>
