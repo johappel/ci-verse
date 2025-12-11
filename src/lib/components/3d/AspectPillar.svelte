@@ -87,9 +87,9 @@
     <T.Mesh position.y={0.02} rotation.x={-Math.PI / 2}>
         <T.RingGeometry args={[size * 0.7, size, 6]} />
         <T.MeshBasicMaterial 
-            color={isHovered ? '#ffffff' : '#64748b'}
+            color={isHovered ? '#a4a48b' : '#64748b'}
             transparent={enableTransparency}
-            opacity={enableTransparency ? (isHovered ? 0.6 : 0.3) : 1.0}
+            opacity={enableTransparency ? (isHovered ? 0.8 : 0.5) : 1.0}
         />
     </T.Mesh>
     {/if}
