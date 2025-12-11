@@ -40,15 +40,24 @@ function toAbsoluteUrl(url: string | undefined): string | undefined {
  */
 function normalizeImageUrls(data: WorldDataResponse): WorldDataResponse {
     // Projects
-    data.projects = data.projects.map(project => ({
-        ...project,
-        display: project.display ? {
-            ...project.display,
-            posterImage: toAbsoluteUrl(project.display.posterImage),
-            logoUrl: toAbsoluteUrl(project.display.logoUrl),
-            screenshotUrl: toAbsoluteUrl(project.display.screenshotUrl),
-        } : undefined
-    })) as ProjectData[];
+    data.projects = data.projects.map(project => {
+        // Override für rpi-virtuell: Immer Landscape erzwingen
+        // (Falls im WordPress noch nicht korrekt eingestellt)
+        let display = project.display;
+        if (project.slug === 'rpi-virtuell' && display) {
+            display = { ...display, posterImageFormat: 'landscape' };
+        }
+
+        return {
+            ...project,
+            display: display ? {
+                ...display,
+                posterImage: toAbsoluteUrl(display.posterImage),
+                logoUrl: toAbsoluteUrl(display.logoUrl),
+                screenshotUrl: toAbsoluteUrl(display.screenshotUrl),
+            } : undefined
+        };
+    }) as ProjectData[];
     
     // Marketplace
     if (data.marketplace) {

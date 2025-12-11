@@ -136,7 +136,11 @@
     
     // Bildbreite berechnen (verfügbarer Platz = Gesamtbreite - Textbreite - Rahmen - Gap)
     const availableImageWidth = s.width - s.textWidth - 0.4 - s.gap; // 0.4 = Rahmen links+rechts
-    const imageHeight = s.height * 0.92; // Höhe wie Text-Bereich
+    
+    // Höhe anpassen für Landscape-Bilder (damit sie nicht verzerrt werden)
+    // Wenn Landscape, dann nutzen wir nicht die volle Höhe, sondern zentrieren es vertikal
+    const isLandscape = imageFormat === 'landscape';
+    const imageHeight = isLandscape ? availableImageWidth * (3/4) : s.height * 0.92;
     
     // NEU: Feste Breite erzwingen (Stretching wie im CSS)
     // Wir nutzen den vollen verfügbaren Platz, egal welches Format das Bild hat

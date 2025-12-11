@@ -401,6 +401,7 @@ export const mockProjects: ProjectData[] = [
         display: {
             slogan: 'Digitalität in der Religionspädagogik',
             posterImage: '/assets/images/rpi-dechow-lohrer-dekt-2023.png',
+            posterImageFormat: 'landscape',
             color: '#16a34a',
             screenshotUrl: 'https://news.rpi-virtuell.de/wp-content/uploads/2023/06/grafik-2.png'
         }
