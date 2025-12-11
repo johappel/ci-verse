@@ -84,15 +84,11 @@
     function onPointerEnter() { hovering = true; }
     function onPointerLeave() { hovering = false; }
     
-    // DEAKTIVIERT für Performance-Test - Spring könnte den Freeze verursachen
-    const glowOpacity = new Spring(0.15, { stiffness: 0.4, damping: 0.7 });
-    // let glowOpacity = { current: 0.15 }; // Dummy-Objekt
-
-    // DEAKTIVIERT für Performance-Test - dieser $effect könnte den Freeze verursachen
-    // $effect(() => {
-    //     const baseOpacity = isCurrentPlatform ? 0.5 : 0.15;
-    //     glowOpacity.target = $hovering ? 0.9 : baseOpacity;
-    // });
+    // const glowOpacity = new Spring(0.15, { stiffness: 0.4, damping: 0.7 });
+    // Dummy-Objekt mit reaktiver Opacity basierend auf Hover und Current-Status
+    let glowOpacity = $derived({
+        current: hovering ? 0.9 : (isCurrentPlatform ? 0.5 : 0.15)
+    });
 
     // Layout für Projekt-Stände auf der Plattform (statisch)
     const standPositions = getHexagonalLayout(projects.length, platform.size * 0.6);

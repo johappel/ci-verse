@@ -7,6 +7,7 @@
      */
     import { T } from '@threlte/core';
     import { ShaderMaterial, Color, AdditiveBlending, DoubleSide } from 'three';
+    import { performanceStore } from '$lib/logic/performanceStore.svelte';
 
     interface Props {
         platformSize: number;
@@ -19,6 +20,19 @@
         glowColor,
         spotCount = 6
     }: Props = $props();
+
+    // Performance-basierte Material-Auswahl
+    // Verwende getter statt $derived für robustere Reaktivität
+    let qualityLevel = $state(performanceStore.qualityLevel);
+    
+    // Sync mit Store
+    $effect(() => {
+        qualityLevel = performanceStore.qualityLevel;
+    });
+    
+    // Abgeleitete Werte basierend auf lokalem State
+    let isHighQuality = $derived(qualityLevel === 'high');
+    let isLowQuality = $derived(qualityLevel === 'low');
 
     // Lampen-Positionen (Hexagon-Muster)
     const spotRadius = 0.55; // Etwas kleiner für kürzere Traverse
@@ -120,25 +134,44 @@
     <T.PlaneGeometry args={[platformSize * 2, platformSize * 2]} />
 </T.Mesh>
 
-<!-- Hexagonale Traverse (Doppelring mit Querstreben) -->
+<!-- Hexagonale Traverse - mit key für saubere Re-Renders bei Quality-Wechsel -->
+{#key qualityLevel}
 
 <!-- Äußerer Ring (oben) -->
 <T.Mesh position.y={lampHeight + 0.15} rotation.x={Math.PI / 2}>
     <T.TorusGeometry args={[traverseRadius, tubeRadius, 8, 6]} />
-    <T.MeshStandardMaterial color={traverseColor} metalness={0.7} roughness={0.4} />
+    {#if isHighQuality}
+    <T.MeshStandardMaterial color={traverseColor} metalness={0.2} roughness={0.8} />
+    {:else if isLowQuality}
+    <T.MeshBasicMaterial color={traverseColor} />
+    {:else}
+    <T.MeshLambertMaterial color={traverseColor} />
+    {/if}
 </T.Mesh>
 
 <!-- Innerer Ring (unten) -->
 <T.Mesh position.y={lampHeight - 0.15} rotation.x={Math.PI / 2}>
     <T.TorusGeometry args={[traverseRadius, tubeRadius, 8, 6]} />
-    <T.MeshStandardMaterial color={traverseColor} metalness={0.7} roughness={0.4} />
+    {#if isHighQuality}
+    <T.MeshStandardMaterial color={traverseColor} metalness={0.2} roughness={0.8} />
+    {:else if isLowQuality}
+    <T.MeshBasicMaterial color={traverseColor} />
+    {:else}
+    <T.MeshLambertMaterial color={traverseColor} />
+    {/if}
 </T.Mesh>
 
 <!-- 6 vertikale Streben zwischen den Ringen (an den Ecken) -->
 {#each lamps as lamp}
     <T.Mesh position={[lamp.x, lampHeight, lamp.z]}>
         <T.CylinderGeometry args={[tubeRadius, tubeRadius, 0.3, 8]} />
-        <T.MeshStandardMaterial color={traverseColor} metalness={0.7} roughness={0.4} />
+        {#if isHighQuality}
+        <T.MeshStandardMaterial color={traverseColor} metalness={0.2} roughness={0.8} />
+        {:else if isLowQuality}
+        <T.MeshBasicMaterial color={traverseColor} />
+        {:else}
+        <T.MeshLambertMaterial color={traverseColor} />
+        {/if}
     </T.Mesh>
 {/each}
 
@@ -147,13 +180,25 @@
     <!-- Aufhängung (vertikale Stange) -->
     <T.Mesh position={[lamp.x, lampHeight - 0.5, lamp.z]}>
         <T.CylinderGeometry args={[0.05, 0.05, 0.7, 8]} />
-        <T.MeshStandardMaterial color={traverseColor} metalness={0.7} roughness={0.4} />
+        {#if isHighQuality}
+        <T.MeshStandardMaterial color={traverseColor} metalness={0.2} roughness={0.8} />
+        {:else if isLowQuality}
+        <T.MeshBasicMaterial color={traverseColor} />
+        {:else}
+        <T.MeshLambertMaterial color={traverseColor} />
+        {/if}
     </T.Mesh>
     
     <!-- Lampen-Kegel (Schirm: oben spitz, unten offen) -->
     <T.Mesh position={[lamp.x, lampHeight - 1.05, lamp.z]}>
         <T.ConeGeometry args={[0.45, 0.6, 8]} />
-        <T.MeshStandardMaterial color={traverseColor} metalness={0.6} roughness={0.5} />
+        {#if isHighQuality}
+        <T.MeshStandardMaterial color={traverseColor} metalness={0.2} roughness={0.8} />
+        {:else if isLowQuality}
+        <T.MeshBasicMaterial color={traverseColor} />
+        {:else}
+        <T.MeshLambertMaterial color={traverseColor} />
+        {/if}
     </T.Mesh>
     
     <!-- Leuchtende Linse (emissive Scheibe an Unterseite des Schirms) - WARMWEISS -->
@@ -173,23 +218,32 @@
     <!-- Leuchtende Kugel in der Mitte (hängt unter dem Schirm) -->
     <T.Mesh 
         position.x={lamp.x}
-        position.y={lampHeight - 1.55}
+        position.y={lampHeight - 1.23}
         position.z={lamp.z}
     >
-        <T.SphereGeometry args={[0.18, 16, 16]} />
+        <T.SphereGeometry args={[0.28, isHighQuality ? 30 : 16, isHighQuality ? 30 : 16]} />
+        {#if isHighQuality}
+        <T.MeshStandardMaterial 
+            color="#fffaf0"
+            emissive="#fffaf0"
+            emissiveIntensity={20}
+            toneMapped={false}
+        />
+        {:else}
         <T.MeshBasicMaterial 
             color="#fffaf0"
         />
+        {/if}
     </T.Mesh>
     
     <!-- Glow-Ring nach unten (sichtbar von oben) - WARMWEISS -->
     <T.Mesh 
         position.x={lamp.x}
-        position.y={lampHeight - 1.42}
+        position.y={lampHeight - 1.39}
         position.z={lamp.z}
         rotation.x={-Math.PI / 2}
     >
-        <T.RingGeometry args={[0.20, 1.2, 16]} />
+        <T.RingGeometry args={[0.35, 0.8, 16]} />
         <T.MeshBasicMaterial 
             color="#fff8e0"
             transparent={true}
@@ -202,7 +256,7 @@
     <!-- Glow-Ring nach oben (sichtbar von unten) - WARMWEISS -->
     <T.Mesh 
         position.x={lamp.x}
-        position.y={lampHeight - 1.41}
+        position.y={lampHeight - 1.38}
         position.z={lamp.z}
         rotation.x={Math.PI / 2}
     >
@@ -210,9 +264,11 @@
         <T.MeshBasicMaterial 
             color="#fff8e0"
             transparent={true}
-            opacity={0.3}
+            opacity={0.6}
             blending={AdditiveBlending}
             depthWrite={false}
         />
     </T.Mesh>
 {/each}
+
+{/key}
