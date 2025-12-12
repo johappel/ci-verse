@@ -1,9 +1,10 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { loadEnv } from 'vite';
+import path from 'path';
 
 export default defineConfig(({ command, mode }) => {
-	const env = loadEnv(mode, process.cwd(), '');
+	const env = loadEnv(mode, path.resolve(process.cwd()), '');
 	const wpUrl = env.VITE_WP_URL || 'http://ci.test';
 
 	return {

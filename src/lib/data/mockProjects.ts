@@ -726,7 +726,6 @@ export const mockMarketplace: MarketplaceContent = {
             title: 'Comenius-Institut',
             type: 'institution',
             icon: '🏛️',
-            description: 'Evangelische Arbeitsstätte für Erziehungswissenschaft e.V. – Ihr Kompetenzzentrum für religiöse Bildung seit 1954.',
             display: {
                 color: '#1e40af'
             },
@@ -738,7 +737,6 @@ export const mockMarketplace: MarketplaceContent = {
             title: 'Publikationen & News',
             type: 'publications',
             icon: '📚',
-            description: 'Aktuelle Veröffentlichungen, Neuigkeiten und Forschungsergebnisse aus dem Comenius-Institut.',
             display: {
                 color: '#059669'
             },
@@ -753,7 +751,6 @@ export const mockMarketplace: MarketplaceContent = {
             title: 'Veranstaltungen',
             type: 'events',
             icon: '📅',
-            description: 'Aktuelle Termine, Tagungen, Fortbildungen und Workshops des Comenius-Instituts.',
             display: {
                 color: '#dc2626'
             },

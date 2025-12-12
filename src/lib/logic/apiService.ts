@@ -2,7 +2,7 @@
  * WordPress REST API Service
  * 
  * Lädt alle Daten (Plattformen, Projekte, Staff, Marktplatz)
- * vom WordPress REST API Endpoint
+ * vom WordPress REST API Endpoint oder aus Mock-Daten
  */
 
 import type { 
@@ -12,10 +12,20 @@ import type {
     MarketplaceContent,
     PartnerConnection 
 } from '$lib/types/project';
+import { 
+    mockProjects, 
+    partnerConnections as mockPartnerConnections,
+    mockPlatformContents,
+    mockMarketplace,
+    mockStaff
+} from '$lib/data/mockProjects';
 
 // ============================================================================
 // KONFIGURATION
 // ============================================================================
+
+// Entscheide: Mock-Daten oder WordPress API?
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
 
 // WordPress URL aus Environment oder Default
 const WP_BASE_URL = import.meta.env.VITE_WP_URL || 'http://ci.test';
@@ -106,10 +116,11 @@ let cachedWorldData: WorldDataResponse | null = null;
 let fetchPromise: Promise<WorldDataResponse> | null = null;
 
 /**
- * Lädt alle World-Daten vom WordPress REST API
+ * Lädt alle World-Daten vom WordPress REST API oder Mock-Daten
  * 
  * Features:
  * - Automatische Dev/Prod-URL-Erkennung
+ * - Mock-Daten-Fallback für Offline-Entwicklung
  * - Caching für wiederholte Aufrufe
  * - Fehlerbehandlung mit aussagekräftigen Meldungen
  */
@@ -123,7 +134,41 @@ export async function fetchWorldData(): Promise<WorldDataResponse> {
     if (fetchPromise) {
         return fetchPromise;
     }
-    
+
+    // ========================================================================
+    // MODUS 1: MOCK-DATEN (Für GitHub Pages, Local Development, etc.)
+    // ========================================================================
+    if (USE_MOCK_DATA) {
+        console.log('🎭 Using MOCK DATA mode');
+        
+        fetchPromise = Promise.resolve({
+            projects: mockProjects,
+            platforms: mockPlatformContents,
+            staff: mockStaff,
+            marketplace: mockMarketplace,
+            partnerConnections: mockPartnerConnections
+        });
+        
+        return fetchPromise.then((data) => {
+            cachedWorldData = data;
+            fetchPromise = null;
+            console.log('✅ Mock Data loaded:', {
+                projects: data.projects.length,
+                platforms: Object.keys(data.platforms).length,
+                staff: data.staff.length,
+                marketplace: data.marketplace ? '✓' : '✗'
+            });
+            return data;
+        }).catch((error) => {
+            fetchPromise = null;
+            console.error('❌ Failed to load Mock Data:', error);
+            throw error;
+        });
+    }
+
+    // ========================================================================
+    // MODUS 2: WORDPRESS API (Für Production mit WordPress Backend)
+    // ========================================================================
     const apiUrl = getApiUrl();
     console.log('🌍 Fetching World Data from:', apiUrl);
     
