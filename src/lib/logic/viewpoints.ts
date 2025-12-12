@@ -279,7 +279,7 @@ function getWallViewPoint(
  * Spezielle ViewPoints für Marktplatz (Plattform S)
  */
 export function getMarketplaceViewPoint(
-    type: 'reception' | 'leitlinie',
+    type: 'reception' | 'leitlinie' | 'publications' | 'events' | 'nexus',
     index: number = 0
 ): ViewPoint | null {
     const platform = platforms['S'];
@@ -291,9 +291,16 @@ export function getMarketplaceViewPoint(
 
     if (type === 'reception') {
         return getReceptionWallViewPoint(px, py, pz);
-    } else {
+    } else if (type === 'leitlinie') {
         return getLeitlinieViewPoint(index, px, py, pz, platform.size);
+    } else if (type === 'publications') {
+        return getPublicationsStandViewPoint(px, py, pz);
+    } else if (type === 'events') {
+        return getEventsStandViewPoint(px, py, pz);
+    } else if (type === 'nexus') {
+        return getNexusTerminalViewPoint(px, py, pz);
     }
+    return null;
 }
 
 /**
@@ -311,6 +318,113 @@ function getReceptionWallViewPoint(
     const rotation = receptionWallPosition.rotation;
 
     const viewDistance = 9;
+    const cameraY = getCameraY(py);
+    const cos = Math.cos(rotation);
+    const sin = Math.sin(rotation);
+
+    return {
+        camera: {
+            x: worldX + sin * viewDistance,
+            y: cameraY,
+            z: worldZ + cos * viewDistance
+        },
+        target: {
+            x: worldX,
+            y: cameraY,
+            z: worldZ
+        },
+        distance: viewDistance
+    };
+}
+
+/**
+ * ViewPoint für Publications-Stand (News Feed) auf Marktplatz
+ * Position aus MarketplacePlatform.svelte: { x: -26, z: 12, rotation: Math.PI * +0.6 }
+ */
+function getPublicationsStandViewPoint(
+    px: number,
+    py: number,
+    pz: number
+): ViewPoint {
+    const standPosition = { x: -26, z: 12, rotation: Math.PI * 0.6 };
+
+    const worldX = px + standPosition.x;
+    const worldZ = pz + standPosition.z;
+    const rotation = standPosition.rotation;
+
+    const viewDistance = 7;
+    const cameraY = getCameraY(py) + 1.0; // Höher für bessere Übersicht
+    const targetY = getCameraY(py) - 0.5; // Blick leicht nach unten
+    const cos = Math.cos(rotation);
+    const sin = Math.sin(rotation);
+
+    return {
+        camera: {
+            x: worldX + sin * viewDistance,
+            y: cameraY,
+            z: worldZ + cos * viewDistance
+        },
+        target: {
+            x: worldX,
+            y: targetY,
+            z: worldZ
+        },
+        distance: viewDistance
+    };
+}
+
+/**
+ * ViewPoint für Events-Stand (Termine) auf Marktplatz
+ * Position aus MarketplacePlatform.svelte: { x: -20, z: 23, rotation: Math.PI * +0.7 }
+ */
+function getEventsStandViewPoint(
+    px: number,
+    py: number,
+    pz: number
+): ViewPoint {
+    const standPosition = { x: -20, z: 23, rotation: Math.PI * 0.7 };
+
+    const worldX = px + standPosition.x;
+    const worldZ = pz + standPosition.z;
+    const rotation = standPosition.rotation;
+
+    const viewDistance = 7;
+    const cameraY = getCameraY(py) + 1.0; // Höher für bessere Übersicht
+    const targetY = getCameraY(py) - 0.5; // Blick leicht nach unten
+    const cos = Math.cos(rotation);
+    const sin = Math.sin(rotation);
+
+    return {
+        camera: {
+            x: worldX + sin * viewDistance,
+            y: cameraY,
+            z: worldZ + cos * viewDistance
+        },
+        target: {
+            x: worldX,
+            y: targetY,
+            z: worldZ
+        },
+        distance: viewDistance
+    };
+}
+
+/**
+ * ViewPoint für Nexus Terminal auf Marktplatz
+ * Position aus MarketplacePlatform.svelte: { x: -31, z: -21, rotation: Math.PI * 0.335 }
+ */
+function getNexusTerminalViewPoint(
+    px: number,
+    py: number,
+    pz: number
+): ViewPoint {
+    const terminalPosition = { x: -31, z: -21, rotation: Math.PI * 0.335 };
+
+    const worldX = px + terminalPosition.x;
+    const worldZ = pz + terminalPosition.z;
+    const rotation = terminalPosition.rotation;
+
+    const viewDistance = 6;
     const cameraY = getCameraY(py);
     const cos = Math.cos(rotation);
     const sin = Math.sin(rotation);

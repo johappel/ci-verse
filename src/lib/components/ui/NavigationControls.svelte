@@ -223,7 +223,7 @@
 	// ============================================
 	
 	interface PosterTarget {
-		type: 'booth' | 'wall' | 'reception' | 'leitlinie-left' | 'leitlinie-right';
+		type: 'booth' | 'wall' | 'reception' | 'leitlinie-left' | 'leitlinie-right' | 'publications' | 'events' | 'nexus';
 		project?: ProjectData;
 		position: number;
 		label?: string;
@@ -264,8 +264,18 @@
 		if (platformId === 'S') {
 			const marketplace = worldStore.getMarketplaceContent();
 			if (!marketplace) return [];
+			
+			// Stand-Namen aus den Daten holen
+			const publicationsStand = marketplace.stands?.find(s => s.type === 'publications');
+			const eventsStand = marketplace.stands?.find(s => s.type === 'events');
+			
 			const targets: PosterTarget[] = [
 				{ type: 'reception', position: 0, label: 'Empfang' },
+				// 3 Stände
+				{ type: 'nexus', position: 0, label: 'Nexus Terminal' },
+				{ type: 'publications', position: 0, label: publicationsStand?.title || 'News Feed' },
+				{ type: 'events', position: 0, label: eventsStand?.title || 'Termine' },
+				// Leitlinien-Poster
 				...marketplace.wallPosters.slice(0, 4).map((_, i) => ({
 					type: 'leitlinie-left' as const,
 					position: i,
@@ -348,6 +358,8 @@
 		} else if (target.type === 'leitlinie-left' || target.type === 'leitlinie-right') {
 			const absoluteIndex = target.type === 'leitlinie-left' ? target.position : target.position + 4;
 			navigateToLeitlinie(absoluteIndex);
+		} else if (target.type === 'publications' || target.type === 'events' || target.type === 'nexus') {
+			navigateToMarketplaceStand(target.type);
 		} else if (target.type === 'booth' && target.project) {
 			navigateToBooth(target.project.id, platformId);
 		} else if (target.type === 'wall' && target.project) {
@@ -357,6 +369,18 @@
 	
 	function navigateToReceptionWall() {
 		const viewPoint = getMarketplaceViewPoint('reception');
+		if (viewPoint && cameraControls) {
+			cameraControls.smoothTime = performanceStore.settings.cameraSmoothTime;
+			cameraControls.setLookAt(
+				viewPoint.camera.x, viewPoint.camera.y, viewPoint.camera.z,
+				viewPoint.target.x, viewPoint.target.y, viewPoint.target.z,
+				true
+			);
+		}
+	}
+	
+	function navigateToMarketplaceStand(type: 'publications' | 'events' | 'nexus') {
+		const viewPoint = getMarketplaceViewPoint(type);
 		if (viewPoint && cameraControls) {
 			cameraControls.smoothTime = performanceStore.settings.cameraSmoothTime;
 			cameraControls.setLookAt(
