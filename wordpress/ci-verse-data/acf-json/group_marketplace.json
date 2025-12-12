@@ -209,6 +209,24 @@
                         ]
                     ]
                 }
+                ,
+                {
+                    "key": "field_stand_nostr_relay",
+                    "label": "Nostr Relay (wss://...)",
+                    "name": "nostr_relay",
+                    "type": "url",
+                    "instructions": "WebSocket-Relay-URL (z.B. wss://relay-rpi.edufeed.org/) für Nostr-Events",
+                    "placeholder": "wss://relay.example.org/",
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_stand_type",
+                                "operator": "==",
+                                "value": "events"
+                            }
+                        ]
+                    ]
+                }
             ]
         },
         {

@@ -219,10 +219,14 @@
     <RssFeedPanel 
         isOpen={worldStore.state.isRssPanelOpen} 
         onClose={() => worldStore.closeRssPanel()} 
+        feedUrls={worldStore.state.rssFeedUrls ?? undefined}
+        title={worldStore.state.rssPanelTitle ?? undefined}
     />
     <EventsPanel 
         isOpen={worldStore.state.isEventsPanelOpen} 
         onClose={() => worldStore.closeEventsPanel()} 
+        nostrRelay={worldStore.state.nostrRelay ?? undefined}
+        nostrFilter={worldStore.state.nostrFilter ?? undefined}
     />
 {/if}
 

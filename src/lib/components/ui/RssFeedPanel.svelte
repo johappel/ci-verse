@@ -32,8 +32,7 @@
     }: Props = $props();
 
     let isLoading = $state(false);
-
-    // Mock-Daten für Demo
+    // Mock-Daten für Demo (Fallback)
     const mockFeedItems: FeedItem[] = [
         {
             id: '1',
@@ -80,10 +79,52 @@
     let feedItems = $state<FeedItem[]>(mockFeedItems);
 
     // Simuliertes Laden
+    import { getWpBaseUrl } from '$lib/logic/apiService';
+
     async function refreshFeed() {
         isLoading = true;
-        await new Promise(resolve => setTimeout(resolve, 800));
-        isLoading = false;
+        try {
+            if (feedUrls && feedUrls.length > 0) {
+                // Verwende WP-Feed-Proxy um CORS zu umgehen
+                const url = feedUrls[0];
+                const proxy = `${getWpBaseUrl()}/wp-json/civerse/v1/feed-proxy?url=${encodeURIComponent(url)}`;
+                const resp = await fetch(proxy);
+                if (!resp.ok) throw new Error('Feed fetch failed');
+                const text = await resp.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'application/xml');
+                const items = Array.from(doc.querySelectorAll('item')).slice(0, 10).map((it, idx) => {
+                    const title = it.querySelector('title')?.textContent || 'Kein Titel';
+                    const link = it.querySelector('link')?.textContent || url;
+                    const desc = it.querySelector('description')?.textContent || '';
+                    const pub = it.querySelector('pubDate')?.textContent;
+                    const date = pub ? new Date(pub) : new Date();
+                    return {
+                        id: String(idx),
+                        title,
+                        excerpt: desc.replace(/<[^>]+>/g, '').slice(0, 200),
+                        date,
+                        url: link,
+                        category: undefined
+                    } as FeedItem;
+                });
+                if (items.length > 0) {
+                    feedItems = items;
+                    isLoading = false;
+                    return;
+                }
+            }
+
+            // Fallback: Simuliertes Laden
+            await new Promise(resolve => setTimeout(resolve, 500));
+            feedItems = mockFeedItems;
+        } catch (error) {
+            console.error('Failed to load RSS feed', error);
+            // Fallback zu Mock
+            feedItems = mockFeedItems;
+        } finally {
+            isLoading = false;
+        }
     }
 
     function formatDate(date: Date): string {

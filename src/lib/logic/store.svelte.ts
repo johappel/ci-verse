@@ -4,7 +4,11 @@ import { fetchWorldData } from './apiService';
 // Erweiterte AppState für Marketplace-Panels
 interface ExtendedAppState extends AppState {
     isRssPanelOpen: boolean;
+    rssFeedUrls?: string[] | null;
+    rssPanelTitle?: string | null;
     isEventsPanelOpen: boolean;
+    nostrRelay?: string | null;
+    nostrFilter?: string | null;
     // Iframe Dialog
     isIframeOpen: boolean;
     iframeUrl: string | null;
@@ -54,7 +58,9 @@ export class WorldStore {
         // NEU: Content-Card für Aspects
         selectedAspect: null,
         // NEU: Marketplace-Panels
-        isRssPanelOpen: false,
+            isRssPanelOpen: false,
+            rssFeedUrls: null,
+            rssPanelTitle: null,
         isEventsPanelOpen: false,
         // NEU: Iframe Dialog
         isIframeOpen: false,
@@ -256,7 +262,9 @@ export class WorldStore {
     }
 
     // NEU: RSS-Panel für Publications
-    openRssPanel() {
+    openRssPanel(feedUrls?: string[] | null, title?: string | null) {
+        this.state.rssFeedUrls = feedUrls ?? null;
+        this.state.rssPanelTitle = title ?? 'Publikationen & News';
         this.state.isRssPanelOpen = true;
         this.state.selectedId = null;
         this.state.isChatOpen = false;
@@ -265,10 +273,14 @@ export class WorldStore {
 
     closeRssPanel() {
         this.state.isRssPanelOpen = false;
+        this.state.rssFeedUrls = null;
+        this.state.rssPanelTitle = null;
     }
 
     // NEU: Events-Panel für Veranstaltungen
-    openEventsPanel() {
+    openEventsPanel(relay?: string | null, filter?: string | null) {
+        this.state.nostrRelay = relay ?? null;
+        this.state.nostrFilter = filter ?? null;
         this.state.isEventsPanelOpen = true;
         this.state.selectedId = null;
         this.state.isChatOpen = false;
@@ -277,6 +289,8 @@ export class WorldStore {
 
     closeEventsPanel() {
         this.state.isEventsPanelOpen = false;
+        this.state.nostrRelay = null;
+        this.state.nostrFilter = null;
     }
 
     // NEU: Iframe Dialog für externe Websites

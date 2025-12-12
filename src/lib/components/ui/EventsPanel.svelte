@@ -36,18 +36,22 @@
     interface Props {
         isOpen: boolean;
         onClose: () => void;
-        calendarUrl?: string;
+        nostrRelay?: string | null;
+        nostrFilter?: string | null;
         title?: string;
     }
 
     let { 
         isOpen = false, 
         onClose, 
-        calendarUrl,
+        nostrRelay,
+        nostrFilter,
         title = "Veranstaltungen"
     }: Props = $props();
 
     let isLoading = $state(false);
+    let connectionStatus = $state<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
+    let demoMode = $state(false);
 
     function getTagValue(tags: string[][], name: string): string | undefined {
         return tags.find(t => t[0] === name)?.[1];
@@ -146,14 +150,142 @@
         }
     ];
     
-    let nostrEvents = $state<NostrCalendarEvent[]>(mockNostrEvents);
+    let nostrEvents = $state<NostrCalendarEvent[]>([]);
     let events = $derived(nostrEvents.map(parseNostrEvent));
     let sortedEvents = $derived([...events].sort((a, b) => a.start.getTime() - b.start.getTime()));
 
+    // NIP-19 npub zu hex pubkey konvertieren (vereinfacht - nur Bech32 Dekodierung)
+    function npubToHex(npub: string): string | null {
+        if (!npub.startsWith('npub1')) return null;
+        try {
+            // Bech32 Alphabet
+            const ALPHABET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+            const data = npub.slice(5); // Remove 'npub1'
+            const values: number[] = [];
+            for (const char of data) {
+                const idx = ALPHABET.indexOf(char);
+                if (idx === -1) return null;
+                values.push(idx);
+            }
+            // Convert 5-bit groups to 8-bit bytes (skip checksum)
+            const bits: number[] = [];
+            for (const v of values.slice(0, -6)) { // Remove 6 checksum chars
+                for (let i = 4; i >= 0; i--) {
+                    bits.push((v >> i) & 1);
+                }
+            }
+            const bytes: number[] = [];
+            for (let i = 0; i + 8 <= bits.length; i += 8) {
+                let byte = 0;
+                for (let j = 0; j < 8; j++) {
+                    byte = (byte << 1) | bits[i + j];
+                }
+                bytes.push(byte);
+            }
+            return bytes.map(b => b.toString(16).padStart(2, '0')).join('');
+        } catch {
+            return null;
+        }
+    }
+
+    // Nostr Events via WebSocket laden
+    async function fetchNostrEvents(relay: string, filter: string): Promise<NostrCalendarEvent[]> {
+        return new Promise((resolve, reject) => {
+            connectionStatus = 'connecting';
+            const events: NostrCalendarEvent[] = [];
+            
+            try {
+                const ws = new WebSocket(relay);
+                const subId = 'civerse-' + Math.random().toString(36).slice(2, 10);
+                let timeout: ReturnType<typeof setTimeout>;
+                
+                ws.onopen = () => {
+                    connectionStatus = 'connected';
+                    // NIP-01 REQ mit NIP52 kind 31923 (Time-Based Calendar Event)
+                    // Filter nach Autor (pubkey)
+                    const pubkeyHex = npubToHex(filter);
+                    const reqFilter: Record<string, unknown> = {
+                        kinds: [31923], // NIP52 Time-Based Calendar Event
+                        limit: 50
+                    };
+                    if (pubkeyHex) {
+                        reqFilter.authors = [pubkeyHex];
+                    }
+                    ws.send(JSON.stringify(['REQ', subId, reqFilter]));
+                    
+                    // Timeout nach 10 Sekunden
+                    timeout = setTimeout(() => {
+                        ws.close();
+                        resolve(events);
+                    }, 10000);
+                };
+                
+                ws.onmessage = (msg) => {
+                    try {
+                        const data = JSON.parse(msg.data);
+                        if (data[0] === 'EVENT' && data[1] === subId) {
+                            const event = data[2] as NostrCalendarEvent;
+                            if (event.kind === 31923) {
+                                events.push(event);
+                            }
+                        } else if (data[0] === 'EOSE' && data[1] === subId) {
+                            // End of stored events
+                            clearTimeout(timeout);
+                            ws.send(JSON.stringify(['CLOSE', subId]));
+                            ws.close();
+                            resolve(events);
+                        }
+                    } catch (e) {
+                        console.warn('Nostr message parse error:', e);
+                    }
+                };
+                
+                ws.onerror = (err) => {
+                    connectionStatus = 'error';
+                    console.error('Nostr WebSocket error:', err);
+                    clearTimeout(timeout);
+                    reject(err);
+                };
+                
+                ws.onclose = () => {
+                    if (connectionStatus === 'connected') {
+                        connectionStatus = 'disconnected';
+                    }
+                };
+            } catch (e) {
+                connectionStatus = 'error';
+                reject(e);
+            }
+        });
+    }
+
     async function refreshEvents() {
+        if (!nostrRelay || !nostrFilter) {
+            // Demo-Modus: Mock-Daten anzeigen
+            demoMode = true;
+            nostrEvents = mockNostrEvents;
+            return;
+        }
+        
+        demoMode = false;
         isLoading = true;
-        await new Promise(resolve => setTimeout(resolve, 800));
-        isLoading = false;
+        try {
+            const fetchedEvents = await fetchNostrEvents(nostrRelay, nostrFilter);
+            if (fetchedEvents.length > 0) {
+                nostrEvents = fetchedEvents;
+            } else {
+                // Fallback zu Mock wenn keine Events gefunden
+                console.log('No Nostr events found, using demo data');
+                demoMode = true;
+                nostrEvents = mockNostrEvents;
+            }
+        } catch (e) {
+            console.error('Failed to fetch Nostr events:', e);
+            demoMode = true;
+            nostrEvents = mockNostrEvents;
+        } finally {
+            isLoading = false;
+        }
     }
 
     function formatDate(date: Date): string {
@@ -188,13 +320,20 @@
     function isUpcoming(date: Date): boolean {
         return date > new Date();
     }
+
+    // Events laden wenn Panel geöffnet wird
+    $effect(() => {
+        if (isOpen) {
+            refreshEvents();
+        }
+    });
 </script>
 
 <GlassDialog 
     isOpen={isOpen} 
     onClose={onClose}
     title={title}
-    subtitle="{sortedEvents.length} Termine"
+    subtitle="{demoMode ? 'Demo-Modus' : connectionStatus === 'connected' ? 'Live' : connectionStatus} • {sortedEvents.length} Termine"
     icon={Calendar}
     width="550px"
     height="650px"

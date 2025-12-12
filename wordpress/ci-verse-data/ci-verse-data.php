@@ -92,6 +92,19 @@ function civerse_register_rest_routes() {
             ],
         ],
     ]);
+
+    // Feed Proxy - holt entfernte RSS/Atom-Feeds und gibt sie mit CORS-Headern zurück
+    register_rest_route('civerse/v1', '/feed-proxy', [
+        'methods' => 'GET',
+        'callback' => 'civerse_feed_proxy',
+        'permission_callback' => '__return_true',
+        'args' => [
+            'url' => [
+                'required' => true,
+                'description' => 'Feed URL to proxy (http(s)://...)',
+            ],
+        ],
+    ]);
 }
 
 function civerse_get_world_data() {
@@ -140,6 +153,44 @@ function civerse_image_proxy($request) {
     ]);
 }
 
+function civerse_feed_proxy($request) {
+    $feed_url = $request->get_param('url');
+
+    if (!$feed_url) {
+        return new WP_Error('missing_url', 'Feed URL is required');
+    }
+
+    // Sicherheitscheck: nur http(s)
+    if (!preg_match('#^https?://#i', $feed_url)) {
+        return new WP_Error('invalid_url', 'Feed URL must be an absolute http(s) URL');
+    }
+
+    // Fetch remote feed
+    $response = wp_safe_remote_get($feed_url, [
+        'timeout' => 15,
+        'headers' => [
+            'User-Agent' => 'CI-Verse-Feed-Proxy/1.0 (+https://example.org)'
+        ]
+    ]);
+
+    if (is_wp_error($response)) {
+        return new WP_Error('fetch_failed', 'Could not fetch feed');
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $content_type = wp_remote_retrieve_header($response, 'content-type') ?: 'application/xml';
+
+    // WICHTIG: Rohen XML-Body direkt ausgeben, NICHT als JSON enkodieren
+    // WP_REST_Response würde den Body als JSON enkodieren und escapen
+    status_header(200);
+    header('Content-Type: ' . $content_type);
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Accept');
+    echo $body;
+    exit; // REST-Pipeline beenden
+}
+
 // ============================================================================
 // DATA GETTERS
 // ============================================================================
@@ -178,22 +229,31 @@ function civerse_get_marketplace() {
                     $rss_feeds[] = $feed['url'];
                 }
             }
-            return [
-                'id' => 's-' . sanitize_title($stand['title'] ?? 'stand'),
-                'title' => $stand['title'] ?? '',
-                'type' => $stand['type'] ?? 'info',
-                'icon' => $stand['icon'] ?? '',
-                'description' => $stand['description'] ?? '',
-                'display' => [
-                    'color' => $stand['color'] ?? '#64748b',
-                    'logoUrl' => civerse_to_relative_url($stand['logo']['url'] ?? ''),
-                    'bannerImage' => civerse_to_relative_url($stand['banner']['url'] ?? ''),
-                ],
-                'chatWebhook' => !empty($stand['chat_webhook']) ? $stand['chat_webhook'] : null,
-                'rssFeedUrls' => !empty($rss_feeds) ? $rss_feeds : null,
-                'calendarUrl' => !empty($stand['calendar_url']) ? $stand['calendar_url'] : null,
-                'externalUrl' => $stand['external_url'] ?? null,
-            ];
+                // Nostr fields: ACF bietet `nostr_filter` (npub/nevent).
+                // Für den Relay-URL verwenden wir explizit `nostr_relay` wenn vorhanden,
+                // ansonsten als pragmatischen Fallback `external_url` (häufig im ACF-Form eingetragen).
+                $nostr_filter = !empty($stand['nostr_filter']) ? $stand['nostr_filter'] : null;
+                $nostr_relay = !empty($stand['nostr_relay']) ? $stand['nostr_relay'] : (!empty($stand['external_url']) ? $stand['external_url'] : null);
+
+                return [
+                    'id' => 's-' . sanitize_title($stand['title'] ?? 'stand'),
+                    'title' => $stand['title'] ?? '',
+                    'type' => $stand['type'] ?? 'info',
+                    'icon' => $stand['icon'] ?? '',
+                    'description' => $stand['description'] ?? '',
+                    'display' => [
+                        'color' => $stand['color'] ?? '#64748b',
+                        'logoUrl' => civerse_to_relative_url($stand['logo']['url'] ?? ''),
+                        'bannerImage' => civerse_to_relative_url($stand['banner']['url'] ?? ''),
+                    ],
+                    'chatWebhook' => !empty($stand['chat_webhook']) ? $stand['chat_webhook'] : null,
+                    'rssFeedUrls' => !empty($rss_feeds) ? $rss_feeds : null,
+                    'calendarUrl' => !empty($stand['calendar_url']) ? $stand['calendar_url'] : null,
+                    'externalUrl' => $stand['external_url'] ?? null,
+                    // Neu: Nostr Einstellungen (npub/nevent + relay)
+                    'nostrFilter' => $nostr_filter,
+                    'nostrRelay' => $nostr_relay,
+                ];
         }, $stands),
         'wallPosters' => array_map(function($poster) {
             return [

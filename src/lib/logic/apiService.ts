@@ -25,6 +25,10 @@ function getApiUrl(): string {
     return API_URL;
 }
 
+export function getWpBaseUrl(): string {
+    return WP_BASE_URL;
+}
+
 /**
  * Konvertiert relative Bild-URLs zu absoluten URLs
  * Falls WordPress relative Pfade zurückgibt, füge die Base-URL hinzu

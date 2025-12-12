@@ -101,6 +101,7 @@ export interface MarketplaceStand {
     chatWebhook?: string;          // n8n Webhook für KI-Chat (type: institution)
     rssFeedUrls?: string[];        // RSS für News/Publikationen (type: publications)
     nostrFilter?: string;          // Nostr npub/nevent für Events (type: events)
+    nostrRelay?: string;           // Nostr Relay WSS-URL für Events (type: events)
     externalUrl?: string;          // Fallback-Link zur Webseite
 }
 

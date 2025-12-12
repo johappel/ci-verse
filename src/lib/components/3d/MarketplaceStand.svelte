@@ -23,6 +23,69 @@
     import { getCameraY } from '$lib/logic/platforms';
     import { onMount } from 'svelte';
 
+    // ========== NOSTR HELPERS ==========
+    
+    interface NostrEvent {
+        id: string;
+        kind: number;
+        tags: string[][];
+    }
+
+    // Bech32 npub zu hex pubkey
+    function npubToHex(npub: string): string | null {
+        if (!npub.startsWith('npub1')) return null;
+        try {
+            const ALPHABET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+            const data = npub.slice(5);
+            const values: number[] = [];
+            for (const char of data) {
+                const idx = ALPHABET.indexOf(char);
+                if (idx === -1) return null;
+                values.push(idx);
+            }
+            const bits: number[] = [];
+            for (const v of values.slice(0, -6)) {
+                for (let i = 4; i >= 0; i--) bits.push((v >> i) & 1);
+            }
+            const bytes: number[] = [];
+            for (let i = 0; i + 8 <= bits.length; i += 8) {
+                let byte = 0;
+                for (let j = 0; j < 8; j++) byte = (byte << 1) | bits[i + j];
+                bytes.push(byte);
+            }
+            return bytes.map(b => b.toString(16).padStart(2, '0')).join('');
+        } catch { return null; }
+    }
+
+    // Nostr Events via WebSocket (simplified for preview)
+    function fetchNostrEvents(relay: string, filter: string): Promise<NostrEvent[]> {
+        return new Promise((resolve) => {
+            const events: NostrEvent[] = [];
+            try {
+                const ws = new WebSocket(relay);
+                const subId = 'preview-' + Math.random().toString(36).slice(2, 8);
+                const timeout = setTimeout(() => { ws.close(); resolve(events); }, 5000);
+                
+                ws.onopen = () => {
+                    const pubkey = npubToHex(filter);
+                    const req: Record<string, unknown> = { kinds: [31923], limit: 10 };
+                    if (pubkey) req.authors = [pubkey];
+                    ws.send(JSON.stringify(['REQ', subId, req]));
+                };
+                ws.onmessage = (msg) => {
+                    try {
+                        const data = JSON.parse(msg.data);
+                        if (data[0] === 'EVENT' && data[1] === subId) events.push(data[2]);
+                        else if (data[0] === 'EOSE') { clearTimeout(timeout); ws.close(); resolve(events); }
+                    } catch {}
+                };
+                ws.onerror = () => { clearTimeout(timeout); resolve(events); };
+            } catch { resolve(events); }
+        });
+    }
+
+    // ========== COMPONENT ==========
+
     interface Props {
         stand: MarketplaceStand;
         position?: [number, number, number];
@@ -44,23 +107,23 @@
 
     // ========== DYNAMISCHE INHALTE ==========
     
-    // Mock News-Daten
-    const newsItems = [
+    // News-Daten (initial Mock, können durch RSS ersetzt werden)
+    let newsItems = $state([
         { id: '1', title: 'Neue Studie zur religiösen Bildung', category: 'Forschung', date: '25. Nov' },
         { id: '2', title: 'Konfi-App 3.0 mit KI-Funktionen', category: 'Digital', date: '20. Nov' },
         { id: '3', title: 'Erasmus+ Projekt abgeschlossen', category: 'Europa', date: '15. Nov' },
         { id: '4', title: 'Fortbildung "Digitale Gemeinde"', category: 'Weiterbildung', date: '10. Nov' },
         { id: '5', title: 'Neuer Bildungsatlas online', category: 'Forschung', date: '05. Nov' },
-    ];
+    ]);
 
-    // Mock Event-Daten
-    const eventItems = [
+    // Event-Daten (initial Mock, können durch Nostr ersetzt werden)
+    let eventItems = $state([
         { id: '1', title: 'KI in der religiösen Bildung', date: '05. Dez', time: '09:00', location: 'Münster' },
         { id: '2', title: 'Godly Play Einführung', date: '10. Dez', time: '14:00', location: 'Online' },
         { id: '3', title: 'Datenschutz Webinar', date: '15. Dez', time: '10:00', location: 'Online' },
         { id: '4', title: 'Neujahrsempfang 2026', date: '15. Jan', time: '18:00', location: 'Münster' },
         { id: '5', title: 'Digitale Gemeinde Modul 1', date: '22. Jan', time: '09:00', location: 'Frankfurt' },
-    ];
+    ]);
 
     // Aktueller Index für Animation
     let currentNewsIndex = $state(0);
@@ -74,7 +137,60 @@
 
     onMount(() => {
         let intervalId: ReturnType<typeof setInterval>;
-        
+        // Wenn Publications-Stand RSS-Feeds hat, lade erste Feed-Einträge als Preview
+        if (stand.type === 'publications' && stand.rssFeedUrls && stand.rssFeedUrls.length > 0) {
+            const feedUrls = stand.rssFeedUrls;
+            (async () => {
+                try {
+                    // Use WP feed-proxy to avoid CORS
+                    const proxy = `${import.meta.env.VITE_WP_URL || window.location.origin}/wp-json/civerse/v1/feed-proxy?url=${encodeURIComponent(feedUrls[0])}`;
+                    const resp = await fetch(proxy);
+                    if (!resp.ok) throw new Error('Feed fetch failed');
+                    const text = await resp.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(text, 'application/xml');
+                    const items = Array.from(doc.querySelectorAll('item')).slice(0, 5).map((it, idx) => ({
+                        id: String(idx),
+                        title: it.querySelector('title')?.textContent || 'Kein Titel',
+                        category: it.querySelector('category')?.textContent || '',
+                        date: it.querySelector('pubDate')?.textContent || '',
+                    }));
+                    if (items.length > 0) {
+                        newsItems = items;
+                    }
+                } catch (e) {
+                    // Fallback: Leave mock items
+                    console.warn('Could not load RSS preview for stand', stand.id, e);
+                }
+            })();
+        }
+
+        // Wenn Events-Stand Nostr-Relay hat, lade Events als Preview
+        if (stand.type === 'events' && stand.nostrRelay && stand.nostrFilter) {
+            const relay = stand.nostrRelay;
+            const filter = stand.nostrFilter;
+            (async () => {
+                try {
+                    const events = await fetchNostrEvents(relay, filter);
+                    if (events.length > 0) {
+                        eventItems = events.slice(0, 5).map(ev => {
+                            const startTs = ev.tags.find(t => t[0] === 'start')?.[1];
+                            const start = startTs ? new Date(parseInt(startTs) * 1000) : new Date();
+                            return {
+                                id: ev.id,
+                                title: ev.tags.find(t => t[0] === 'title')?.[1] || 'Event',
+                                date: start.toLocaleDateString('de-DE', { day: '2-digit', month: 'short' }).replace(' ', '. '),
+                                time: start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+                                location: ev.tags.find(t => t[0] === 'location')?.[1] || ''
+                            };
+                        });
+                    }
+                } catch (e) {
+                    console.warn('Could not load Nostr events for stand', stand.id, e);
+                }
+            })();
+        }
+
         if (stand.type === 'publications') {
             const runInterval = () => {
                 isTransitioning = true;
@@ -161,10 +277,12 @@
                 worldStore.openChat(stand.chatWebhook);
                 break;
             case 'publications':
-                worldStore.openRssPanel();
+                // Öffne RSS-Panel und übergebe die Feed-URLs (falls vorhanden)
+                worldStore.openRssPanel(stand.rssFeedUrls ?? null, stand.title ?? 'Publikationen');
                 break;
             case 'events':
-                worldStore.openEventsPanel();
+                // Übergebe Nostr-Relay und Filter an das Events-Panel
+                worldStore.openEventsPanel(stand.nostrRelay, stand.nostrFilter);
                 break;
             default:
                 if (stand.externalUrl) {
@@ -313,15 +431,17 @@
                 >
                     <!-- Header -->
                     <div class="board-header">
-                        <span class="header-icon">{stand.type === 'publications' ? '📰' : '📅'}</span>
-                        <span class="header-title">{stand.type === 'publications' ? 'AKTUELL' : 'NÄCHSTER TERMIN'}</span>
+                        <span class="header-icon">{stand.icon || (stand.type === 'publications' ? '📰' : '📅')}</span>
+                        <span class="header-title">{stand.title || (stand.type === 'publications' ? 'AKTUELL' : 'TERMINE')}</span>
                         <span class="header-dot"></span>
                     </div>
 
                     {#if stand.type === 'publications'}
                         <!-- News Content -->
                         <div class="content-area">
+                            {#if currentNews.category && currentNews.category.toLowerCase() !== 'uncategorized'}
                             <div class="category-badge">{currentNews.category}</div>
+                            {/if}
                             <div class="main-title">{currentNews.title}</div>
                             <div class="meta-line">
                                 <span class="date">{currentNews.date}</span>
