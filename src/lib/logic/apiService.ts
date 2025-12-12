@@ -25,7 +25,16 @@ import {
 // ============================================================================
 
 // Entscheide: Mock-Daten oder WordPress API?
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
+// Robuste Prüfung: String 'true' oder Boolean true
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' || 
+                      import.meta.env.VITE_USE_MOCK_DATA === true;
+
+// Debug-Log zur Build-Zeit
+console.log('🔧 API Service Config:', {
+    VITE_USE_MOCK_DATA: import.meta.env.VITE_USE_MOCK_DATA,
+    USE_MOCK_DATA,
+    MODE: import.meta.env.MODE
+});
 
 // WordPress URL aus Environment oder Default
 const WP_BASE_URL = import.meta.env.VITE_WP_URL || 'http://ci.test';
