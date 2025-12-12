@@ -105,6 +105,23 @@ function civerse_register_rest_routes() {
             ],
         ],
     ]);
+
+    // Chat Proxy - leitet Anfragen an n8n-Webhook weiter (CORS-Umgehung)
+    register_rest_route('civerse/v1', '/chat-proxy', [
+        'methods' => 'GET',
+        'callback' => 'civerse_chat_proxy',
+        'permission_callback' => '__return_true',
+        'args' => [
+            'webhook' => [
+                'required' => true,
+                'description' => 'n8n Webhook URL',
+            ],
+            'q' => [
+                'required' => true,
+                'description' => 'User question',
+            ],
+        ],
+    ]);
 }
 
 function civerse_get_world_data() {
@@ -189,6 +206,69 @@ function civerse_feed_proxy($request) {
     header('Access-Control-Allow-Headers: Content-Type, Accept');
     echo $body;
     exit; // REST-Pipeline beenden
+}
+
+/**
+ * Chat Proxy - leitet Anfragen an n8n-Webhook weiter
+ * Umgeht CORS-Probleme bei direkten Browser-Anfragen
+ */
+function civerse_chat_proxy($request) {
+    $webhook_url = $request->get_param('webhook');
+    $question = $request->get_param('q');
+
+    if (!$webhook_url || !$question) {
+        return new WP_Error('missing_params', 'webhook and q parameters are required');
+    }
+
+    // Sicherheitscheck: nur bekannte n8n-Domains erlauben
+    $allowed_domains = [
+        'n8n.rpi-virtuell.de',
+        'n8n.comenius.de',
+        'localhost',
+    ];
+    
+    $parsed = parse_url($webhook_url);
+    $host = $parsed['host'] ?? '';
+    
+    $is_allowed = false;
+    foreach ($allowed_domains as $domain) {
+        if ($host === $domain || str_ends_with($host, '.' . $domain)) {
+            $is_allowed = true;
+            break;
+        }
+    }
+    
+    if (!$is_allowed) {
+        return new WP_Error('invalid_webhook', 'Webhook domain not allowed: ' . $host);
+    }
+
+    // Baue die vollständige URL mit Query-Parameter
+    $full_url = $webhook_url . '?q=' . urlencode($question);
+
+    // Anfrage an n8n weiterleiten
+    $response = wp_safe_remote_get($full_url, [
+        'timeout' => 30,
+        'headers' => [
+            'Accept' => 'application/json',
+            'User-Agent' => 'CI-Verse-Chat-Proxy/1.0'
+        ]
+    ]);
+
+    if (is_wp_error($response)) {
+        return new WP_Error('fetch_failed', 'Could not reach chat webhook: ' . $response->get_error_message());
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $status_code = wp_remote_retrieve_response_code($response);
+
+    // JSON-Antwort direkt durchreichen
+    status_header($status_code);
+    header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, HEAD, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Accept');
+    echo $body;
+    exit;
 }
 
 // ============================================================================

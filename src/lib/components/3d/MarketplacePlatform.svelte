@@ -348,6 +348,7 @@
         rotation={receptionWallPosition.rotation}
         platformPosition={[platform.x, platform.y, platform.z]}
         {teamMembers}
+        chatWebhook={institutionStand?.chatWebhook}
     />
 
     <!-- ========== NEXUS TERMINAL (Partner-Verbindungen) ========== -->

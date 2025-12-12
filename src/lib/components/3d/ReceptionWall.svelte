@@ -42,13 +42,15 @@
         rotation?: number;
         platformPosition?: [number, number, number];
         teamMembers?: TeamMember[];
+        chatWebhook?: string;
     }
 
     let { 
         position = [0, 0, 0], 
         rotation = 0,
         platformPosition = [0, 0, 0],
-        teamMembers = []
+        teamMembers = [],
+        chatWebhook
     }: Props = $props();
 
     const { onPointerEnter, onPointerLeave } = useCursor('pointer');
@@ -93,10 +95,7 @@
 
     function handleChatClick(e?: Event) {
         e?.stopPropagation(); // Verhindert dass Klick zur Mesh durchdringt
-        console.log('handleChatClick aufgerufen!');
-        console.log('isChatOpen vorher:', worldStore.state.isChatOpen);
-        worldStore.openChat();
-        console.log('isChatOpen nachher:', worldStore.state.isChatOpen);
+        worldStore.openChat(chatWebhook);
     }
 
     function handleWallClick() {

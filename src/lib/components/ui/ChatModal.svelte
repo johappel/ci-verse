@@ -87,20 +87,19 @@
         let responseContent: string;
 
         if (chatWebhook) {
-            // Echte n8n-Webhook Integration
+            // n8n-Webhook über WordPress-Proxy (umgeht CORS)
             try {
-                const response = await fetch(chatWebhook, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        message: query,
-                        sessionId: crypto.randomUUID(),
-                        timestamp: new Date().toISOString()
-                    })
+                const wpUrl = import.meta.env.VITE_WP_URL || window.location.origin;
+                const proxyUrl = `${wpUrl}/wp-json/civerse/v1/chat-proxy?webhook=${encodeURIComponent(chatWebhook)}&q=${encodeURIComponent(query)}`;
+                
+                const response = await fetch(proxyUrl, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
                 });
                 
                 if (response.ok) {
                     const data = await response.json();
+                    // Antwort ist HTML - direkt übernehmen
                     responseContent = data.response || data.message || data.text || 'Keine Antwort erhalten.';
                 } else {
                     responseContent = 'Entschuldigung, es gab ein Problem mit der Verbindung. Bitte versuchen Sie es später erneut.';
