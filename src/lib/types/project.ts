@@ -91,7 +91,6 @@ export interface MarketplaceStand {
     title: string;
     type: MarketplaceStandType;
     icon: string;                  // Emoji oder Icon-Name
-    description: string;
     display: {
         color: string;
         logoUrl?: string;          // Logo des Stands
@@ -99,6 +98,8 @@ export interface MarketplaceStand {
     };
     // Interaktions-Quellen (je nach Typ)
     chatWebhook?: string;          // n8n Webhook für KI-Chat (type: institution)
+    chatbotLabel?: string;         // Button-Text für Chat (type: institution)
+    chatWelcomeMessage?: string;   // Begrüßungstext des Chatbots (HTML erlaubt)
     rssFeedUrls?: string[];        // RSS für News/Publikationen (type: publications)
     nostrFilter?: string;          // Nostr npub/nevent für Events (type: events)
     nostrRelay?: string;           // Nostr Relay WSS-URL für Events (type: events)

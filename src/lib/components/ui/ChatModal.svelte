@@ -15,10 +15,25 @@
     // chatWebhook URL aus dem Store (vom Institution-Stand)
     let chatWebhook = $derived(worldStore.state.chatWebhook);
     
+    // Begrüßungsnachricht aus WordPress oder Default
+    let chatWelcomeMessage = $derived(worldStore.state.chatWelcomeMessage);
+    
+    const defaultWelcomeMessage = 'Willkommen beim Comenius-Institut! 👋\n\nIch bin Ihr digitaler Assistent und helfe Ihnen gerne bei Fragen zu unseren Projekten, Angeboten und der religiösen Bildung.\n\nWie kann ich Ihnen heute helfen?';
+    
     // Debug: Beobachte Änderungen
     $effect(() => {
         console.log('ChatModal: isModalOpen changed to', isModalOpen);
     });
+    
+    // Messages mit dynamischer Begrüßung initialisieren
+    function getInitialMessages(): ChatMessage[] {
+        return [{
+            id: 'welcome',
+            role: 'assistant',
+            content: chatWelcomeMessage || defaultWelcomeMessage,
+            timestamp: new Date()
+        }];
+    }
 
     function handleClose() {
         console.log('ChatModal handleClose called');
@@ -33,18 +48,19 @@
         timestamp: Date;
     }
 
-    // Chat-State
-    let messages = $state<ChatMessage[]>([
-        {
-            id: 'welcome',
-            role: 'assistant',
-            content: 'Willkommen beim Comenius-Institut! 👋\n\nIch bin Ihr digitaler Assistent und helfe Ihnen gerne bei Fragen zu unseren Projekten, Angeboten und der religiösen Bildung.\n\nWie kann ich Ihnen heute helfen?',
-            timestamp: new Date()
-        }
-    ]);
+    // Chat-State - wird beim Öffnen zurückgesetzt
+    let messages = $state<ChatMessage[]>(getInitialMessages());
     let inputValue = $state('');
     let isLoading = $state(false);
     let messagesContainer = $state<HTMLDivElement | null>(null);
+    
+    // Bei jedem Öffnen: Messages mit aktueller Begrüßung zurücksetzen
+    $effect(() => {
+        if (isModalOpen) {
+            messages = getInitialMessages();
+            inputValue = '';
+        }
+    });
 
     // Mock-Antworten für Demo
     const mockResponses: Record<string, string> = {
@@ -182,18 +198,21 @@
                     </div>
 
                     <!-- Message Bubble -->
-                    <div style="
-                        max-width: 80%;
-                        border-radius: 1rem;
-                        padding: 0.625rem 1rem;
-                        font-size: 0.875rem;
-                        line-height: 1.625;
-                        background: {message.role === 'assistant' ? 'rgba(22, 78, 99, 0.4)' : 'rgba(51, 65, 85, 0.5)'};
-                        color: {message.role === 'assistant' ? 'white' : '#f1f5f9'};
-                        border: 1px solid rgba(255,255,255,0.08);
-                        border-bottom-left-radius: {message.role === 'assistant' ? '0.125rem' : '1rem'};
-                        border-bottom-right-radius: {message.role === 'user' ? '0.125rem' : '1rem'};
-                    ">
+                    <div 
+                        class="chat-message-content"
+                        style="
+                            max-width: 80%;
+                            border-radius: 1rem;
+                            padding: 0.625rem 1rem;
+                            font-size: 0.875rem;
+                            line-height: 1.625;
+                            background: {message.role === 'assistant' ? 'rgba(22, 78, 99, 0.4)' : 'rgba(51, 65, 85, 0.5)'};
+                            color: {message.role === 'assistant' ? 'white' : '#f1f5f9'};
+                            border: 1px solid rgba(255,255,255,0.08);
+                            border-bottom-left-radius: {message.role === 'assistant' ? '0.125rem' : '1rem'};
+                            border-bottom-right-radius: {message.role === 'user' ? '0.125rem' : '1rem'};
+                        "
+                    >
                         <!-- Render Markdown-like formatting -->
                         {@html message.content
                             .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #67e8f9;">$1</strong>')
@@ -274,3 +293,15 @@
         </div>
     </div>
 </GlassDialog>
+
+<style>
+    /* Links in Chat-Nachrichten (gerendert via @html) */
+    :global(.chat-message-content a) {
+        color: #67e8f9;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+    :global(.chat-message-content a:hover) {
+        color: #ffffff;
+    }
+</style>

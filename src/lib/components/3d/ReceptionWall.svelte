@@ -22,14 +22,6 @@
     const enableTransparency = $derived(performanceStore.qualityLevel !== 'low');
     import InteractionPillar from './InteractionPillar.svelte';
     import type { ProjectData } from '$lib/types/project';
-    
-    // Institutions-Bild laden mit korrektem Farbmanagement und Base Path
-    const institutionTexture = useTexture(`${base}/assets/about-ci.jpg`, {
-        transform: (texture) => {
-            texture.colorSpace = SRGBColorSpace;
-            return texture;
-        }
-    });
 
     interface TeamMember {
         name: string;
@@ -43,6 +35,9 @@
         platformPosition?: [number, number, number];
         teamMembers?: TeamMember[];
         chatWebhook?: string;
+        bannerImage?: string;
+        chatbotLabel?: string;
+        chatWelcomeMessage?: string;
     }
 
     let { 
@@ -50,10 +45,27 @@
         rotation = 0,
         platformPosition = [0, 0, 0],
         teamMembers = [],
-        chatWebhook
+        chatWebhook,
+        bannerImage,
+        chatbotLabel = 'Frag mich!',
+        chatWelcomeMessage
     }: Props = $props();
 
     const { onPointerEnter, onPointerLeave } = useCursor('pointer');
+    
+    // Institutions-Bild laden mit korrektem Farbmanagement
+    // WordPress-Bilder brauchen die volle URL im Dev-Mode
+    const wpBaseUrl = import.meta.env.VITE_WP_URL || '';
+    const textureUrl = bannerImage 
+        ? (bannerImage.startsWith('http') ? bannerImage : `${wpBaseUrl}${bannerImage}`)
+        : `${base}/assets/about-ci.jpg`;
+    
+    const institutionTexture = useTexture(textureUrl, {
+        transform: (texture) => {
+            texture.colorSpace = SRGBColorSpace;
+            return texture;
+        }
+    });
 
     // Farben
     const primaryColor = '#1e40af';
@@ -95,7 +107,7 @@
 
     function handleChatClick(e?: Event) {
         e?.stopPropagation(); // Verhindert dass Klick zur Mesh durchdringt
-        worldStore.openChat(chatWebhook);
+        worldStore.openChat(chatWebhook, chatWelcomeMessage);
     }
 
     function handleWallClick() {
@@ -316,10 +328,10 @@
             />
         </T.Mesh>
         
-        <!-- "Frag mich!" Text über dem Button -->
+        <!-- Chatbot Button-Text (aus WordPress oder Default) -->
         <Billboard position={[0, -2, 0.15]}>
             <Text
-                text="Frag mich!"
+                text={chatbotLabel}
                 color="#ffffff"
                 fontSize={0.35}
                 anchorX="center"

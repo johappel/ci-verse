@@ -139,13 +139,6 @@
                     }
                 },
                 {
-                    "key": "field_stand_description",
-                    "label": "Beschreibung",
-                    "name": "description",
-                    "type": "textarea",
-                    "rows": 2
-                },
-                {
                     "key": "field_stand_external_url",
                     "label": "Externe URL",
                     "name": "external_url",
@@ -157,6 +150,62 @@
                     "name": "chat_webhook",
                     "type": "url",
                     "instructions": "Nur bei Typ \"Institution\"",
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_stand_type",
+                                "operator": "==",
+                                "value": "institution"
+                            }
+                        ]
+                    ]
+                },
+                {
+                    "key": "field_stand_banner_image",
+                    "label": "Banner-Bild",
+                    "name": "banner_image",
+                    "type": "image",
+                    "return_format": "url",
+                    "preview_size": "medium",
+                    "instructions": "Bild für das Institutions-Panel (empfohlen: 800x600)",
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_stand_type",
+                                "operator": "==",
+                                "value": "institution"
+                            }
+                        ]
+                    ]
+                },
+                {
+                    "key": "field_stand_chatbot_label",
+                    "label": "Chatbot Button-Text",
+                    "name": "chatbot_label",
+                    "type": "text",
+                    "default_value": "Frag mich!",
+                    "placeholder": "Frag mich!",
+                    "instructions": "Text für den Chat-Button",
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_stand_type",
+                                "operator": "==",
+                                "value": "institution"
+                            }
+                        ]
+                    ]
+                },
+                {
+                    "key": "field_stand_chat_welcome",
+                    "label": "Chat Begrüßungsnachricht",
+                    "name": "chat_welcome_message",
+                    "type": "wysiwyg",
+                    "tabs": "all",
+                    "toolbar": "basic",
+                    "media_upload": 0,
+                    "instructions": "Begrüßungstext des KI-Assistenten. HTML-Links erlaubt.",
+                    "default_value": "Willkommen! 👋\n\nIch bin Ihr digitaler Assistent und helfe Ihnen gerne bei Fragen.\n\nWie kann ich Ihnen heute helfen?",
                     "conditional_logic": [
                         [
                             {

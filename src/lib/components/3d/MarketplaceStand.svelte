@@ -348,7 +348,6 @@
 
             <Text text={stand.icon} fontSize={0.5} position={[-dimensions.width / 2 + 0.8, dimensions.height - 0.4, -dimensions.depth / 2 + 0.15]} anchorX="center" anchorY="middle" />
             <Text text={stand.title} fontSize={0.35} color="#1f2937" position={[0, dimensions.height - 1.2, -dimensions.depth / 2 + 0.12]} anchorX="center" anchorY="top" maxWidth={dimensions.width - 1} />
-            <Text text={stand.description} fontSize={0.18} color="#4b5563" position={[0, dimensions.height - 2, -dimensions.depth / 2 + 0.12]} anchorX="center" anchorY="top" maxWidth={dimensions.width - 1.5} lineHeight={1.4} textAlign="center" />
 
             <!-- Button - NUR auf Marktplatz rendern -->
             {#if isOnMarketplace}

@@ -349,6 +349,9 @@
         platformPosition={[platform.x, platform.y, platform.z]}
         {teamMembers}
         chatWebhook={institutionStand?.chatWebhook}
+        bannerImage={institutionStand?.display?.bannerImage}
+        chatbotLabel={institutionStand?.chatbotLabel}
+        chatWelcomeMessage={institutionStand?.chatWelcomeMessage}
     />
 
     <!-- ========== NEXUS TERMINAL (Partner-Verbindungen) ========== -->

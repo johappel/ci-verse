@@ -18,6 +18,7 @@ interface ExtendedAppState extends AppState {
     selectedPartner: PartnerConnection | null;
     // Chat Webhook URL (von Institution-Stand)
     chatWebhook: string | null;
+    chatWelcomeMessage: string | null;
     // Pending ViewTarget (nach Transport ausführen)
     pendingViewTarget: { projectId: string; displayType: 'booth' | 'wall'; platformId: string } | null;
 }
@@ -71,6 +72,7 @@ export class WorldStore {
         selectedPartner: null,
         // NEU: Chat Webhook URL
         chatWebhook: null,
+        chatWelcomeMessage: null,
         // NEU: Pending ViewTarget (nach Transport)
         pendingViewTarget: null
     });
@@ -248,9 +250,10 @@ export class WorldStore {
     }
 
     // NEU: Chat-Modal für ProjectChart
-    openChat(webhookUrl?: string) {
+    openChat(webhookUrl?: string, welcomeMessage?: string) {
         this.state.isChatOpen = true;
         this.state.chatWebhook = webhookUrl ?? null;
+        this.state.chatWelcomeMessage = welcomeMessage ?? null;
         this.state.selectedId = null; // Schließe Projekt-Modal
         this.state.isRssPanelOpen = false;
         this.state.isEventsPanelOpen = false;
@@ -259,6 +262,7 @@ export class WorldStore {
     closeChat() {
         this.state.isChatOpen = false;
         this.state.chatWebhook = null;
+        this.state.chatWelcomeMessage = null;
     }
 
     // NEU: RSS-Panel für Publications
